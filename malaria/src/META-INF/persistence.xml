@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="malaria" transaction-type="RESOURCE_LOCAL">
+	    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+	    <non-jta-data-source>jdbc/SIVE</non-jta-data-source>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.ParametroEvento</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.ParametroEpidemiologico</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.FactorRiesgoEvento</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.FactorRiesgo</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.EventoSaludSistema</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.EventoSalud</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.ColVolAcceso</class>
+	    <class>ni.gob.minsa.malaria.modelo.vigilancia.ColVol</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.TipoIdentificacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.TipoAsegurado</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.SisPersona</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.Sexo</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.Etnia</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.EstadoCivil</class>
+	    <class>ni.gob.minsa.malaria.modelo.sis.Escolaridad</class>
+	    <class>ni.gob.minsa.malaria.modelo.seguridad.UsuarioUnidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.seguridad.UsuarioEntidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.portal.Usuario</class>
+	    <class>ni.gob.minsa.malaria.modelo.portal.Sistema</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ViviendaRiesgo</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ViviendaParametroEpidemiologico</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ViviendaManzana</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ViviendaEncuesta</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.Vivienda</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.Sector</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.PoblacionComunidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.Pais</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.Manzana</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ControlUnidadPoblacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ControlEntidadPoblacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.ComunidadReferencia</class>
+	    <class>ni.gob.minsa.malaria.modelo.poblacion.Comunidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.TipoVivienda</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.TipoUnidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.TipoTransporte</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.TipoSitioReferencia</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.SistemaCatalogo</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.Regimen</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.Parametro</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.Ocupacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.NivelRiesgo</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.Marcador</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.CondicionOcupacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.ClaseEvento</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.ClaseAccesibilidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.CategoriaUnidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.general.Catalogo</class>
+	    <class>ni.gob.minsa.malaria.modelo.estructura.Unidad</class>
+	    <class>ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva</class>
+	    <class>ni.gob.minsa.malaria.modelo.auditoria.AuditTrn</class>
+	    <class>ni.gob.minsa.malaria.modelo.auditoria.AuditSsn</class>
+	    <class>ni.gob.minsa.malaria.modelo.BaseEntidadCreacion</class>
+	    <class>ni.gob.minsa.malaria.modelo.BaseEntidadCatalogo</class>
+	    <class>ni.gob.minsa.malaria.modelo.BaseEntidadAcceso</class>
+		<properties>
+			<property name="eclipselink.logging.level" value="FINEST"/>
+			<property name="eclipselink.logging.timestamp" value="true"/>
+			<property name="eclipselink.logging.exceptions" value="true"/>
+			<property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+		</properties>
+	</persistence-unit>
+</persistence>

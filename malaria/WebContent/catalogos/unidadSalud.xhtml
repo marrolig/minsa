@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Unidades de Salud
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+	<ui:define name="content">
+
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmUnidadSalud">
+
+		<ni:titleBar titleText="Catálogos > Unidades de Salud" />
+		
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!--  Selección de entidad administrativa y tipo de unidad -->
+
+		<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+					   value="Entidad Adminitrativa:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboEntidad" styleClass="txtDefault"    
+						 style="position:absolute; left:140px;top:35px;width:290px;" 
+						 value="#{unidadSaludBean.entidadSelectedId}">
+				<f:selectItems value="#{unidadSaludBean.entidades}" var="entidadAdtva"
+							   itemValue="#{entidadAdtva.entidadAdtvaId}"
+							   itemLabel="#{entidadAdtva.nombre}" />
+				<p:ajax event="change" process="cboEntidad" 
+						listener="#{unidadSaludBean.obtenerUnidades}" 
+						update="grdUnidades,panDetalle,panButton"/>
+		</h:selectOneMenu>
+
+		<h:outputLabel for="cboTipoUnidad" styleClass="lblDefault" 
+					   value="Tipo de Unidad:" 
+					   style="position:absolute; left:20px; top:55px;"/>
+		<h:selectOneMenu id="cboTipoUnidad" styleClass="txtDefault"  
+						 style="position:absolute; left:140px;top:55px;width:290px;" 
+						 value="#{unidadSaludBean.tipoUnidadSelectedId}"> 
+				<f:selectItems var="tipoUnidad" 
+							   itemValue="#{tipoUnidad.tipounidadId}" 
+							   itemLabel="#{tipoUnidad.nombre}" 
+							   value="#{unidadSaludBean.tiposUnidades}" />
+				<p:ajax event="change" process="cboTipoUnidad" 
+						listener="#{unidadSaludBean.obtenerUnidades}" 
+						update="grdUnidades,panDetalle,panButton"/>
+				
+		</h:selectOneMenu>
+
+		<!-- Tabla de Unidades -->
+		<div style="float:left; position:absolute; top:80px; left:10px; width:420px; height:320px;">
+		<p:dataTable id="grdUnidades" var="unidad"
+					 rowKey="#{unidad.unidadId}"
+					 selectionMode="single" selection="#{unidadSaludBean.unidadSelected}" 
+					 loadingMessage="Cargando registros ..." 
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 style="width:420px;" 
+					 value="#{unidadSaludBean.unidades}" scrollHeight="293" scrollWidth="420"
+					 scrollable="true">
+					 
+			<p:ajax event="rowSelect" listener="#{unidadSaludBean.onUnidadSelected}"   
+                    update=":frmUnidadSalud:panDetalle :frmUnidadSalud:panButton :frmUnidadSalud:grwMensaje" />  
+        	<p:ajax event="rowUnselect" listener="#{unidadSaludBean.onUnidadUnSelected}" 
+        			update=":frmUnidadSalud:panDetalle :frmUnidadSalud:panButton :frmUnidadSalud:grwMensaje"/>  
+					 
+			<p:column headerText="Nombre" sortBy="#{unidad.nombre}" style="text-align:left; width:280px;">
+				<h:outputText value="#{unidad.nombre}" title="#{unidad.direccion}"/>
+			</p:column>
+			<p:column headerText="Municipio" sortBy="#{unidad.municipio.nombre}" style="text-align:left;">
+				<h:outputText value="#{unidad.municipio.nombre}" />
+			</p:column>
+		</p:dataTable>
+		</div>
+		
+		<!-- Panel de Detalle de una opción de Menu -->
+		
+		<p:panel id="panDetalle" header="Detalle" 
+				 styleClass="panDetail" 
+				 style="position:absolute; top:30px;left:455px; width:530px; height:365px;">
+
+			<h:outputLabel for="txtNombre"
+						 styleClass="lblDefault" 
+						 value="Nombre:" 
+						 style="position:absolute; left:20px; top:80px;"/>
+			<h:inputText id="txtNombre" style="position:absolute; left:100px; top:80px; width:400px;" 
+						 value="#{unidadSaludBean.nombre}" styleClass="txtDefault" disabled="true"
+						 maxlength="50" size="58"/>
+
+			<h:outputLabel for="txtRazonSocial" value="Razón Social:"
+						   styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:110px;"/>
+			<h:inputText id="txtRazonSocial" style="position:absolute; left:100px; top:110px; width:400px;" 
+						 value="#{unidadSaludBean.razonSocial}" styleClass="txtDefault" disabled="true"
+						 maxlength="50" size="58"/>
+								   
+			<h:outputLabel for="txtDireccion" value="Direccion:" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:140px; text-align:right;" />
+			<h:inputText id="txtDireccion" disabled="true" 
+						 style="position:absolute; left:100px; top:140px; width:400px;"
+						 value="#{unidadSaludBean.direccion}" styleClass="txtDefault" /> 
+						 
+			<h:outputLabel for="txtMunicipio" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:170px; text-align:right;" 
+						   value="Municipio:" />
+			<h:inputText id="txtMunicipio" style="position:absolute; left:100px; top:170px; width:180px;" 
+						     value="#{unidadSaludBean.municipio}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtRegimen" styleClass="lblDefault"
+						   style="position:absolute; left:310px; top:170px; text-align:right;" 
+						   value="Regimen:" />
+			<h:inputText id="txtRegimen" style="position:absolute; left:400px; top:170px; width:100px;" 
+						 value="#{unidadSaludBean.regimen}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtTelefono" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:200px; text-align:right;" 
+						   value="Teléfono:" />
+			<h:inputText id="txtTelefono" style="position:absolute; left:100px; top:200px; width:180px;" 
+						     value="#{unidadSaludBean.telefono}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtGrupoEconomico" styleClass="lblDefault"
+						   style="position:absolute; left:310px; top:200px; text-align:right;" 
+						   value="Grupo Económico:" />
+			<h:inputText id="txtGrupoEconomico" style="position:absolute; left:400px; top:200px; width:100px;" 
+						 value="#{unidadSaludBean.grupoEconomico}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtFax" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:230px; text-align:right;" 
+						   value="Fax:" />
+			<h:inputText id="txtFax" style="position:absolute; left:100px; top:230px; width:180px;" 
+						     value="#{unidadSaludBean.fax}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtCategoria" styleClass="lblDefault"
+						   style="position:absolute; left:310px; top:230px; text-align:right;" 
+						   value="Categoría:" />
+			<h:inputText id="txtCategoria" style="position:absolute; left:400px; top:230px; width:100px;" 
+						 value="#{unidadSaludBean.categoria}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtEmail" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:260px; text-align:right;" 
+						   value="Correo:" />
+			<h:inputText id="txtEmail" style="position:absolute; left:100px; top:260px; width:210px;" 
+						     value="#{unidadSaludBean.email}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="chkDeclaraSector" styleClass="lblDefault"
+						   style="position:absolute; left:345px; top:260px;"  
+						   value="Declara Sector Sanitario:" />
+			<h:selectBooleanCheckbox id="chkDeclaraSector" disabled="true"  
+									 styleClass="txtDefault" value="#{unidadSaludBean.declaraSector}"
+									 style="position:absolute; left: 490px; top: 260px;"/>
+     
+			<h:outputLabel for="txtLongitud" styleClass="lblDefault"
+						   style="position:absolute; left:20px; top:290px; text-align:right;" 
+						   value="Longitud:" />
+			<h:inputText id="txtLongitud" style="position:absolute; left:100px; top:290px; width:100px;" 
+						     value="#{unidadSaludBean.longitud}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+
+			<h:outputLabel for="txtLatitud" styleClass="lblDefault" 
+						   style="position:absolute; left:230px; top:290px; text-align:right;" 
+						   value="Latitud:" />
+			<h:inputText id="txtLatitud" style="position:absolute; left:280px; top:290px; width:100px;" 
+						     value="#{unidadSaludBean.latitud}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+     
+			<h:outputLabel for="chkConectividad" styleClass="lblDefault" 
+						   style="position:absolute; left:400px; top:290px;"  
+						   value="Conectividad:" />
+			<h:selectBooleanCheckbox id="chkConectividad" disabled="true" 
+									 styleClass="txtDefault" value="#{unidadSaludBean.conectividad}"
+									 style="position:absolute; left: 490px; top: 290px;"/>
+
+     
+		</p:panel>
+		
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+   
+  <ui:composition>
+  
+  <h:form id="frmHeader">
+  		<div style="text-align:left;margin-left:auto;margin-right:auto;width:100em;">
+		<p:panel styleClass="panHeader" style="position:absolute; top: 0px; height:90px; width:100em;">
+
+			<h:outputLabel value="Ministerio de Salud" 
+						   styleClass="lblTitleHeader" 
+						   style="position:absolute; top: 10px; left: 20px;">
+			</h:outputLabel>
+
+			<h:outputLabel value="Control Vectorial de Malaria" 
+						   styleClass="lblSubTitleHeader" 
+						   style="position:absolute; top: 35px; left: 20px;">
+			</h:outputLabel>
+			<h:graphicImage url="/images/calendar.png" height="16" 
+							style="position: absolute; top: 2px; left:500px;">
+			</h:graphicImage>
+			<h:outputLabel value="#{headerBean.fecha}" 
+						   styleClass="lblTitle" 
+						   style="position:absolute; left: 520px; top: 4px; text-align:left;">
+			</h:outputLabel>
+			<h:graphicImage url="/images/user.png" height="16" 
+							style="position: absolute; top: 2px; left:710px;">
+			</h:graphicImage>
+			
+			<!--  Nombre del Usuario  -->
+			<h:outputLabel value="#{headerBean.usuarioNombre}" 
+						   styleClass="lblTitle" 
+						   style="position:absolute; left: 730px; top: 4px; text-align:left;">
+			</h:outputLabel>
+
+			<!-- Opción para cambio de aplicación -->
+		 
+			<div style="position: absolute; width:100px; height:16px; top: 45px; left: 640px; cursor:pointer;" 
+				 class="btLinkControl">
+				 <h:commandLink id="lnkCambiarAplicacion" onclick="dlgCambioAplicacion.show()" 
+                	style="position: absolute; top: 0px; left: 0px;" 
+                	class="lblTitle">
+				 	<h:graphicImage height="12" 
+				 					style="position: absolute; top: 2px; left:2px;"
+				 					url="/images/cambiarAplicacion.png">
+				 	</h:graphicImage>
+				 	<span style="position:absolute; top:2px; left:18px; width:100px;">Cambiar Sistema</span>
+				 </h:commandLink>
+			</div>
+			
+			<!-- Opción para cambio de clave -->
+		 
+			<div style="position: absolute; width:100px; height:16px; top: 45px; left: 760px; cursor:pointer;" 
+				 class="btLinkControl">
+				 <a id="lnkCambiarClave" onclick="dlgCambioClave.show()" 
+                	style="position: absolute; top: 0px; left: 0px;" 
+                	class="lblTitle">
+				 	<h:graphicImage height="12" 
+				 					style="position: absolute; top: 2px; left:2px;"
+				 					url="/images/security_lock.png">
+				 	</h:graphicImage>
+				 	<span style="position:absolute; top:2px; left:18px; width:100px;">Cambiar Clave</span></a>
+			</div>
+			
+			<!-- Opción para salir del sistema -->
+			
+			<div style="position: absolute; width:100px; height:16px; top: 45px; left: 880px; cursor:pointer;" 
+				 class="btLinkControl">
+				 <h:outputLink id="linkSalir" value="javascript:void(0)" 
+				 			   onclick="confirmation.show()" styleClass="navLinkInside" 
+                			   style="position: absolute; top: 0px; left: 0px;">
+				 	<h:graphicImage height="12" 
+				 					style="position: absolute; top: 2px; left:2px;border:0px;"
+				 					url="/images/go-home.png">
+				 	</h:graphicImage>
+				 	<h:outputText value="Finalizar Sesión" style="position:absolute; top:2px; left:18px; width:100px;" />
+				 </h:outputLink>
+			</div>
+			
+			<!-- Menu del Sistema -->
+			
+			<div style="position:absolute; top: 65px; left:0px; width: 100%;z-index:1000">
+				<p:menubar effect="NONE" autoSubmenuDisplay="false" styleClass="custom-menu-bar"   
+						   model="#{headerBean.menu}">
+				</p:menubar>
+			</div>
+			
+		</p:panel>
+		</div>
+
+		<!-- Modal para finalizar sesión de trabajo -->
+		
+		<p:confirmDialog message="Desea finalizar la sesión de trabajo?"
+				modal="true" 
+				header="Aviso" 
+				severity="alert" 
+				widgetVar="confirmation">
+			<p:commandButton id="btnSiSalir" value="Si" styleClass="btnDefault" process="@none"
+							 style="font-size:11px;" update="@none" ajax="true" onclick="top.document.location.replace('#{headerBean.urlLogin}')" />
+			<p:commandButton id="btnNoSalir" value="No" styleClass="btnDefault" style="font-size:11px;"
+							 onclick="confirmation.hide()" type="button" /> 
+		</p:confirmDialog>
+		
+		<p:growl id="grwMensaje" showDetail="true" life="3000" />    
+
+	
+		<!-- Modal para cambiar clave -->
+		
+		<p:dialog id="dlgCambioClave" header="Cambio de Clave de Acceso" modal="true"
+				  widgetVar="dlgCambioClave" height="170" width="370" closable="false"
+				  resizable="false">
+							  
+				<h:panelGrid id="panCambioClave" columns="2" width="100%" 
+							 style="margin-bottom:20px;margin-top:10px;text-align:left;">
+							   
+					<h:outputLabel for="txtClaveActual" value="Clave Actual:" 
+								   styleClass="lblDefault" />
+					<h:inputSecret id="txtClaveActual" style="width:230px;" 
+								   value="#{headerBean.claveActual}" 
+								   maxlenght="30" styleClass="txtDefault"  
+								   required="true" label="Clave Actual" />
+					
+					<h:outputLabel for="txtClaveNueva" value="Nueva Clave:" 
+								   styleClass="lblDefault" />
+					<h:inputSecret id="txtClaveNueva" 
+								   value="#{headerBean.claveNueva}" 
+								   maxlength="30" styleClass="txtDefault"
+								   style="width:230px;" label="Clave Nueva" />
+					
+					<h:outputLabel for="txtClaveRepite" value="Repita Nueva Clave:" 
+								   styleClass="lblDefault" />
+					<h:inputSecret id="txtClaveRepite" 
+								   value="#{headerBean.claveRepite}" 
+								   maxlength="30" styleClass="txtDefault" 
+								   style="width:230px;" label="Repetición de Clave" />
+
+				</h:panelGrid>
+				
+				<h:panelGrid id="panButtonClave" style="text-align:left;" columns="2">  					
+					<p:commandButton value="Aceptar" styleClass="btnDefault"
+									 update="grwMensaje,panCambioClave" 
+									 process="@this,panCambioClave" 
+									 actionListener="#{headerBean.cambiarClave}" 
+									 oncomplete="handleChangePassRequest(xhr, status, args);"/>
+									 
+					<p:commandButton value="Cancelar" styleClass="btnDefault"
+									 update="grwMensaje,panCambioClave"
+									 process="@this" 
+									 actionListener="#{headerBean.cancelarCambio}" 
+									 onclick="dlgCambioClave.hide();" />
+  				</h:panelGrid>
+	
+		</p:dialog>
+		
+		<!-- Modal para bloquear en transacción  -->
+		
+		<p:dialog modal="true" widgetVar="statusDialog" header="Espere un momento ..."     
+				  draggable="false" closable="false" width="250" resizable="false">
+			<div style="text-align:center;width:200px;">
+				<p:graphicImage value="/images/loadingBar.gif" />
+			</div>  
+		</p:dialog>
+		
+		
+		<p:overlayPanel id="oPanCambiarAplicacion" for="lnkCambiarAplicacion" hideEffect="fade">
+			<p:dataTable id="grdSistemas" var="sistema"
+						 rowKey="#{sistema.key}" 
+						 value="#{headerBean.sistemas}" 
+						 loadingMessage="Cargando registros ..."
+						 errorMessage="Error al cargar los datos"
+						 styleClass="panDetail" emptyMessage="No existen más sistemas autorizados"
+						 rows="6" paginator="true" paginatorPosition="top"
+						 selectionMode="single" 
+						 selection="#{headerBean.sistemaSelected}">
+						 
+				<p:ajax event="rowSelect" listener="#{headerBean.onSistemaSelected}"
+						onstart="statusDialog.show();" oncomplete="handleAppRequest(xhr, status, args);"   
+            	        update=":frmHeader:grwMensaje" />  
+				
+				<p:column headerText="Sistema">  
+                	<h:outputText value="#{sistema.value}" />  
+            	</p:column>
+			</p:dataTable>    	
+		</p:overlayPanel>
+
+    	<script type="text/javascript">
+
+			function handleChangePassRequest(xhr, status, args) {
+				if(!args.validationFailed &amp;&amp; args.logOK) {
+					dlgCambioClave.hide();
+				}
+			}
+			
+			function handleAppRequest(xhr, status, args) {
+				if(args.peticionOK) {
+					document.location.replace(args.urlApp);
+				} else {
+					statusDialog.hide();
+				}
+			}
+			
+			
+		</script>
+		</h:form>
+  	</ui:composition>
+</html>

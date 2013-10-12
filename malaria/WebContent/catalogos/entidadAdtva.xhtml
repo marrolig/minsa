@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Entidades Administrativas
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+	<ui:define name="content">
+
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmEntidadAdtva">
+
+		<ni:titleBar titleText="Catálogos > Entidades Administrativas" />
+		
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!-- Tabla de Entidades Administrativas -->
+		<div style="float:left; position:absolute; top:30px; left:10px; width:410px; height:370px;">
+		<p:dataTable id="grdEntidades" var="entidadAdtva"
+					 rowKey="#{entidadAdtva.entidadAdtvaId}"
+					 selectionMode="single" selection="#{entidadAdtvaBean.entidadSelected}" 
+					 loadingMessage="Cargando registros ..."
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 style="width:410px;"  
+					 value="#{entidadAdtvaBean.entidades}" 
+					 scrollHeight="345" scrollWidth="410"
+					 scrollable="true">
+					 
+			<p:ajax event="rowSelect" listener="#{entidadAdtvaBean.onEntidadSelected}"   
+                    update=":frmEntidadAdtva:panDetalle :frmEntidadAdtva:panButton :frmEntidadAdtva:grwMensaje" />  
+        	<p:ajax event="rowUnselect" listener="#{entidadAdtvaBean.onEntidadUnSelected}" 
+        			update=":frmEntidadAdtva:panDetalle :frmEntidadAdtva:panButton :frmEntidadAdtva:grwMensaje"/>  
+			
+			<p:column headerText="Código" sortBy="#{entidadAdtva.codigo}" style="text-align:left; width:70px;">
+				<h:outputText value="#{entidadAdtva.codigo}"/>
+			</p:column>
+			<p:column headerText="Nombre" sortBy="#{entidadAdtva.nombre}" style="text-align:left; width:330px;">
+				<h:outputText value="#{entidadAdtva.nombre}"/>
+			</p:column>
+		</p:dataTable>
+		</div>
+				
+		<!-- Panel de Detalle  -->
+		
+		<p:panel id="panDetalle" header="Detalle" 
+				 styleClass="panDetail" 
+				 style="position:absolute; top:30px;left:435px; width:550px; height:365px;">
+
+			<p:focus for="txtNombre" />
+			
+			<h:outputLabel for="txtNombre" styleClass="lblDefault" 
+						   value="Nombre:" style="position:absolute; left:60px; top:60px;"/>
+			<h:inputText id="txtNombre" style="position:absolute; left:160px; top:60px; width:300px;" 
+						 value="#{entidadAdtvaBean.nombre}" styleClass="txtDefault"
+						 maxlength="30" size="58" disabled="true"  
+						 required="true" label="Nombre de la Entidad Administrativa" />
+
+			<h:outputLabel for="txtMunicipio" styleClass="lblDefault" 
+						   value="Municipio:" style="position:absolute; left:60px; top:90px;"/>
+			<h:inputText id="txtMunicipio" style="position:absolute; left:160px; top:90px; width:300px;" 
+						     value="#{entidadAdtvaBean.municipio}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtCorreo" styleClass="lblDefault" 
+						   value="Correo Electrónico:" 
+						   style="position:absolute; left:60px; top:120px; text-align:right;" />
+			<h:inputText id="txtCorreo" disabled="true" 
+						 style="position:absolute; left:160px; top:120px; width:300px;"
+						 value="#{entidadAdtvaBean.email}" styleClass="txtDefault" /> 
+
+			<h:outputLabel for="txtTelefono" styleClass="lblDefault" 
+						   style="position:absolute; left:60px; top:150px; text-align:right;" 
+						   value="Teléfono:" />
+			<h:inputText id="txtTelefono" style="position:absolute; left:160px; top:150px; width:300px;" 
+						 value="#{entidadAdtvaBean.telefono}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtFax" 
+						   style="position:absolute; left:60px; top:180px; text-align:right;" 
+						   value="Fax:" styleClass="lblDefault" />
+			<h:inputText id="txtFax" style="position:absolute; left:160px; top:180px; width:300px;" 
+						 value="#{entidadAdtvaBean.fax}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtLatitud" 
+						   style="position:absolute; left:60px; top:210px; text-align:right;" 
+						   value="Latitud:" styleClass="lblDefault" />
+			<h:inputText id="txtLatitud" style="position:absolute; left:160px; top:210px; width:100px;" 
+						 value="#{entidadAdtvaBean.latitud}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtLongitud" 
+						   style="position:absolute; left:300px; top:210px; text-align:right;" 
+						   value="Longitud:" styleClass="lblDefault" />
+			<h:inputText id="txtLongitud" style="position:absolute; left:360px; top:210px; width:100px;" 
+						 value="#{entidadAdtvaBean.longitud}" disabled="true"
+						 styleClass="txtDefault" size="57" />
+						
+			<h:outputLabel style="position:absolute; left:60px; top:240px; text-align:right;" 
+						   value="Creado por:" styleClass="lblDefault" />
+			
+			<h:outputLabel id="lblUsuarioCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:160px; top:240px;" 
+						   value="#{entidadAdtvaBean.usuarioNombre}" />
+						   
+			<h:outputLabel id="lblFechaCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:160px; top:260px;" 
+						   value="#{entidadAdtvaBean.fechaRegistro}" />
+			
+    
+		</p:panel>
+	
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;"  
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+	</h:form>
+	
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+	
+</h:body>
+
+</html>

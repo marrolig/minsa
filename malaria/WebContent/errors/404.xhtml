@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+<h:body>
+	<ui:composition template="/templates/main-template.xhtml" >
+	
+	<ui:define name="content">
+	
+	<f:view>
+	<h:form id="frmError">
+	
+		<p:panel id="panContenido" 
+				style="position:absolute; height: 98%; width:99%;border:none;background-color: white;">
+			<h:graphicImage id="imgError" url="/images/pageNotFound.png" width="650" style="position:absolute; left:100px; top:30px;" />
+		</p:panel>		
+	
+	</h:form>
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+</h:body>
+</html>

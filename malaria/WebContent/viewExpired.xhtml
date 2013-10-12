@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+<h:head>
+	<link type="text/css" rel="stylesheet" href="#{request.contextPath}/css/redmond/skin.css" />
+</h:head> 
+  <h:body>
+    <script type="text/javascript">
+  
+  	  alert("La sesión de trabajo ha expirado por inactividad.  Deberá iniciar una nueva sesión de trabajo para continuar.");
+  	  #{redirectBean.redirectToUrlLogin}
+  	  
+  </script>
+  
+  <h:form id="form">
+  </h:form>
+  </h:body>
+</html>

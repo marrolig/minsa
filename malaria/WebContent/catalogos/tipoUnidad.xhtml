@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.prime.com.tr/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Tipos de Unidades
+</ui:define>
+
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+	
+	<ui:define name="content">
+
+	<f:view>
+	
+	<h:form id="frmTipoUnidad">
+
+		<ni:titleBar titleText="Catálogos > Tipos de Unidades" />
+		
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!-- Tabla de Tipos de Unidades -->
+		<p:dataTable id="grdTipoUnidades" var="tipoUnidad"
+					 selectionMode="single" selection="#{tipoUnidadBean.tipoUnidadSelected}" 
+					 loadingMessage="Cargando registros ..." 
+					 rowSelectListener="#{tipoUnidadBean.onTipoUnidadSelected}"
+					 rowUnselectListener="#{tipoUnidadBean.onTipoUnidadUnSelected}"
+					 onRowSelectUpdate="panDetalle panButton grwMensaje" 
+					 onRowUnselectUpdate="panDetalle panButton grwMensaje" 
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="No existen tipos de unidades" 
+					 style="float:left; position:absolute; top:30px; left:10px; width:400px; height:370px;"  
+					 value="#{tipoUnidadBean.tipoUnidades}" height="345"
+					 scrollable="true">
+			<p:column headerText="Código" sortBy="#{tipoUnidad.codigo}" style="text-align:left;width:70px;">
+				<h:outputText value="#{tipoUnidad.codigo}"/>
+			</p:column>
+			<p:column headerText="Nombre" sortBy="#{tipoUnidad.nombre}" style="text-align:left; width:250px;">
+				<h:outputText value="#{tipoUnidad.nombre}"/>
+			</p:column>
+		</p:dataTable>
+		
+		<!-- Panel de Detalle  -->
+		
+		<p:panel id="panDetalle" header="Detalle" styleClass="panDetail" style="position:absolute; top:30px;left:435px; width:550px; height:365px;">
+
+			<p:focus for="txtNombre" />
+			
+			<h:outputLabel for="txtNombre" value="Nombre:" styleClass="lblDefault" 
+						   style="position:absolute; left:60px; top:120px;"/>
+			<h:inputText id="txtNombre" style="position:absolute; left:160px; top:120px; width:300px;" 
+						 value="#{tipoUnidadBean.nombre}" styleClass="txtDefault"
+						 maxlength="30" size="58" disabled="true"  
+						 required="true" label="Nombre del Tipo de Unidad" />
+
+			<h:outputLabel for="txtCodigo" value="Código:" styleClass="lblDefault" 
+						   style="position:absolute; left:60px; top:150px;"/>
+			<h:inputText id="txtCodigo" style="position:absolute; left:160px; top:150px; width:100px;" 
+						     value="#{tipoUnidadBean.codigo}" disabled="true"
+						     styleClass="txtDefault" size="57" />
+			
+			<h:outputLabel for="txtOrden" value="Número de Orden:" styleClass="lblDefault"
+						   style="position:absolute; left:60px; top:180px; text-align:right;" />
+			<h:inputText id="txtOrden" disabled="true" 
+						 style="position:absolute; left:160px; top:180px; width:100px;"
+						 value="#{tipoUnidadBean.orden}" styleClass="txtDefault" /> 
+						
+			<h:outputLabel style="position:absolute; left:60px; top:210px; text-align:right;" 
+						   value="Creado por:" styleClass="lblDefault" />
+			
+			<h:outputLabel id="lblUsuarioCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:160px; top:210px;" 
+						   value="#{tipoUnidadBean.usuarioNombre}" />
+						   
+			<h:outputLabel id="lblFechaCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:160px; top:230px;" 
+						   value="#{tipoUnidadBean.fechaRegistro}" />
+    
+		</p:panel>
+	
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px;padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

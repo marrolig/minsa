@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Desbloqueo de Población por Entidad Administrativa
+</ui:define>
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmPoblacionDesbloqueoEntidad">
+	
+		<ni:titleBar titleText="Población de Comunidades > Anular Confirmación de Entidades" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+
+		<p:notificationBar id="notificacionBar" 
+						   position="bottom" 
+						   autoDisplay="#{!poblacionDesbloqueoEntidadBean.existenEntidadesConfirmadas}"
+						   effect="slide" style="background:none; background-color:#242424;"
+						   widgetVar="notificacionBar" 
+						   styleClass="notificationBar">
+
+					<p:graphicImage value="/images/closeBar.png" onclick="notificacionBar.hide();"  
+						style="position:absolute; left:5px;top:5px;" />
+					
+					<div style="position:absolute;left:40px; top: 5px; padding-right:50px; text-align:left">
+						<h:outputText rendered="#{!poblacionDesbloqueoEntidadBean.existenEntidadesConfirmadas}" 
+								  value="Ninguna entidad administrativa ha confirmado sus datos de población" 
+								  style="color:#FFCC00;font-size:32px;" />
+					</div>
+		</p:notificationBar>
+
+		<!--  Selección de Año de Trabajo -->
+
+		<h:outputLabel for="cboAño" styleClass="lblDefault" 
+					   value="Año:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboAño" styleClass="txtDefault cboDefault"    
+						 style="position:absolute; left:80px;top:35px;width:80px;" 
+						 value="#{poblacionDesbloqueoEntidadBean.añoSelected}">
+				<f:selectItems value="#{poblacionDesbloqueoEntidadBean.años}" />
+				<p:ajax event="change" process="cboAño" 
+						listener="#{poblacionDesbloqueoEntidadBean.obtenerEntidadesSituacion}" 
+						update="notificacionBar,grdEntidades,panButton,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<!-- Tabla de Entidades Administrativas -->
+		
+		<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:340px;overflow:auto;">
+		<p:dataTable id="grdEntidades" var="controlEntidadPoblacion" 
+					 rowKey="#{controlEntidadPoblacion.controlEntidadPoblacionId}"
+					 loadingMessage="Cargando registros ..."
+					 paginator="true" 
+					 paginatorAlwaysVisible="true" paginatorPosition="top" rows="14" 
+					 selection="#{poblacionDesbloqueoEntidadBean.controlEntidadesPoblacionSelected}"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="No se encontraron entidades administrativas con datos de población" 
+					 value="#{poblacionDesbloqueoEntidadBean.controlEntidadesPoblacion}">
+			<p:column headerText="Entidad Administrativa" style="text-align:left; width:230px;">
+				<h:outputText value="#{controlEntidadPoblacion.entidadAdtva.nombre}"/>
+			</p:column>
+			<p:column headerText="Teléfono" style="text-align:left; width:150px;">
+				<h:outputText value="#{controlEntidadPoblacion.entidadAdtva.telefono}"/>
+			</p:column>
+			<p:column headerText="Correo" style="text-align:left; width:170px;">
+				<h:outputText value="#{controlEntidadPoblacion.entidadAdtva.email}"/>
+			</p:column>
+			<p:column selectionMode="multiple" 
+					  style="text-align:center; width:100px;"/>			
+		
+		</p:dataTable>
+		</div>
+				
+
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:405px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+
+			<p:commandButton id="btnDesbloquear" value="Desbloquear" title="Anula la confirmación de los datos de población"    
+					styleClass="btnDefault" style="font-size:11px;"
+					oncomplete="dlgDesbloquearPoblacion.show();"
+					disabled="#{!poblacionDesbloqueoEntidadBean.existenEntidadesConfirmadas}"
+					update="btnSiDesbloquearPoblacion"
+					process="@this" />
+			<p:commandButton id="btnSalir" widgetVar="btnSalir"
+							 value="Salir" styleClass="btnDefault"   
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+			
+		</p:panel>
+		
+		<!-- Modal para desbloquear los datos de población de las entidades y año -->
+		
+		<p:confirmDialog message="Desea desbloquear los datos de población de las entidades administrativas seleccionadas para el año especificado?"
+				modal="true"   
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgDesbloquearPoblacion">
+			<p:commandButton id="btnSiDesbloquearPoblacion" value="Si"  
+							 process="btnSiDesbloquearPoblacion grdEntidades"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 update="panButton,grdEntidades,grwMensaje" 
+							 actionListener="#{poblacionDesbloqueoEntidadBean.desbloquear}"  
+							 oncomplete="dlgDesbloquearPoblacion.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgDesbloquearPoblacion.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+	</h:form>
+	
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+	
+</h:body>
+
+</html>

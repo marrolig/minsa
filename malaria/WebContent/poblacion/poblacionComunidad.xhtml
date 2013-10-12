@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Población de Comunidades
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmPoblacionComunidad">
+	
+		<ni:titleBar titleText="Población > Población por Comunidades" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<p:notificationBar id="notificacionBar" 
+						   position="bottom" 
+						   autoDisplay="#{!poblacionComunidadBean.plan}"
+						   effect="slide" style="background:none; background-color:#484848;" 
+						   widgetVar="notificacionBar" 
+						   styleClass="notificationBar">
+
+					<p:graphicImage value="/images/closeBar.png" onclick="notificacionBar.hide();"  
+						style="position:absolute; left:5px;top:5px;" />
+					
+					<div style="position:absolute;left:40px; top: 5px; padding-right:50px; text-align:left">
+						<h:outputText value="Los datos de población para la unidad de salud ya están confirmados y no pueden ser modificados." 
+						   		  	  style="color:#FFCC00;font-size:32px;" />
+					</div>
+		</p:notificationBar>
+		
+		<!--  Selección de entidad administrativa y unidad de salud -->
+
+		<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+					   value="Entidad Administrativa:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboEntidad" styleClass="txtDefault cboDefault" 
+	 					 disabled="#{poblacionComunidadBean.capa==2}"    
+						 style="position:absolute; left:145px;top:35px;width:200px;" 
+						 value="#{poblacionComunidadBean.entidadSelectedId}">
+				<f:selectItems value="#{poblacionComunidadBean.entidades}" var="entidad"
+							   itemValue="#{entidad.entidadAdtvaId}"
+							   itemLabel="#{entidad.nombre}" />
+				<p:ajax event="change" process="cboEntidad,cboUnidad,cboAño" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+						listener="#{poblacionComunidadBean.obtenerUnidades}" 
+						update="cboEntidad,cboUnidad,capa1,panButtonCapa1,notificacionBar,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<h:outputLabel for="cboUnidad" styleClass="lblDefault" 
+					   value="Unidad:" 
+					   style="position:absolute; left:360px; top:35px;"/>
+		<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault" disabled="#{poblacionComunidadBean.capa==2}" 
+						 style="position:absolute; left:410px;top:35px;width:420px;" 
+						 value="#{poblacionComunidadBean.unidadSelectedId}"> 
+				<f:selectItems var="unidad" 
+							   itemValue="#{unidad.unidadId}" 
+							   itemLabel="#{unidad.nombre}" 
+							   value="#{poblacionComunidadBean.unidades}" />
+				<p:ajax event="change" process="cboUnidad,cboAño" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+						listener="#{poblacionComunidadBean.cambiarUnidad}" 
+						update="cboUnidad,capa1,panButtonCapa1,grwMensaje,notificacionBar"/>
+				
+		</h:selectOneMenu>
+
+		<!--  Selección de Año de Trabajo -->
+
+		<h:outputLabel for="cboAño" styleClass="lblDefault" 
+					   value="Año:" 
+					   style="position:absolute; left:865px; top:35px;"/>
+		<h:selectOneMenu id="cboAño" styleClass="txtDefault cboDefault"    
+						 style="position:absolute; left:900px;top:35px;width:68px;" 
+						 value="#{poblacionComunidadBean.añoSelected}">
+				<f:selectItems value="#{poblacionComunidadBean.años}" />
+				<p:ajax event="change" process="cboAño"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+						listener="#{poblacionComunidadBean.cambiarAño}" 
+						update="cboAño,capa1,capa2,grwMensaje,notificacionBar"/>
+		</h:selectOneMenu>
+
+		<p:panel id="capa1"  styleClass="panDefault" visible="#{poblacionComunidadBean.capa==1}">
+		
+		<!-- Tabla de Población por Sectores -->
+		<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:235px;">
+			<p:dataTable id="grdPoblacionSectores" var="poblacionAnualSector" 
+						 rowKey="#{poblacionAnualSector.sectorId}"
+						 selectionMode="single" rendered="#{poblacionComunidadBean.capa==1}" 
+						 selection="#{poblacionComunidadBean.poblacionAnualSectorSelected}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail"
+						 emptyMessage="No existen sectores asociados a la unidad" 
+						 style="width:980px;" scrollHeight="210" scrollWidth="980"
+					 	 scrollable="true" value="#{poblacionComunidadBean.poblacionAnualSectores}">
+
+				<p:ajax event="rowSelect" 
+						listener="#{poblacionComunidadBean.onPoblacionSectorSelected}"   
+            	        update=":frmPoblacionComunidad:capa1 :frmPoblacionComunidad:capa2 :frmPoblacionComunidad:cboEntidad :frmPoblacionComunidad:cboUnidad" />  
+
+				<p:column headerText="Sector" style="text-align:left; width:400px;">
+					<h:outputText value="#{poblacionAnualSector.nombre}"/>
+				</p:column>
+				<p:column headerText="Código" style="text-align:left; width:80px;">
+					<h:outputText value="#{poblacionAnualSector.codigo}" />
+				</p:column>
+				<p:column headerText="Comunidades" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualSector.comunidades}" />
+				</p:column>
+				<p:column headerText="Población" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualSector.poblacion}" />
+				</p:column>
+				<p:column headerText="Manzanas" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualSector.manzanas}" />
+				</p:column>
+				<p:column headerText="Viviendas" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualSector.viviendas}" />
+				</p:column>
+				<p:column headerText="Hogares" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualSector.hogares}" />
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+		
+		<!-- Tabla Resumen de Población por Sectores -->
+		<div style="float:left; position:absolute; top:298px; left:10px; width:980px; height:95px;">
+			<p:dataTable id="grdResumenSectores" var="resumenPoblacionSector" 
+						 rendered="#{poblacionComunidadBean.capa==1}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail"
+						 emptyMessage="&bnsp;" 
+						 style="width:980px;"
+					 	 value="#{poblacionComunidadBean.resumenPoblacionSectores}">
+
+				<p:column headerText="Area" footerText="Total" style="text-align:left; width:80px;">
+					<h:outputText value="#{resumenPoblacionSector.tipoArea}"/>
+				</p:column>
+				<p:column headerText="Comunidades" footerText="#{poblacionComunidadBean.totalPoblacionSectores.comunidades}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.comunidades}" />
+				</p:column>
+				<p:column headerText="%Comunidades" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.porcentajeComunidades}" />
+				</p:column>
+				<p:column headerText="Población" footerText="#{poblacionComunidadBean.totalPoblacionSectores.poblacion}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.poblacion}" />
+				</p:column>
+				<p:column headerText="%Poblacion" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.porcentajePoblacion}" />
+				</p:column>
+				<p:column headerText="Manzanas" footerText="#{poblacionComunidadBean.totalPoblacionSectores.manzanas}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.manzanas}" />
+				</p:column>
+				<p:column headerText="Viviendas" footerText="#{poblacionComunidadBean.totalPoblacionSectores.viviendas}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.viviendas}" />
+				</p:column>
+				<p:column headerText="%Viviendas" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.porcentajeViviendas}" />
+				</p:column>
+				<p:column headerText="Hogares" footerText="#{poblacionComunidadBean.totalPoblacionSectores.hogares}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.hogares}" />
+				</p:column>
+				<p:column headerText="%Hogares" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionSector.porcentajeHogares}" />
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+		<!--   panel de botones -->		
+
+		<p:panel id="panButtonCapa1" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:commandButton id="btnConfirmar" value="Confirmar" 
+							 disabled="#{!poblacionComunidadBean.plan or poblacionComunidadBean.unidadSelectedId==0 or !poblacionComunidadBean.existenDatosPoblacion}" 
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 update="btnSiConfirmar grwMensaje" 
+							 process="@this" 
+							 oncomplete="dlgConfirmarPoblacion.show();"/>
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+		</p:panel>   <!-- fin capa 1 -->
+
+		<p:panel id="capa2"  styleClass="panDefault" visible="#{poblacionComunidadBean.capa==2}">
+		
+		<!-- Tabla de Población por Comunidades para un sector seleccionado -->
+		<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:230px;">
+			<p:dataTable id="grdPoblacionComunidades" var="poblacionAnualComunidad" 
+						 rowKey="#{poblacionAnualComunidad.comunidadId}"
+						 rendered="#{poblacionComunidadBean.capa==2}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail" 
+						 emptyMessage="No existen comunidades asociadas al sector" 
+						 style="width:980px;" scrollHeight="187" scrollWidth="980"
+					 	 scrollable="true" value="#{poblacionComunidadBean.poblacionAnualComunidades}">
+
+				<f:facet name="header">
+					<div style="text-align:left;">
+						<h:outputText value="#{poblacionComunidadBean.nombreSectorSelected}" />
+					</div>
+				</f:facet>
+				
+				<p:column headerText="Comunidad" style="text-align:left; width:380px;">
+					<h:outputText value="#{poblacionAnualComunidad.nombre}"/>
+				</p:column>
+				<p:column headerText="Código" style="text-align:left; width:80px;">
+					<h:outputText value="#{poblacionAnualComunidad.codigo}" />
+				</p:column>
+
+				<p:column headerText="Area" style="text-align:left; width:60px;">
+					<h:outputText value="#{poblacionAnualComunidad.tipoArea}" />
+				</p:column>
+
+				<p:column headerText="Población" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualComunidad.poblacion}" rendered="#{!poblacionComunidadBean.plan}" />
+					<p:inputMask mask="?999999"  
+							 maxlength="6" styleClass="txtDefault"
+							 onkeydown="e=window.event || {}; var charCode = e.charCode || e.keyCode || e.which; if (charCode==13) {event.keyCode=9; return 9;}" 
+							 placeHolder="" style="width:80px;height:14px;"
+							 value="#{poblacionAnualComunidad.poblacion}"
+							 rendered="#{poblacionComunidadBean.plan}" >
+						<p:ajax event="change" process="@this" 
+								listener="#{poblacionComunidadBean.notificarCambio}" 
+								update="@this :frmPoblacionComunidad:panButtonCapa2" />
+					</p:inputMask>
+					
+				</p:column>
+				<p:column headerText="Manzanas" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualComunidad.manzanas}" rendered="#{!poblacionComunidadBean.plan}" />
+					<p:inputMask mask="?999999"  
+							 maxlength="6" styleClass="txtDefault"
+							 onkeydown="e=window.event || {}; var charCode = e.charCode || e.keyCode || e.which; if (charCode==13) {event.keyCode=9; return 9;}" 
+							 placeHolder="" style="width:80px;height:14px;"
+							 value="#{poblacionAnualComunidad.manzanas}"
+							 rendered="#{poblacionComunidadBean.plan}" >
+						<p:ajax event="change" process="@this"
+								listener="#{poblacionComunidadBean.notificarCambio}" 
+								update="@this :frmPoblacionComunidad:panButtonCapa2" />
+					</p:inputMask>
+				</p:column>
+				<p:column headerText="Viviendas" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualComunidad.viviendas}" rendered="#{!poblacionComunidadBean.plan}" />
+					<p:inputMask mask="?999999"  
+							 maxlength="6" styleClass="txtDefault"
+							 onkeydown="e=window.event || {}; var charCode = e.charCode || e.keyCode || e.which; if (charCode==13) {event.keyCode=9; return 9;}" 
+							 placeHolder="" style="width:80px;height:14px;"
+							 value="#{poblacionAnualComunidad.viviendas}"
+							 rendered="#{poblacionComunidadBean.plan}" >
+						<p:ajax event="change" process="@this"
+								listener="#{poblacionComunidadBean.notificarCambio}" 
+								update="@this :frmPoblacionComunidad:panButtonCapa2" />
+					</p:inputMask>
+					
+				</p:column>
+				<p:column headerText="Hogares" style="text-align:left; width:100px;">
+					<h:outputText value="#{poblacionAnualComunidad.hogares}" rendered="#{!poblacionComunidadBean.plan}" />
+					<p:inputMask mask="?999999"  
+							 maxlength="6" styleClass="txtDefault"
+							 onkeydown="e=window.event || {}; var charCode = e.charCode || e.keyCode || e.which; if (charCode==13) {event.keyCode=9; return 9;}" 
+							 placeHolder="" style="width:80px;height:15px;"
+							 value="#{poblacionAnualComunidad.hogares}"
+							 rendered="#{poblacionComunidadBean.plan}" >
+						<p:ajax event="change" process="@this"
+								listener="#{poblacionComunidadBean.notificarCambio}" 
+								update="@this :frmPoblacionComunidad:panButtonCapa2" />
+					</p:inputMask>
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+		
+		<!-- Tabla Resumen de Población de Comunidades del Sector -->
+		<div style="float:left; position:absolute; top:298px; left:10px; width:980px; height:95px;">
+			<p:dataTable id="grdResumenComunidades" var="resumenPoblacionComunidad" 
+						 rendered="#{poblacionComunidadBean.capa==2}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail"
+						 emptyMessage="&bnsp;" 
+						 style="width:980px;"
+					 	 value="#{poblacionComunidadBean.resumenPoblacionComunidades}">
+
+				<p:column headerText="Area" footerText="Total" style="text-align:left; width:80px;">
+					<h:outputText value="#{resumenPoblacionComunidad.tipoArea}"/>
+				</p:column>
+				<p:column headerText="Comunidades" footerText="#{poblacionComunidadBean.totalPoblacionComunidades.comunidades}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.comunidades}" />
+				</p:column>
+				<p:column headerText="%Comunidades" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.porcentajeComunidades}" />
+				</p:column>
+				<p:column headerText="Población" footerText="#{poblacionComunidadBean.totalPoblacionComunidades.poblacion}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.poblacion}" />
+				</p:column>
+				<p:column headerText="%Poblacion" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.porcentajePoblacion}" />
+				</p:column>
+				<p:column headerText="Manzanas" footerText="#{poblacionComunidadBean.totalPoblacionComunidades.manzanas}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.manzanas}" />
+				</p:column>
+				<p:column headerText="Viviendas" footerText="#{poblacionComunidadBean.totalPoblacionComunidades.viviendas}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.viviendas}" />
+				</p:column>
+				<p:column headerText="%Viviendas" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.porcentajeViviendas}" />
+				</p:column>
+				<p:column headerText="Hogares" footerText="#{poblacionComunidadBean.totalPoblacionComunidades.hogares}" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.hogares}" />
+				</p:column>
+				<p:column headerText="%Hogares" style="text-align:right; width:100px;">
+					<h:outputText value="#{resumenPoblacionComunidad.porcentajeHogares}" />
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+		<!--   panel de botones -->		
+
+		<p:panel id="panButtonCapa2" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:commandButton id="btnGuardar" value="Guardar" 
+							 disabled="#{!poblacionComunidadBean.plan or poblacionComunidadBean.unidadSelectedId==0 or !poblacionComunidadBean.cambiosPendientes}" 
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 onstart="statusDialog.show();" 
+							 oncomplete="statusDialog.hide();"
+							 update="capa2 grwMensaje"  
+							 process="@this" 
+							 actionListener="#{poblacionComunidadBean.guardar}" />
+			<p:commandButton id="btnRegresar" value="Regresar"
+							 onstart="statusDialog.show()" 
+							 oncomplete="statusDialog.hide();controlPeticionRegresar(xhr, status, args);"
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 process="@this" 
+							 actionListener="#{poblacionComunidadBean.activarPrimerCapa}" />
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+		</p:panel>   <!-- fin capa 2 -->
+
+		<!-- Modal para confirmar regresar sin guardar  -->
+		
+		<p:confirmDialog message="Existen cambios pendientes de guardar.  Desea perder dichos cambios ?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarRegresar">
+			<p:commandButton id="btnSiConfirmarRegresar" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 update="capa1 capa2 cboEntidad cboUnidad" actionListener="#{poblacionComunidadBean.regresarPrimerCapa}"  
+							 onstart="dlgConfirmarRegresar.hide();statusDialog.show()" oncomplete="statusDialog.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarRegresar.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<!-- Modal para confirmar los datos de población  -->
+		
+		<p:confirmDialog message="La confirmación de los datos de población implica una protección de los mismos para que no puedan ser modificados.  Desea continuar con el proceso de confirmación?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarPoblacion">
+			<p:commandButton id="btnSiConfirmar" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 update="capa1,grwMensaje,notificacionBar" 
+							 actionListener="#{poblacionComunidadBean.confirmar}"  
+							 onstart="dlgConfirmarPoblacion.hide();statusDialog.show()" 
+							 oncomplete="statusDialog.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarPoblacion.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<script type="text/javascript">
+		  
+			function controlPeticionRegresar(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.cambiosPendientes) {   
+					dlgConfirmarRegresar.show();   
+				} 
+			}
+			    
+		</script> 
+	
+
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

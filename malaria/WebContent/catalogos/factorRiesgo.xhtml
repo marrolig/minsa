@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Factores de Riesgo
+</ui:define>
+
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+	
+	<ui:define name="content">
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+		</style>
+	
+	<f:view>
+	
+	<h:form id="frmFactorRiesgo">
+
+		<ni:titleBar titleText="Catalogos > Factores de Riesgo" />
+		
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!-- Tabla de Factores de Riesgo -->
+		<div style="float:left; position:absolute; top:30px; left:10px; width:500px; height:370px;">
+		<p:dataTable id="grdFactoresRiesgos" var="factorRiesgo" 
+					 rowKey="#{factorRiesgo.factorRiesgoId}"
+					 rowStyleClass="#{factorRiesgo.pasivo==1 ? 'rowNonActive' : null}"
+					 selectionMode="single" selection="#{factorRiesgoBean.factorRiesgoSelected}" 
+					 loadingMessage="Cargando registros ..." style="width:500px;"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 value="#{factorRiesgoBean.factoresRiesgos}" scrollHeight="345" scrollWidth="500" 
+					 scrollable="true">
+					 
+			<p:ajax event="rowSelect" listener="#{factorRiesgoBean.onFactorRiesgoSelected}"   
+                    update=":frmFactorRiesgo:panDetalle :frmFactorRiesgo:panButton :frmFactorRiesgo:grwMensaje :frmFactorRiesgo:grdEventosAsociados :frmFactorRiesgo:panFooterList" />  
+        	<p:ajax event="rowUnselect" listener="#{factorRiesgoBean.onFactorRiesgoUnSelected}" 
+        			update=":frmFactorRiesgo:panDetalle :frmFactorRiesgo:panButton :frmFactorRiesgo:grwMensaje :frmFactorRiesgo:grdEventosAsociados :frmFactorRiesgo:panFooterList"/>  
+					 
+			<p:column headerText="Código" sortBy="#{factorRiesgo.codigo}" style="text-align:left;width:80px;">
+				<h:outputText value="#{factorRiesgo.codigo}"/>
+			</p:column>
+			<p:column headerText="Nombre" sortBy="#{factorRiesgo.nombre}" style="text-align:left; width:420px;">
+				<h:outputText value="#{factorRiesgo.nombre}"/>
+			</p:column>
+		</p:dataTable>
+		</div>
+		
+		<!-- Panel de Detalle  -->
+		
+		<p:panel id="panDetalle" header="Detalle" styleClass="panDetail" 
+				 style="position:absolute; top:30px;left:520px; width:465px; height:161px;">
+
+			<p:focus for="txtNombre" />
+			
+			<h:outputLabel for="txtNombre" value="Nombre:" styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:40px;"/>
+			<h:inputText id="txtNombre" style="position:absolute; left:70px; top:40px; width:380px;" 
+						 value="#{factorRiesgoBean.nombre}" styleClass="txtDefault" disabled="true"
+						 maxlength="100" size="58" requiredMessage="El nombre del factor de riesgo es requerido"   
+						 required="true" label="Nombre del Factor de Riesgo" />
+
+			<h:outputLabel for="txtCodigo" value="Código:" styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:70px;"/>
+			<h:inputText value="#{factorRiesgoBean.codigo}" 
+						 id="txtCodigo" required="true" requiredMessage="El código del factor de riesgo es requerido" 
+						 disabled="true" maxlength="10" 
+						 style="position:absolute; width:150px; left:70px; top:70px; text-align:left;" />
+			
+			<h:outputLabel for="chkPasivo" styleClass="lblDefault"
+						   style="position:absolute; left:400px; top:70px;"  
+						   value="Pasivo:" />
+			<h:selectBooleanCheckbox id="chkPasivo" disabled="true" 
+									 styleClass="txtDefault" value="#{factorRiesgoBean.pasivo}"
+									 style="position:absolute; left: 440px; top: 70px;"/>
+			
+			<h:outputLabel style="position:absolute; left:20px; top:105px; text-align:right;" 
+						   value="Creado por:" styleClass="lblDefault" />
+			
+			<h:outputLabel id="lblUsuarioCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:90px; top:105px;" 
+						   value="#{factorRiesgoBean.usuarioNombre}" />
+						   
+			<h:outputLabel id="lblFechaCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:90px; top:125px;" 
+						   value="#{factorRiesgoBean.fechaRegistro}" />
+    
+		</p:panel>
+	
+	
+		<!-- Eventos Asociados -->
+		
+		<div style="float:left; position:absolute; top:200px;left:520px; width:468px; height:180px;">
+		<p:dataTable id="grdEventosAsociados" var="factorRiesgoEvento" 
+					 rowStyleClass="#{factorRiesgoEvento.eventoSalud.pasivo==1 ? 'rowNonActive' : null}"
+					 styleClass="panDetail" emptyMessage="No existen eventos asociados" 
+					 style="width:468px;"  
+					 value="#{factorRiesgoBean.eventosAsociados}" 
+					 rowKey="#{factorRiesgoEvento.factorRiesgoEventoId}"
+					 scrollable="true" scrollHeight="160" scrollWidth="468">
+			<p:column headerText="Eventos de Salud Asociados" style="text-align:left;width:400px;">
+				<h:outputText value="#{factorRiesgoEvento.eventoSalud.nombre}" />
+			</p:column>
+		</p:dataTable>
+		</div>
+		
+		<h:panelGroup id="panFooterList" style="position: absolute; width:468px; height:20px; top: 380px; left: 520px;" 
+				 class="dtFooter">
+		</h:panelGroup>
+	
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px;padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				 
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

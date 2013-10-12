@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.prime.com.tr/ui">
+
+<h:head>
+  <link rel="shortcut icon" href="./favicon.ico" type="image/ico" />
+  <title>Control Vectorial de Malaria</title>
+  <script type="text/javascript">
+  
+  	  function resizeIframe() {
+
+		var myWidth = 0, myHeight = 0;
+		if( typeof( window.innerWidth ) == 'number' ) {
+		//Non-IE
+			myWidth = window.innerWidth;
+			myHeight = window.innerHeight;
+		} else if( document.documentElement &amp;&amp; ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) 
+
+			{
+				//IE 6+ in 'standards compliant mode'
+				myWidth = docume
+				nt.docum
+				entElement.clientWidth;
+				myHeight = document.documentElement.clientHeight;
+			} else if( document.body &amp;&amp; ( document.body.clientWidth || document.body.clientHeight ) ) {
+			//IE 4 compatible
+			myWidth = do
+			cument.body.clientWidth;
+			myHeight = document.body.clientHeight;
+		}
+
+		myHeight -= document.getElementById('ifrMain').offsetLeft;
+		myHeight -= 0; some extra height here
+		document.getElementById('ifrMain').style.height = myHeight +"px";
+
+	};
+	//document.getElementById('ifrMain').onload = resizeIframe;
+	//window.onresize = resizeIframe;
+  	  
+  </script>
+</h:head> 
+  <h:body onunload="document.getElementById('form:btnBorrarSesion').click();">
+  
+  <script type="text/javascript">
+  
+  	  #{mainBean.redirectToUrlLogin}
+  	  
+  </script>
+  
+  <h:form id="form">
+  	<h:commandButton style="position:absolute:top:10px;left:10px;border:0px;background-color:transparente;" value=" " actionListener="#{mainBean.borrarSesiones}" id="btnBorrarSesion"></h:commandButton>
+	<iframe id="ifrMain" name="ifrMain" 
+			frameborder="0" 
+			scrolling="no" 
+			src="inicio.xhtml" 
+            style="position:absolute; left:0px; top:0px; width:100%; height:100%; padding:0px; margin:0px;">
+	</iframe>
+  </h:form>
+  </h:body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Parámetros Epidemiológicos
+</ui:define>
+
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+	
+	<ui:define name="content">
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+		</style>
+	
+	<f:view>
+	
+	<h:form id="frmParametro">
+
+		<ni:titleBar titleText="Catálogos > Parámetros Epidemiológicos" />
+		
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!-- Tabla de Parametros Epidemiológicos -->
+		<div style="float:left; position:absolute; top:30px; left:10px; width:500px; height:370px;">
+		<p:dataTable id="grdParametros" var="parametroEpidemiologico" 
+					 rowKey="#{parametroEpidemiologico.parametroEpidemiologicoId}"
+					 rowStyleClass="#{parametroEpidemiologico.pasivo==1 ? 'rowNonActive' : null}"
+					 selectionMode="single" selection="#{parametroEpidemiologicoBean.parametroEpidemiologicoSelected}" 
+					 loadingMessage="Cargando registros ..." style="width:500px;"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 value="#{parametroEpidemiologicoBean.parametrosEpidemiologicos}" scrollHeight="345" scrollWidth="500" 
+					 scrollable="true">
+					 
+			<p:ajax event="rowSelect" listener="#{parametroEpidemiologicoBean.onParametroEpidemiologicoSelected}"   
+                    update=":frmParametro:panDetalle :frmParametro:panButton :frmParametro:grwMensaje :frmParametro:grdEventosAsociados :frmParametro:panFooterList" />  
+        	<p:ajax event="rowUnselect" listener="#{parametroEpidemiologicoBean.onParametroEpidemiologicoUnSelected}" 
+        			update=":frmParametro:panDetalle :frmParametro:panButton :frmParametro:grwMensaje :frmParametro:grdEventosAsociados :frmParametro:panFooterList"/>  
+					 
+			<p:column headerText="Código" sortBy="#{parametroEpidemiologico.codigo}" style="text-align:left;width:80px;">
+				<h:outputText value="#{parametroEpidemiologico.codigo}"/>
+			</p:column>
+			<p:column headerText="Concepto" sortBy="#{parametroEpidemiologico.concepto}" style="text-align:left; width:420px;">
+				<h:outputText value="#{parametroEpidemiologico.concepto}"/>
+			</p:column>
+		</p:dataTable>
+		</div>
+		
+		<!-- Panel de Detalle  -->
+		
+		<p:panel id="panDetalle" header="Detalle" styleClass="panDetail" 
+				 style="position:absolute; top:30px;left:520px; width:465px; height:205px;">
+
+			<p:focus for="txtConcepto" />
+			
+			<h:outputLabel for="txtConcepto" value="Concepto:" styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:30px;"/>
+			<h:inputText id="txtConcepto" style="position:absolute; left:90px; top:30px; width:365px;" 
+						 value="#{parametroEpidemiologicoBean.concepto}" styleClass="txtDefault" disabled="true"
+						 maxlength="100" size="58" requiredMessage="El concepto asociado al parámetro epidemiológico es requerido"    
+						 required="true" label="Concepto" />
+
+			<h:outputLabel for="txtCodigo" value="Código:" styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:60px;"/>
+			<h:inputText value="#{parametroEpidemiologicoBean.codigo}" 
+						 id="txtCodigo" required="true" styleClass="txtDefault" 
+						 requiredMessage="El código es un dato requerido" 
+						 disabled="true" 
+						 maxlength="10" 
+						 style="position:absolute; width:150px; left:90px; top:60px; text-align:left;" />
+
+			<h:outputLabel for="chkPasivo" styleClass="lblDefault"
+						   style="position:absolute; left:390px; top:60px;"  
+						   value="Pasivo:" />
+			<h:selectBooleanCheckbox id="chkPasivo" disabled="true" 
+									 styleClass="txtDefault" value="#{parametroEpidemiologicoBean.pasivo}"
+									 style="position:absolute; left: 440px; top: 60px;"/>
+			
+			<h:outputLabel for="txtEtiqueta" value="Valores:" styleClass="lblDefault" 
+						   style="position:absolute; left:20px; top:90px;"/>
+			<h:inputText value="#{parametroEpidemiologicoBean.etiqueta}" 
+						 id="txtEtiqueta" required="true" title="Lista de valores separados por el signo |.  Por ejemplo: Si|No" 
+						 requiredMessage="La lista de valores es un dato requerido" 
+						 maxlength="200" styleClass="txtDefault" disabled="true"
+						 style="position:absolute; width:365px; left:90px; top:90px; text-align:left;" />
+
+			<h:outputLabel for="txtDescripcion" styleClass="lblDefault" 
+						   value="Descripcion:" 
+						   style="position:absolute; left:20px; top:120px; text-align:left;" />
+			<h:inputTextarea id="txtDescripcion" style="position:absolute; left:90px; top:120px; width:365px; overflow:auto; resize: none; height:40px;"
+						 	 value="#{parametroEpidemiologicoBean.descripcion}" styleClass="txtAreaDefault"  
+						 	 onkeypress="ValidarCaracteres(this, 400);return (ValidarEnter(this, event));"
+						 	 onkeyup="ValidarCaracteres(this, 400);" disabled="true"
+						 	 cols="56" rows="2" label="Descripcion"/> 
+
+			<h:outputLabel style="position:absolute; left:20px; top:170px; text-align:right;" 
+						   value="Creado por:" styleClass="lblDefault" />
+			
+			<h:outputLabel id="lblUsuarioCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:90px; top:170px;" 
+						   value="#{parametroEpidemiologicoBean.usuarioNombre}" />
+						   
+			<h:outputLabel id="lblFechaCreacion" styleClass="txtCreateInfo" 
+						   style="position:absolute; left:90px; top:186px;" 
+						   value="#{parametroEpidemiologicoBean.fechaRegistro}" />
+    
+		</p:panel>
+	
+	
+		<!-- Eventos Asociados -->
+		
+		<div style="float:left; position:absolute; top:245px;left:520px; width:468px; height:136px;">
+		<p:dataTable id="grdEventosAsociados" var="parametroEvento" 
+					 rowStyleClass="#{parametroEvento.eventoSalud.pasivo==1 ? 'rowNonActive' : null}"
+					 styleClass="panDetail" emptyMessage="No existen eventos asociados" 
+					 style="width:468px;"  
+					 value="#{parametroEpidemiologicoBean.eventosAsociados}" 
+					 rowKey="#{parametroEvento.parametroEventoId}"
+					 scrollable="true" scrollHeight="110" scrollWidth="468">
+			<p:column headerText="Eventos de Salud Asociados" style="text-align:left;width:400px;">
+				<h:outputText value="#{parametroEvento.eventoSalud.nombre}" />
+			</p:column>
+		</p:dataTable>
+		</div>
+		
+		<h:panelGroup id="panFooterList" style="position: absolute; width:468px; height:20px; top: 380px; left: 520px;" 
+				 class="dtFooter">
+		</h:panelGroup>
+	
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px;padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				 
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

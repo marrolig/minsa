@@ -1,0 +1,341 @@
+.mouse_select_left, .page_refresh, .mat-map, .mat-magnifier .report, .status_online, .status_offline, .table_export, .table_lightning, .table_refresh, .table_tab_search, .tick, .time, .to_do_list, .transform_scale, .update, .user, .user_add, .user_orange, .vcard_edit, .vcard, .user_silhouette, .user_red, .vcard_delete, .vcard_add, .world, .zoom, .zoom_extend, .zoom_in, .zoom_layer, .zoom_out, .printer, .phone, .pencil, .page_white_magnify, .note, .lock, .lock_open, .mail_box, .lightning, .key, .information, .home_page, .group, .filter, .events, .email, .date_magnify, .date, .database_lightning, .cross, .client_account_template, .chart_bar, .cancel, .canvas_size, .calendar{
+	background: url('../images/minsa-sprites-1.png') no-repeat !important;
+}
+
+.mouse_select_left{
+	background-position: -18px -16px ;
+	width: 16px;
+	height: 16px;
+}
+
+.page_refresh{
+	background-position: -65px -16px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-map{
+	background-position: -115px -16px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-magnifier{
+	background: url('../images/minsa-sprites-1.png') no-repeat !important;
+	background-position: -64px -64px !important;
+	width: 16px;
+	height: 16px;
+}
+
+.report{
+	background-position: -213px -16px ;
+	width: 16px;
+	height: 16px;
+}
+
+.status_online{
+	background-position: -466px -116px ;
+	width: 16px;
+	height: 16px;
+}
+
+.status_offline{
+	background-position: -516px -115px ;
+	width: 16px;
+	height: 16px;
+}
+
+.table_export{
+	background-position: -417px -18px ;
+	width: 16px;
+	height: 16px;
+}
+
+.table_lightning{
+	background-position: -463px -20px ;
+	width: 16px;
+	height: 16px;
+}
+
+.table_refresh{
+	background-position: -515px -19px ;
+	width: 16px;
+	height: 16px;
+}
+
+.table_tab_search{
+	background-position: -20px -66px ;
+	width: 16px;
+	height: 16px;
+}
+
+.tick{
+	background-position: -517px -64px ;
+	width: 16px;
+	height: 16px;
+}
+
+.time{
+	background-position: -19px -165px ;
+	width: 16px;
+	height: 16px;
+}
+
+.to_do_list{
+	background-position: -417px -69px ;
+	width: 16px;
+	height: 16px;
+}
+
+.transform_scale{
+	background-position: -165px -18px ;
+	width: 16px;
+	height: 16px;
+}
+
+.update{
+	background-position: -366px -18px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-user{
+	background-position: -115px -115px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-userAdd{
+	background-position: -218px -118px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-userOrange{
+	background-position: -164px -116px ;
+	width: 16px;
+	height: 16px;
+}
+
+.vcard_edit{
+	background-position: -267px -118px ;
+	width: 16px;
+	height: 16px;
+}
+
+.vcard{
+	background-position: -310px -116px ;
+	width: 16px;
+	height: 16px;
+}
+
+.user_silhouette{
+	background-position: -18px -117px ;
+	width: 16px;
+	height: 16px;
+}
+
+.user_red{
+	background-position: -66px -115px ;
+	width: 16px;
+	height: 16px;
+}
+
+.vcard_delete{
+	background-position: -364px -117px ;
+	width: 16px;
+	height: 16px;
+}
+
+.vcard_add{
+	background-position: -414px -117px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-world{
+	background-position: -317px -17px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-zoom{
+	background-position: -117px -65px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-zoom_extend{
+	background-position: -166px -66px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-zoom_in{
+	background-position: -216px -66px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-zoom_layer{
+	background-position: -267px -66px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-zoom_out{
+	background-position: -319px -67px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-printer{
+	background-position: -566px -17px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-phone{
+	background-position: -466px -67px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-pencil{
+	background-position: -569px -64px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-pageWhiteMagnify{
+	background-position: -369px -68px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-note{
+	background-position: -267px -19px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-lock{
+	background-position: -66px -165px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-lockOpen{
+	background-position: -115px -165px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-mailBox{
+	background-position: -165px -166px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-lightning{
+	background-position: -217px -167px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-key{
+	background-position: -268px -165px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-information{
+	background-position: -317px -167px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-homePage{
+	background-position: -363px -168px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-group{
+	background-position: -566px -115px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-filter{
+	background-position: -415px -167px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-events{
+	background-position: -469px -164px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-email{
+	background-position: -517px -166px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-dateMagnify{
+	background-position: -567px -166px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-date{
+	background-position: -610px -165px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-databaseLightning{
+	background-position: -611px -17px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-cross{
+	background-position: -613px -68px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-clientAccountTemplate{
+	background-position: -612px -115px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-chartBar{
+	background-position: -17px -215px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-cancel{
+	background-position: -66px -216px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-canvasSize{
+	background-position: -116px -218px ;
+	width: 16px;
+	height: 16px;
+}
+
+.mat-calendar{
+	background-position: -166px -217px ;
+	width: 16px;
+	height: 16px;
+}
+

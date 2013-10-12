@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Sitios de Referencia
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+			
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmComunidadReferencia">
+	
+		<ni:titleBar titleText="Población > Sitios de Referencia" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<!--  Selección de entidad administrativa y unidad de salud -->
+
+		<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+					   value="Entidad Administrativa:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboEntidad" styleClass="txtDefault cboDefault" 
+						 style="position:absolute; left:145px;top:35px;width:200px;" 
+						 value="#{comunidadReferenciaBean.entidadSelectedId}">
+				<f:selectItems value="#{comunidadReferenciaBean.entidades}" var="entidad"
+							   itemValue="#{entidad.entidadAdtvaId}"
+							   itemLabel="#{entidad.nombre}" />
+				<p:ajax event="change" process="cboEntidad,cboUnidad" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+						listener="#{comunidadReferenciaBean.obtenerUnidades}" 
+						update="cboEntidad,cboUnidad,grdSitiosReferencias,panDetalle,txtFiltro,panButton,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<h:outputLabel for="cboUnidad" styleClass="lblDefault" 
+					   value="Unidad:" 
+					   style="position:absolute; left:360px; top:35px;"/>
+		<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:410px;top:35px;width:420px;" 
+						 value="#{comunidadReferenciaBean.unidadSelectedId}"> 
+				<f:selectItems var="unidad" 
+							   itemValue="#{unidad.unidadId}" 
+							   itemLabel="#{unidad.nombre}" 
+							   value="#{comunidadReferenciaBean.unidades}" />
+				<p:ajax event="change" process="cboUnidad" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+						listener="#{comunidadReferenciaBean.cambiarUnidad}" 
+						update="cboUnidad,grdSitiosReferencias,panDetalle,txtFiltro,panButton,grwMensaje"/>
+				
+		</h:selectOneMenu>
+		
+		<p:commandButton id="btnMapa" icon="icon-world" ajax="true" 
+						 disabled="#{comunidadReferenciaBean.unidadSelected==null}"
+						 style="position:absolute; left:900px;top:32px;" 
+        				 value="Ver Mapa" actionListener="#{comunidadReferenciaBean.generarMapa}"
+        				 onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgMapa.show()" 
+        				 update="panMapa" process="@this" />
+
+		<!-- Tabla de Sitios de Referencia -->
+		<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:235px;">
+			<p:dataTable id="grdSitiosReferencias" var="sitioReferencia" 
+						 rowKey="#{sitioReferencia.comunidadReferenciaId}"
+						 selectionMode="single"  
+						 selection="#{comunidadReferenciaBean.comunidadReferenciaSelected}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail"
+						 emptyMessage="No existen sitios de referencia" 
+						 style="width:980px;" scrollHeight="210" scrollWidth="980"
+					 	 scrollable="true" value="#{comunidadReferenciaBean.comunidadesReferencias}">
+
+				<p:ajax event="rowSelect" 
+						listener="#{comunidadReferenciaBean.onComunidadReferenciaSelected}"   
+            	        update=":frmComunidadReferencia:panButton :frmComunidadReferencia:panDetalle" />  
+
+				<p:ajax event="rowUnselect" 
+						listener="#{comunidadReferenciaBean.onComunidadReferenciaUnSelected}"   
+            	        update=":frmComunidadReferencia:panButton :frmComunidadReferencia:panDetalle" />  
+
+				<p:column headerText="Comunidad" style="text-align:left; width:380px;">
+					<h:outputText value="#{sitioReferencia.comunidad.nombre}"/>
+				</p:column>
+				<p:column headerText="Sitio de Referencia" style="text-align:left; width:400px;">
+					<h:outputText value="#{sitioReferencia.nombre}" />
+				</p:column>
+				<p:column headerText="Tipo de Sitio" style="text-align:left; width:200px;">
+					<h:outputText value="#{sitioReferencia.tipoSitio.valor}" />
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+		
+		<p:panel id="panDetalle" style="position:absolute;top:310px;left:10px;width:980px;height:90px;padding-left:0em; padding-top:0em; padding-bottom:0em;" 
+				 styleClass="panDetail">
+		
+			<h:outputLabel for="txtComunidad" styleClass="lblDefaultSmall" 
+						   value="Comunidad:" 
+						   style="position:absolute; left:8px; top:8px;"/>
+     		<p:autoComplete id="txtComunidad" value="#{comunidadReferenciaBean.comunidadSelected}" 
+     				minQueryLength="3" maxResults="5" queryDelay="300" styleClass="txtDefault"    
+     				forceSelection="true" disabled="#{comunidadReferenciaBean.comunidadReferenciaId!=0}" 
+     				title="Para buscar, escriba parte del nombre de la comunidad. Unicamente se presentarán las primeras 5 comunidades que coinciden con el texto ingresado."   
+					completeMethod="#{comunidadReferenciaBean.completarComunidad}" 
+					var="comunidad" style="position:absolute; left:3px; top:20px; width:328px; height:20px;" 
+					itemLabel="#{comunidad.nombre}" size="63" 
+					converter="comunidadConverter"    
+					itemValue="#{comunidad}">
+			</p:autoComplete>
+			
+			<h:outputLink value="javascript:void(0)" styleClass="navDelLink" rendered="#{comunidadReferenciaBean.comunidadReferenciaId==0}" 
+					  	style="position:absolute; top:20px; left: 350px; cursor:pointer; border: 0.08em solid #d4d4d4;">
+				<h:graphicImage url="/images/dataBase.png" 
+							width="17" style="right:0px; border:0px;"  />
+				<p:ajax event="click" process="@this cboUnidad" listener="#{comunidadReferenciaBean.buscarComunidad}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide(); dlgListaComunidades.show()"
+						update="grdComunidades,panButtonComunidad,grwMensaje">
+				</p:ajax>
+			</h:outputLink>
+			
+		
+			<h:outputLabel for="txtNombre"
+						 styleClass="lblDefaultSmall" 
+						 value="Nombre:" 
+						 style="position:absolute; left:380px; top:8px;"/>
+			<h:inputText id="txtNombre" style="position:absolute; left:380px; top:20px; width:380px;" 
+						 value="#{comunidadReferenciaBean.nombre}" styleClass="txtDefault" required="true"
+						 maxlength="100" size="58"/>
+			
+			<h:outputLabel for="cboTipoSitio" styleClass="lblDefaultSmall" 
+					   value="Tipo de Sitio:" 
+					   style="position:absolute; left:780px; top:8px;"/>
+			<h:selectOneMenu id="cboTipoSitio" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:780px;top:20px;width:190px;" 
+						 value="#{comunidadReferenciaBean.tipoSitioReferenciaSelectedId}">
+				<f:selectItem itemValue="0" itemLabel=" " /> 
+				<f:selectItems var="tipoSitio" 
+							   itemValue="#{tipoSitio.catalogoId}" 
+							   itemLabel="#{tipoSitio.valor}" 
+							   value="#{comunidadReferenciaBean.tiposSitiosReferencias}" />
+			</h:selectOneMenu>
+			
+			<h:outputLabel for="txtObservacion"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:8px; top:45px;"/>
+			<h:inputText id="txtObservacion" style="position:absolute; left:8px; top:57px; width:740px;" 
+						 value="#{comunidadReferenciaBean.observaciones}" styleClass="txtDefault"
+						 maxlength="400" size="98"/>
+			
+			<h:outputLabel for="txtLatitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Latitud:" 
+						 style="position:absolute; left:780px; top:45px;"/>
+
+			<h:inputText id="txtLatitud" style="position:absolute; left:780px; top:57px; width:80px;" 
+						     value="#{comunidadReferenciaBean.latitud}" 
+						     title="GPS Y"
+						     styleClass="txtDefault gpsY" size="57" />
+				<script type="text/javascript">
+					jQuery(".gpsY").format({precision: 6,allow_negative:false,autofix:true});
+				</script>
+
+
+			<h:outputLabel for="txtLongitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Longitud:" 
+						 style="position:absolute; left:880px; top:45px;"/>
+			<h:inputText id="txtLongitud" style="position:absolute; left:880px; top:57px; width:80px;" 
+						     value="#{comunidadReferenciaBean.longitud}" 
+						     title="GPS X"
+						     styleClass="txtDefault gpsX" size="57" />
+				<script type="text/javascript">
+					jQuery(".gpsX").format({precision: 6,allow_negative:true,autofix:true});
+				</script>
+				
+		
+		</p:panel>   <!-- fin capa 2 -->
+
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:commandButton id="btnAgregar" value="Agregar" 
+							 disabled="#{comunidadReferenciaBean.comunidadReferenciaId==0}" 
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 update="grdSitiosReferencias,panDetalle,panButton" 
+							 process="@this" 
+							 actionListener="#{comunidadReferenciaBean.agregar}" />
+			
+			<p:commandButton id="btnGuardar" value="Guardar" 
+							 styleClass="btnDefault" style="font-size:11px;"  
+							 update="grdSitiosReferencias,panDetalle,panButton,grwMensaje" 
+							 process="@this,panDetalle" 
+							 actionListener="#{comunidadReferenciaBean.guardar}" />
+
+			<p:commandButton id="btnEliminar" value="Eliminar"  
+							 disabled="#{comunidadReferenciaBean.comunidadReferenciaId==0}"
+							 oncomplete="dlgEliminarComunidadReferencia.show()"
+							 process="@this,panDetalle"
+						     styleClass="btnDefault" style="font-size:11px;"/>
+						     							 
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+
+		<p:confirmDialog message="Desea eliminar el Sitio de Referencia de la comunidad?"
+				modal="true" position="center"  
+				header="Aviso"  
+				severity="alert" 
+				widgetVar="dlgEliminarComunidadReferencia">
+			<p:commandButton id="btnSiEliminarComunidadReferencia" value="Si"  process="@this" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 update="panDetalle,panButton,grwMensaje,grdSitiosReferencias" 
+							 actionListener="#{comunidadReferenciaBean.eliminar}"  
+							 oncomplete="dlgEliminarComunidadReferencia.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgEliminarComunidadReferencia.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		
+		<p:dialog id="dlgListaComunidades" 
+				  header="Lista de Comunidades" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgListaComunidades" 
+				  styleClass="panDefault"
+				  height="440" width="520"
+				  resizable="false">
+		
+			<div style="float:left; position:absolute; top:10px; left:10px; width:500px; height:320px;">
+				<p:dataTable id="grdComunidades" var="comunidad" widgetVar="tablaComunidades"
+						 rowKey="#{comunidad.comunidadId}"
+						 selectionMode="single" selection="#{comunidadReferenciaBean.comunidadListaSelected}" 
+						 loadingMessage="Cargando registros ..." paginator="true" 
+						 rows="14" paginatorPosition="top" paginatorAlwaysVisible="true"
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail" emptyMessage="No existen comunidades" 
+						 style="width:500px;"  
+						 value="#{comunidadReferenciaBean.comunidades}">
+
+					<p:ajax event="rowSelect"    
+    	        	        update=":frmComunidadReferencia:panButtonComunidad :frmComunidadReferencia:grwMensaje" />  
+	    	    	<p:ajax event="rowUnselect"  
+    	    				update=":frmComunidadReferencia:panButtonComunidad :frmComunidadReferencia:grwMensaje" />  
+
+					<f:facet name="header">
+						<p:outputPanel>
+							<h:outputText value="&nbsp;" style="font-size:14px;height:34px;" />
+	                	</p:outputPanel>
+        	    	</f:facet>
+						 
+					<p:column headerText="Código" style="text-align:left; width:80px;">
+						<h:outputText value="#{comunidad.codigo}" />
+					</p:column>
+					<p:column headerText="Nombre" style="text-align:left; width:320px;">
+						<h:outputText value="#{comunidad.nombre}" title="#{comunidad.sector.nombre}"/>
+					</p:column>
+					<p:column headerText="Area" style="text-align:left; width:50px;">
+						<h:outputText value="#{comunidad.tipoArea=='U' ? 'Urbano' : (comunidad.tipoArea=='R' ? 'Rural': '')}" />
+					</p:column>
+			
+				</p:dataTable>
+			</div>
+
+			<!-- Busqueda de Comunidades -->
+
+    	     <h:outputText value="Buscar:" style="position:absolute; top:18px;left:180px;color:#ffffff; font-weight:bold;"  />
+        	 <h:inputText id="txtFiltro" value="#{comunidadReferenciaBean.filtroComunidad}" 
+         				  onkeydown="if (event.keyCode==13) {event.keyCode=9; document.getElementById('frmComunidadReferencia:lnkBuscar').click(); return event.keyCode}"
+         				  style="width:200px; position: absolute; top: 14px; left: 250px;" />
+                    
+	         <h:outputLink id="lnkBuscar" value="javascript:void(0)" 
+					styleClass="navDelLink"    
+        	    	style="position: absolute; top: 14px; left: 460px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+				<h:graphicImage height="17" title="Haga clic para iniciar búsqueda"  
+					style="position: absolute; top: 0px; left:0px; border:0px;"
+					url="/images/buscar.gif">
+				</h:graphicImage>
+				<p:ajax event="click" process="@this,txtFiltro"
+					listener="#{comunidadReferenciaBean.buscarComunidad}" 
+					update="grdComunidades,panButtonComunidad,grwMensaje">
+				</p:ajax>
+			</h:outputLink>
+
+        	<h:outputLink id="lnkQuitarFiltro" value="javascript:void(0)" 
+					styleClass="navDelLink"    
+            		style="position: absolute; top: 14px; left: 485px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
+				<h:graphicImage height="17" title="Haga clic para limpiar filtro de búsqueda"  
+					style="position: absolute; top: 0px; left:0px; border:0px;"
+					url="/images/edit-clear.png">
+				</h:graphicImage>
+				<p:ajax event="click" process="@this,txtFiltro"
+					listener="#{comunidadReferenciaBean.quitarFiltro}" 
+					update="txtFiltro,grdComunidades,panButtonComunidad,grwMensaje">
+				</p:ajax>
+			</h:outputLink>
+		
+			<p:panel id="panButtonComunidad" styleClass="panButton" 
+				 	 style="position:absolute; top:385px; width:500px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnAceptarComunidad" 
+							 disabled="#{empty comunidadReferenciaBean.comunidadListaSelected}"
+							 value="Aceptar"  
+							 process="@this" 
+							 ajax="true" 
+							 actionListener="#{comunidadReferenciaBean.seleccionarComunidad}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 update="grdSitiosReferencias,panDetalle,grwMensaje,txtFiltro" 
+							 oncomplete="dlgListaComunidades.hide()">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" onclick="dlgListaComunidades.hide()"
+							 style="font-size:11px;"
+							 type="button" styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+		
+		
+		<p:dialog id="dlgMapa" widgetVar="dlgMapa" width="840" height="480" modal="true" resizable="false">
+			<p:panel id="panMapa">
+				<p:gmap id="mapSitios" center="#{comunidadReferenciaBean.centroMapa}" zoom="#{comunidadReferenciaBean.zoom}" 
+						type="ROADMAP" rendered="#{comunidadReferenciaBean.centroMapa!=null}"
+						model="#{comunidadReferenciaBean.mapaModelo}"  
+						style="width:800px;height:450px">  
+    			</p:gmap>
+    		</p:panel>
+		</p:dialog>  
+
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

@@ -1,0 +1,987 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Viviendas
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+			.ui-menubutton .ui-button {
+				width:100px !important;
+				height:23px !important;
+				margin-right:1px !important;
+			}
+			
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmVivienda">
+	
+		<ni:titleBar titleText="Población > Viviendas" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<p:panel id="capa1"  styleClass="panDefault" visible="#{viviendaBean.capaActiva==1}">
+		
+		<!--  Selección de entidad administrativa y unidad de salud -->
+
+		<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+					   value="Entidad Administrativa:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboEntidad" styleClass="txtDefault cboDefault" 
+						 style="position:absolute; left:145px;top:35px;width:200px;" 
+						 value="#{viviendaBean.entidadSelectedId}">
+				<f:selectItems value="#{viviendaBean.entidades}" var="entidad"
+							   itemValue="#{entidad.entidadAdtvaId}"
+							   itemLabel="#{entidad.nombre}" />
+				<p:ajax event="change" process="cboEntidad,cboUnidad" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+						listener="#{viviendaBean.cambiarEntidad}" 
+						update="cboEntidad,cboUnidad,grdComunidades,grdViviendas,txtFiltroComunidad,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<h:outputLabel for="cboUnidad" styleClass="lblDefault" 
+					   value="Unidad:" 
+					   style="position:absolute; left:360px; top:35px;"/>
+		<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:410px;top:35px;width:420px;" 
+						 value="#{viviendaBean.unidadSelectedId}"> 
+				<f:selectItems var="unidad" 
+							   itemValue="#{unidad.unidadId}" 
+							   itemLabel="#{unidad.nombre}" 
+							   value="#{viviendaBean.unidades}" />
+				<p:ajax event="change" process="cboUnidad" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+						listener="#{viviendaBean.cambiarUnidad}" 
+						update="cboUnidad,grdComunidades,grdViviendas,txtFiltroComunidad,panButton1,grwMensaje,btnMapa"/>
+				
+		</h:selectOneMenu>
+
+		<p:commandButton id="btnMapa" icon="world" ajax="true" 
+						 disabled="#{viviendaBean.comunidadSelected==null}"
+						 style="position:absolute; left:900px;top:32px;" 
+        				 value="Ver Mapa" actionListener="#{viviendaBean.generarMapa}"
+        				 onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgMapa.show()" 
+        				 update="panMapa" process="@this" />
+
+		<!-- Tabla de Comunidades -->
+		<div style="float:left; position:absolute; top:70px; left:10px; width:436px; height:326px; border:1px solid silver;">
+			<p:dataTable id="grdComunidades" var="comunidad" widgetVar="tablaComunidades"
+						 rowKey="#{comunidad.comunidadId}"
+						 selectionMode="single" selection="#{viviendaBean.comunidadSelected}" 
+						 loadingMessage="Cargando registros ..." paginator="true" 
+						 rows="12" paginatorPosition="top" paginatorAlwaysVisible="true"
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail" emptyMessage="No existen comunidades para el sector seleccionado" 
+						 style="width:435px;"  
+						 value="#{viviendaBean.comunidades}">
+
+				<p:ajax event="rowSelect" listener="#{viviendaBean.onComunidadSelected}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"   
+            	        update=":frmVivienda:grdViviendas :frmVivienda:panButton1 :frmVivienda:grwMensaje :frmVivienda:txtFiltroVivienda :frmVivienda:lnkBuscarVivienda :frmVivienda:lnkQuitarFiltroVivienda :frmVivienda:btnMapa" />  
+	        	<p:ajax event="rowUnselect" listener="#{viviendaBean.onComunidadUnSelected}"
+	        			onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+    	    			update=":frmVivienda:grdViviendas :frmVivienda:panButton1 :frmVivienda:grwMensaje :frmVivienda:txtFiltroVivienda :frmVivienda:lnkBuscarVivienda :frmVivienda:lnkQuitarFiltroVivienda :frmVivienda:btnMapa" />  
+
+				<f:facet name="header">
+					<p:outputPanel>
+						<h:outputText value="&nbsp;" style="font-size:12px;height:32px;" />
+                	</p:outputPanel>
+            	</f:facet>
+					 
+				<p:column headerText="Código" style="text-align:left; width:70px;">
+					<h:outputText value="#{comunidad.codigo}" />
+				</p:column>
+				<p:column headerText="Nombre" style="text-align:left; width:265px;">
+					<h:outputText value="#{comunidad.nombre}" title="#{comunidad.sector.nombre}"/>
+				</p:column>
+				<p:column headerText="Area" style="text-align:left; width:50px;">
+					<h:outputText value="#{comunidad.tipoArea=='U' ? 'Urbano' : (comunidad.tipoArea=='R' ? 'Rural': '')}" />
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+
+		<!-- Busqueda de Comunidades -->
+
+         <h:outputText value="Buscar por Nombre:" styleClass="lblDefaultSmall"  
+         			   style="position:absolute; top:78px;left:85px;color:#ffffff; font-weight:bold;"  />
+         <h:inputText id="txtFiltroComunidad" value="#{viviendaBean.filtroComunidad}"  
+         			  onkeydown="if (event.keyCode==13) {event.keyCode=9; document.getElementById('frmVivienda:lnkBuscar').click(); return event.keyCode}"
+         			  style="width:200px; position: absolute; top: 74px; left: 190px;" />
+                    
+         <h:outputLink id="lnkBuscar" value="javascript:void(0)" 
+				styleClass="navDelLink"     
+            	style="position: absolute; top: 74px; left: 400px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+			<h:graphicImage height="17" title="Haga clic para iniciar búsqueda"  
+				style="position: absolute; top: 0px; left:0px; border:0px;"
+				url="/images/buscar.gif">
+			</h:graphicImage>
+			<p:ajax event="click" process="@this,txtFiltroComunidad"
+				listener="#{viviendaBean.buscarComunidad}" 
+				onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+				update="grdComunidades,grdViviendas,txtFiltroVivienda,panButton1,grwMensaje">
+			</p:ajax>
+		</h:outputLink>
+
+        <h:outputLink id="lnkQuitarFiltro" value="javascript:void(0)" 
+				styleClass="navDelLink"     
+            	style="position: absolute; top: 74px; left: 425px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
+			<h:graphicImage height="17" title="Haga clic para limpiar filtro de búsqueda"  
+				style="position: absolute; top: 0px; left:0px; border:0px;"
+				url="/images/edit-clear.png">
+			</h:graphicImage>
+			<p:ajax event="click" process="@this,txtFiltroComunidad"
+				listener="#{viviendaBean.quitarFiltroComunidad}" 
+				onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+				update="txtFiltroComunidad,txtFiltroVivienda,grdComunidades,grdViviendas,panButton1,grwMensaje">
+			</p:ajax>
+		</h:outputLink>
+
+
+		<!-- Tabla de Viviendas con última encuesta -->
+		<div style="float:left; position:absolute; top:70px; left:455px; width:535px; height:326px; border:1px solid silver;">
+			<p:dataTable id="grdViviendas" var="viviendaUltimaEncuesta" 
+						 rowKey="#{viviendaUltimaEncuesta.viviendaId}"
+						 selectionMode="single" paginator="true"  
+						 selection="#{viviendaBean.viviendaUltimaEncuestaSelected}" 
+						 loadingMessage="Cargando registros ..." 
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail"
+						 emptyMessage="La comunidad no ha sido seleccionada o no existen datos de viviendas"
+						 rows="12" paginatorPosition="top" paginatorAlwaysVisible="true" 
+						 style="width:535px;" 
+						 value="#{viviendaBean.viviendasUltimaEncuesta}">
+
+				<p:ajax event="rowSelect" 
+						listener="#{viviendaBean.onViviendaUltimaEncuestaSelected}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"   
+            	        update=":frmVivienda:capa1 :frmVivienda:capa2" />  
+
+				<f:facet name="header">
+					<p:outputPanel>
+						<h:outputText value="&nbsp;" style="font-size:12px;height:32px;" />
+                	</p:outputPanel>
+            	</f:facet>
+
+				<p:column headerText="Código" style="text-align:left; width:40px;">
+					<h:outputText value="#{fn:substring(viviendaUltimaEncuesta.codigo,9,14)}"/>
+				</p:column>
+				<p:column headerText="Tipo de Vivienda" style="text-align:left; width:70px;">
+					<h:outputText value="#{viviendaUltimaEncuesta.tipoVivienda}" />
+				</p:column>
+				<p:column headerText="Jefe de Familia" style="text-align:left; width:200px;">
+					<h:outputText value="#{viviendaUltimaEncuesta.jefeFamilia}" />
+				</p:column>
+				<p:column headerText="Hab." style="text-align:left; width:60px;">
+					<h:outputText value="#{viviendaUltimaEncuesta.habitantes}" />
+				</p:column>
+				<p:column headerText="Encuesta" style="text-align:left; width:60px;">
+					<h:outputText value="#{viviendaUltimaEncuesta.fechaUltimaEncuesta}">
+						<f:convertDateTime pattern="dd/MM/yy"></f:convertDateTime> 
+					</h:outputText>
+				</p:column>
+			
+			</p:dataTable>
+		</div>
+
+		<!-- Busqueda de Viviendas -->
+
+         <h:outputText value="Buscar por Jefe de Familia:" styleClass="lblDefaultSmall" 
+         			   style="position:absolute; top:78px;left:590px;color:#ffffff; font-weight:bold;"  />
+         <h:inputText id="txtFiltroVivienda" value="#{viviendaBean.filtroVivienda}" disabled="#{viviendaBean.comunidadSelected==null}" 
+         			  onkeydown="if (event.keyCode==13) {event.keyCode=9; document.getElementById('frmVivienda:lnkBuscarVivienda').click(); return event.keyCode}"
+         			  style="width:200px; position: absolute; top: 74px; left: 735px;" />
+                    
+         <h:outputLink id="lnkBuscarVivienda" value="javascript:void(0)" 
+				styleClass="navDelLink" disabled="#{viviendaBean.comunidadSelected==null}"    
+            	style="position: absolute; top: 74px; left: 945px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+			<h:graphicImage height="17" title="Haga clic para iniciar búsqueda"  
+				style="position: absolute; top: 0px; left:0px; border:0px;"
+				url="/images/buscar.gif">
+			</h:graphicImage>
+			<p:ajax event="click" process="@this,txtFiltroVivienda"
+				onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+				listener="#{viviendaBean.buscarVivienda}" 
+				update="grdViviendas,panButton1,grwMensaje">
+			</p:ajax>
+		</h:outputLink>
+
+        <h:outputLink id="lnkQuitarFiltroVivienda" value="javascript:void(0)" 
+				styleClass="navDelLink"  disabled="#{viviendaBean.comunidadSelected==null}"  
+            	style="position: absolute; top: 74px; left: 970px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
+			<h:graphicImage height="17" title="Haga clic para limpiar filtro de búsqueda"  
+				style="position: absolute; top: 0px; left:0px; border:0px;"
+				url="/images/edit-clear.png">
+			</h:graphicImage>
+			<p:ajax event="click" process="@this,txtFiltroVivienda"
+				listener="#{viviendaBean.quitarFiltroVivienda}"
+				onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+				update="txtFiltroVivienda,grdViviendas,panButton1,grwMensaje">
+			</p:ajax>
+		</h:outputLink>
+
+		<p:panel id="panButton1" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:commandButton id="btnAgregar1" value="Agregar" 
+							 disabled="#{viviendaBean.comunidadSelected==null}" 
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 update="capa1,capa2" 
+							 process="@this" 
+							 actionListener="#{viviendaBean.agregar}" />
+			
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+		</p:panel>
+		
+		</p:panel>  <!-- fin capa 1 -->
+		
+		<!-- Inicio Capa 1 -->
+		
+		<p:panel id="capa2"  styleClass="panDefault" visible="#{viviendaBean.capaActiva==2}">
+		
+		<p:panel id="panDetalle" header="Detalle de Vivienda" style="position:absolute;top:25px;left:10px;width:585px;height:248px;padding-left:0em; padding-top:0em; padding-bottom:0em;" 
+				 styleClass="panDetail">
+
+			<h:outputLabel for="txtComunidad" styleClass="lblDefaultSmall" 
+						   value="Comunidad:" 
+						   style="position:absolute; left:10px; top:28px;"/>
+			<h:inputText id="txtComunidad" style="position:absolute; left:10px; top:40px; width:555px;"
+						 value="#{viviendaBean.comunidadSelected.nombre}" styleClass="txtDefault" disabled="true" />
+		
+			<h:outputLabel for="txtConsecutivo" styleClass="lblDefaultSmall" 
+						   value="Código:" 
+						   style="position:absolute; left:10px; top:68px;"/>
+			<h:inputText id="txtCodigoComunidad" style="position:absolute; left:10px; top:80px; width:80px;"
+						 value="#{viviendaBean.codigoComunidad}" styleClass="txtDefault" disabled="true" />
+
+			<h:inputText id="txtConsecutivo" style="position:absolute; left:107px; top:80px; width:40px;"
+						 value="#{viviendaBean.consecutivo}" maxlength="5" 
+						 styleClass="txtDefault consecutivo" disabled="#{viviendaBean.viviendaId!=0}" />
+			<script type="text/javascript">
+					jQuery(".consecutivo").format({precision: 0,allow_negative:false,autofix:true});
+			</script>
+
+			<h:outputLabel styleClass="lblDefaultSmall" 
+					   value="Manzana:" 
+					   style="position:absolute; left:175px; top:68px;"/>
+			<h:selectOneMenu id="cboManzana" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:175px;top:80px;width:205px;" 
+						 value="#{viviendaBean.manzanaSelectedId}">
+				<f:selectItem itemValue="0" itemLabel=" " /> 
+				<f:selectItems var="manzana" 
+							   itemValue="#{manzana.manzanaId}" 
+							   itemLabel="#{fn:substring(manzana.codigo,9,12)} - #{fn:substring(manzana.observaciones,0,35)}" 
+							   value="#{viviendaBean.manzanas}" />
+			</h:selectOneMenu>
+			
+			<h:outputLabel for="cboTipoVivienda" styleClass="lblDefaultSmall" 
+					   value="Tipo de Vivienda:" 
+					   style="position:absolute; left:395px; top:68px;"/>
+			<h:selectOneMenu id="cboTipoVivienda" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:395px;top:80px;width:175px;" 
+						 value="#{viviendaBean.tipoViviendaSelectedId}">
+				<f:selectItem itemValue="0" itemLabel=" " noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+				<f:selectItems var="tipoVivienda" 
+							   itemValue="#{tipoVivienda.catalogoId}" 
+							   itemLabel="#{tipoVivienda.valor}" 
+							   value="#{viviendaBean.tiposViviendas}" />
+			</h:selectOneMenu>
+
+			<h:outputLabel for="txtDireccion" styleClass="lblDefaultSmall" 
+						   value="Dirección:" 
+						   style="position:absolute; left:10px; top:108px;"/>
+			<h:inputText id="txtDireccion" style="position:absolute; left:10px; top:120px; width:555px;"
+						 value="#{viviendaBean.direccion}" styleClass="txtDefault"  />
+
+			<h:outputLabel for="txtObservacion"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:10px; top:148px;"/>
+			<h:inputTextarea id="txtObservacion" style="position:absolute; left:10px; top:160px; width:555px; overflow:auto; resize: none; height:40px;" 
+						 value="#{viviendaBean.observacionesVivienda}" styleClass="txtAreaDefault"  
+						 onkeypress="ValidarCaracteres(this, 200);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 200);" 
+						 cols="56" rows="2" label="Observaciones"/>
+
+			<h:outputLabel for="txtLatitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Latitud:" 
+						 style="position:absolute; left:8px; top:208px;"/>
+
+			<h:inputText id="txtLatitud" style="position:absolute; left:8px; top:220px; width:80px;" 
+						     value="#{viviendaBean.latitud}" 
+						     title="GPS Y"
+						     styleClass="txtDefault gpsY" size="57" />
+				<script type="text/javascript">
+					jQuery(".gpsY").format({precision: 6,allow_negative:false,autofix:true});
+				</script>
+
+			<h:outputLabel for="txtLongitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Longitud:" 
+						 style="position:absolute; left:110px; top:208px;"/>
+			<h:inputText id="txtLongitud" style="position:absolute; left:110px; top:220px; width:80px;" 
+						     value="#{viviendaBean.longitud}" 
+						     title="GPS X"
+						     styleClass="txtDefault gpsX" size="57" />
+				<script type="text/javascript">
+					jQuery(".gpsX").format({precision: 6,allow_negative:true,autofix:true});
+				</script>
+			
+			<h:outputLabel for="chkPasivo" styleClass="lblDefaultSmall"
+						   style="position:absolute; left:205px; top:208px;"  
+						   value="Pasivo:" />
+			<h:selectBooleanCheckbox id="chkPasivo" required="true" 
+									 styleClass="txtDefault" value="#{viviendaBean.pasivo}"
+									 style="position:absolute; left: 211px; top: 220px;"/>
+			
+		</p:panel>   
+
+		<!-- Tabla de Encuestas -->
+		
+		<div style="float:left; position:absolute; top:280px; left:10px; width:587px; height:125px;">
+		<p:dataTable id="grdEncuestas" var="viviendaEncuesta" 
+					 rowKey="#{viviendaEncuesta.viviendaEncuestaId}"
+					 rowStyleClass="#{viviendaEncuesta.protegido ? 'rowProtected' : null}"
+					 selectionMode="single" selection="#{viviendaBean.viviendaEncuestaSelected}" 
+					 loadingMessage="Cargando registros ..." style="width:587px;"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 value="#{viviendaBean.vivienda.encuestas}" scrollHeight="100" scrollWidth="587" 
+					 scrollable="true">
+					 
+				<p:ajax event="rowSelect" 
+						listener="#{viviendaBean.onEncuestaSelected}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgEditarEncuesta.show();"   
+            	        update=":frmVivienda:panDetalleEncuesta :frmVivienda:panButtonEncuesta" />  
+					 
+			<p:column headerText="Encuesta" style="text-align:left;width:65px; font-weight:normal;">
+				<h:outputText value="#{viviendaEncuesta.fechaEncuesta}">
+					<f:convertDateTime pattern="dd/MM/yy"></f:convertDateTime>
+				</h:outputText>
+			</p:column>
+			<p:column headerText="Jefe de Familia" style="text-align:left; width:200px;font-weight:normal;">
+				<h:outputText value="#{viviendaEncuesta.jefeFamilia}" title="#{viviendaEncuesta.observaciones}"/>
+			</p:column>
+			<p:column headerText="Hab." style="text-align:left; width:30px;font-weight:normal;">
+				<h:outputText value="#{viviendaEncuesta.habitantes}" />
+			</p:column>
+			<p:column headerText="Hog." style="text-align:left; width:30px;font-weight:normal;">
+				<h:outputText value="#{viviendaEncuesta.hogares}" />
+			</p:column>
+			<p:column headerText="Condición de Ocupación" style="text-align:left; width:240px;font-weight:normal;">
+				<h:outputText value="#{viviendaEncuesta.condicionOcupacion.valor}" />
+			</p:column>
+			
+		</p:dataTable>
+		</div>
+
+		<!-- Tabla de Riesgos -->
+		
+		<div style="float:left; position:absolute; top:25px; left:610px; width:380px; height:250px;">
+		<p:dataTable id="grdRiesgos" var="viviendaRiesgo" 
+					 rowKey="#{viviendaRiesgo.viviendaRiesgoId}"
+					 rowStyleClass="#{viviendaRiesgo.protegido ? 'rowProtected' : null}"
+					 selectionMode="single" selection="#{viviendaBean.viviendaRiesgoSelected}" 
+					 loadingMessage="Cargando registros ..." style="width:380px;"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 value="#{viviendaBean.vivienda.riesgos}" scrollHeight="225" scrollWidth="380" 
+					 scrollable="true">
+
+				<p:ajax event="rowSelect" 
+						listener="#{viviendaBean.onRiesgoSelected}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgEditarRiesgo.show();"   
+            	        update=":frmVivienda:panDetalleRiesgo :frmVivienda:panButtonRiesgo" />  
+					 
+			<p:column headerText="Factor de Riesgo" style="text-align:left;width:300px; font-weight:normal;">
+				<h:outputText value="#{viviendaRiesgo.factorRiesgo.nombre}"/>
+			</p:column>
+			<p:column headerText="Nivel" style="text-align:left; width:80px;font-weight:normal;">
+				<h:outputText value="#{viviendaRiesgo.nivelRiesgo.valor}" title="#{viviendaRiesgo.observaciones}"/>
+			</p:column>
+		</p:dataTable>
+		</div>
+
+		<!-- Tabla de Parametro -->
+		
+		<div style="float:left; position:absolute; top:280px; left:610px; width:380px; height:250px;">
+		<p:dataTable id="grdParametros" var="viviendaParametro"
+					 rowStyleClass="#{viviendaParametro.protegido ? 'rowProtected' : null}" 
+					 rowKey="#{viviendaParametro.viviendaParametroEpidemiologicoId}"
+					 selectionMode="single" selection="#{viviendaBean.parametroEpidemiologicoViviendaSelected}" 
+					 loadingMessage="Cargando registros ..." style="width:380px;"
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDetail" emptyMessage="&nbsp;" 
+					 value="#{viviendaBean.vivienda.parametros}" scrollHeight="100" scrollWidth="380" 
+					 scrollable="true">
+
+				<p:ajax event="rowSelect" 
+						listener="#{viviendaBean.onParametroSelected}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgEditarParametro.show();"   
+            	        update=":frmVivienda:panDetalleParametro :frmVivienda:panButtonParametro" />  
+					 
+			<p:column headerText="Parametro Epidemiologico" style="text-align:left;width:200px; font-weight:normal;">
+				<h:outputText value="#{viviendaParametro.parametro.concepto}"/>
+			</p:column>
+			<p:column headerText="Valor" style="text-align:left; width:80px;font-weight:normal;">
+				<h:outputText value="#{viviendaParametro.valor}" title="#{viviendaParametro.observaciones}"/>
+			</p:column>
+		</p:dataTable>
+		</div>
+
+		<!--   panel de botones Capa 2-->		
+
+		<p:panel id="panButton2" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+			<p:menuButton value="Agregar" disabled="#{viviendaBean.viviendaId==0}" 
+						  styleClass="btnDefault" style="font-size:11px;width:150px;" >  
+        		<p:menuitem value="Encuesta" ajax="true"   
+        					process="@this" update="panDetalleEncuesta panButtonEncuesta grwMensaje" 
+        					actionListener="#{viviendaBean.agregarEncuesta}"
+        					onstart="statusDialog.show();" 
+        					oncomplete="statusDialog.hide(); dlgEditarEncuesta.show();" />  
+        		<p:menuitem value="Factor de Riesgo" process="@this" 
+        					update="panDetalleRiesgo panButtonRiesgo grwMensaje" ajax="true" 
+        					actionListener="#{viviendaBean.agregarRiesgo}"
+        					onstart="statusDialog.show();" 
+        					oncomplete="statusDialog.hide(); dlgEditarRiesgo.show();" />  
+        		<p:menuitem value="Parámetro Epidemiológico" process="@this" 
+        					update="panDetalleParametro panButtonParametro grwMensaje" ajax="true" 
+        					actionListener="#{viviendaBean.agregarParametro}"
+        					onstart="statusDialog.show();" 
+        					oncomplete="statusDialog.hide(); dlgEditarParametro.show();" />  
+        		<p:separator />  
+        		<p:menuitem value="Vivienda" 
+        					actionListener="#{viviendaBean.agregar}" 
+        					process="@this" ajax="true" 
+        					update="capa2,grwMensaje" />  
+    		</p:menuButton>
+
+			<p:commandButton id="btnGuardar" value="Guardar" 
+							 styleClass="btnDefault" style="font-size:11px;"  
+							 update="capa2,grwMensaje" 
+							 process="@this,panDetalle" 
+							 actionListener="#{viviendaBean.guardar}" />
+
+			<p:commandButton id="btnEliminar" value="Eliminar"  
+							 disabled="#{viviendaBean.viviendaId==0}"
+							 oncomplete="dlgEliminarVivienda.show()"
+							 process="@this,panDetalle"
+						     styleClass="btnDefault" style="font-size:11px;"/>
+						     							 
+			<p:commandButton id="btnRegresar" value="Regresar"
+							 onstart="statusDialog.show();" ajax="true"
+							 oncomplete="statusDialog.hide(); controlPeticionRegresar(xhr, status, args);"
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 process="@this,panDetalle" update="grwMensaje"
+							 actionListener="#{viviendaBean.activarPrimerCapa}" />
+
+			<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+
+		</p:panel>
+
+		</p:panel>   <!-- fin capa 2 -->
+		
+		<p:confirmDialog message="Desea eliminar el registro de la vivienda?"
+				modal="true" position="center"  
+				header="Aviso"  
+				severity="alert" 
+				widgetVar="dlgEliminarVivienda">
+			<p:commandButton id="btnSiEliminarVivienda" value="Si"  process="@this" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 update="capa2" 
+							 actionListener="#{viviendaBean.eliminar}"  
+							 oncomplete="dlgEliminarVivienda.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgEliminarVivienda.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<!-- Modal para confirmar regresar sin guardar  -->
+		
+		<p:confirmDialog message="Existen cambios pendientes de guardar.  Desea perder dichos cambios ?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarRegresar">
+			<p:commandButton id="btnSiConfirmarRegresar" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 update="capa1 capa2" actionListener="#{viviendaBean.regresarCapa1}"  
+							 onstart="dlgConfirmarRegresar.hide();statusDialog.show()" oncomplete="statusDialog.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarRegresar.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<!-- Detalle de Encuesta -->		
+		
+		<p:dialog id="dlgEditarEncuesta" 
+				  header="Detalle de Encuesta a Vivienda" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgEditarEncuesta" 
+				  styleClass="panDefault"
+				  height="240" width="520"
+				  resizable="false">
+		
+			<p:panel id="panDetalleEncuesta" styleClass="panDetail" 
+					 style="position:absolute; top:10px; width:500px; height:180px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+					 
+				  
+				  <h:outputLabel for="txtFechaEncuesta" styleClass="lblDefaultSmall" 
+					 	 		 value="Fecha de Encuesta:" 
+						   		 style="position:absolute; left:10px; top:18px;"/>
+				  <h:inputText id="txtFechaEncuesta" style="position:absolute; left:10px; top:30px; width:90px;"
+						 	   value="#{viviendaBean.fechaEncuesta}" styleClass="txtDefault fecha" 
+						 	   disabled="#{viviendaBean.viviendaEncuestaSelected!=null}" />
+				  	<script type="text/javascript">
+						jQuery('.fecha').dateEntry({dateFormat: 'dmy/',minDate: '-365', maxDate: new Date()}); 
+					</script> 
+
+				  <h:outputLabel for="txtJefeFamilia" styleClass="lblDefaultSmall" 
+					 	 		 value="Jefe de Familia:" 
+						   		 style="position:absolute; left:150px; top:18px;"/>
+				  <h:inputText id="txtJefeFamilia" style="position:absolute; left:150px; top:30px; width:340px;"
+						 	   value="#{viviendaBean.jefeFamilia}" disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}" 
+						 	   styleClass="txtDefault" />
+
+				  <h:outputLabel for="txtHabitantes" styleClass="lblDefaultSmall" 
+					 	 		 value="Habitantes:" 
+						   		 style="position:absolute; left:10px; top:63px;"/>
+				  <h:inputText id="txtHabitantes" style="position:absolute; left:10px; top:75px; width:50px;"
+						 value="#{viviendaBean.habitantes}" maxlength="3"
+						 disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}" 
+						 required="true" requiredMessage="El número de habitantes es requerido.  Especificar el valor 0 (cero) si la vivienda no se encuentra ocupada."
+						 styleClass="txtDefault hab" />
+					<script type="text/javascript">
+						jQuery(".hab").format({precision: 0,allow_negative:false,autofix:true});
+					</script>
+				  
+				  <h:outputLabel for="txtHogares" styleClass="lblDefaultSmall" 
+					 	 		 value="Hogares:" 
+						   		 style="position:absolute; left:85px; top:63px;"/>
+				  <h:inputText id="txtHogares" style="position:absolute; left:85px; top:75px; width:40px;"
+						 value="#{viviendaBean.hogares}" maxlength="1"
+						 disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}" 
+						 styleClass="txtDefault hog" />
+					<script type="text/javascript">
+						jQuery(".hog").format({precision: 0,allow_negative:false,autofix:true});
+					</script>
+				  
+				  <h:outputLabel for="cboCondicionOcupacion" styleClass="lblDefaultSmall" 
+					   value="Condición de Ocupación:" 
+					   style="position:absolute; left:150px; top:63px;"/>
+					<h:selectOneMenu id="cboCondicionOcupacion" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:150px;top:75px;width:275px;"
+						 disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}" 
+						 value="#{viviendaBean.condicionOcupacionSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+						<f:selectItems var="condicionOcupacion" 
+							   itemValue="#{condicionOcupacion.catalogoId}" 
+							   itemLabel="#{condicionOcupacion.valor}" 
+							   value="#{viviendaBean.condicionesOcupacion}" />
+					</h:selectOneMenu>
+				  
+					<h:outputLabel for="txtObservacionEncuesta"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:10px; top:102px;"/>
+					<h:inputTextarea id="txtObservacionEncuesta" style="position:absolute; left:10px; top:120px; width:480px; overflow:auto; resize: none; height:40px;" 
+						 value="#{viviendaBean.observacionesEncuesta}" styleClass="txtAreaDefault"
+						 disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}"  
+						 onkeypress="ValidarCaracteres(this, 400);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 400);" 
+						 cols="56" rows="2" label="Observaciones"/>
+				  
+			</p:panel>
+		
+			<p:panel id="panButtonEncuesta" styleClass="panButton" 
+				 	 style="position:absolute; top:200px; width:500px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnGuardarEncuesta" 
+							 value="Guardar"
+							 disabled="#{viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido}"  
+							 process="@this panDetalleEncuesta" 
+							 ajax="true" 
+							 actionListener="#{viviendaBean.guardarEncuesta}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onstart="statusDialog.show()" 
+							 oncomplete="statusDialog.hide();controlGuardarEncuesta(xhr, status, args)">
+				</p:commandButton>
+				
+				<p:commandButton id="btnEliminarEncuesta" 
+							 value="Eliminar"
+							 disabled="#{viviendaBean.viviendaEncuestaSelected==null or (viviendaBean.viviendaEncuestaSelected!=null and viviendaBean.viviendaEncuestaSelected.protegido)}"
+							 oncomplete="dlgConfirmarEliminarEncuesta.show();"  
+							 process="@this panDetalleEncuesta" 
+							 styleClass="btnDefault" style="font-size:11px;">
+				</p:commandButton>
+				
+				
+				<p:commandButton value="Cancelar" ajax="true" update="grdEncuestas" 
+							 onclick="dlgEditarEncuesta.hide()"
+							 process="@this" actionListener="#{viviendaBean.cerrarEncuesta}"
+							 style="font-size:11px;" 
+							 styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+		
+		<!-- Modal para confirmar eliminar encuesta  -->
+		
+		<p:confirmDialog message="Desea eliminar la encuesta de la vivienda?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarEliminarEncuesta">
+			<p:commandButton id="btnSiConfirmarEliminarEncuesta" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 actionListener="#{viviendaBean.eliminarEncuesta}"  
+							 onstart="dlgConfirmarEliminarEncuesta.hide();statusDialog.show()"
+							 oncomplete="statusDialog.hide();controlGuardarEncuesta(xhr, status, args);">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarEncuesta.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<!-- Detalle de Factor de Riesgo -->
+
+		<p:dialog id="dlgEditarRiesgo" 
+				  header="Detalle de Factor de Riesgo de Vivienda" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgEditarRiesgo" 
+				  styleClass="panDefault"
+				  height="240" width="520"
+				  resizable="false" >
+		
+			<p:panel id="panDetalleRiesgo" styleClass="panDetail" 
+					 style="position:absolute; top:10px; width:500px; height:180px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+					 
+				  <h:outputLabel for="cboFactorRiesgo" styleClass="lblDefaultSmall" 
+					   value="Factor de Riesgo:" 
+					   style="position:absolute; left:10px; top:18px;"/>
+					<h:selectOneMenu id="cboFactorRiesgo" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:10px;top:30px;width:480px;" 
+						 value="#{viviendaBean.factorRiesgoSelectedId}" disabled="#{viviendaBean.viviendaRiesgoSelected!=null}">
+						<f:selectItem itemValue="0" itemLabel=" " noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+						<f:selectItems var="factorRiesgo" 
+							   itemValue="#{factorRiesgo.factorRiesgoId}" 
+							   itemLabel="#{factorRiesgo.nombre}" 
+							   value="#{viviendaBean.factoresRiesgos}" />
+					</h:selectOneMenu>
+				  
+				  	<h:outputLabel for="cboNivelRiesgo" styleClass="lblDefaultSmall" 
+					   value="Nivel de Riesgo:" 
+					   style="position:absolute; left:10px; top:63px;"/>
+					<h:selectOneMenu id="cboNivelRiesgo" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:10px;top:75px;width:275px;" 
+						 disabled="#{viviendaBean.viviendaRiesgoSelected!=null and viviendaBean.viviendaRiesgoSelected.protegido}"
+						 value="#{viviendaBean.nivelRiesgoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+						<f:selectItems var="nivelRiesgo" 
+							   itemValue="#{nivelRiesgo.catalogoId}" 
+							   itemLabel="#{nivelRiesgo.valor}" 
+							   value="#{viviendaBean.nivelesRiesgos}" />
+					</h:selectOneMenu>
+				  
+				  	<h:outputLabel for="txtFechaTomaRiesgo" styleClass="lblDefaultSmall" 
+					 	 		   value="Fecha Toma de Datos:" 
+						   		   style="position:absolute; left:395px; top:63px;"/>
+				  	<h:inputText id="txtFechaTomaRiesgo" style="position:absolute; left:395px; top:75px; width:90px;"
+						 	   	 value="#{viviendaBean.fechaTomaRiesgo}"
+						 	   	 disabled="#{viviendaBean.viviendaRiesgoSelected!=null and viviendaBean.viviendaRiesgoSelected.protegido}" 
+						 	   	 styleClass="txtDefault fecha"  />
+				  		<script type="text/javascript">
+							jQuery('.fecha').dateEntry({dateFormat: 'dmy/',minDate: '-365', maxDate: new Date()}); 
+						</script> 
+				  
+					<h:outputLabel for="txtObservacionRiesgo"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:10px; top:102px;"/>
+					<h:inputTextarea id="txtObservacionRiesgo" style="position:absolute; left:10px; top:120px; width:475px; overflow:auto; resize: none; height:40px;" 
+						 value="#{viviendaBean.observacionesRiesgo}" styleClass="txtAreaDefault"  
+						 disabled="#{viviendaBean.viviendaRiesgoSelected!=null and viviendaBean.viviendaRiesgoSelected.protegido}"
+						 onkeypress="ValidarCaracteres(this, 400);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 400);" 
+						 cols="56" rows="2" label="Observaciones"/>
+				  
+			</p:panel>
+		
+			<p:panel id="panButtonRiesgo" styleClass="panButton" 
+				 	 style="position:absolute; top:200px; width:500px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnGuardarRiesgo" 
+							 value="Guardar"  
+							 process="@this panDetalleRiesgo" 
+							 ajax="true"
+							 disabled="#{viviendaBean.viviendaRiesgoSelected!=null and viviendaBean.viviendaRiesgoSelected.protegido}" 
+							 actionListener="#{viviendaBean.guardarRiesgo}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onstart="statusDialog.show()" 
+							 oncomplete="statusDialog.hide();controlGuardarRiesgo(xhr, status, args)">
+				</p:commandButton>
+				
+				<p:commandButton id="btnEliminarRiesgo" 
+							 value="Eliminar"
+							 disabled="#{viviendaBean.viviendaRiesgoSelected==null or (viviendaBean.viviendaRiesgoSelected!=null and viviendaBean.viviendaRiesgoSelected.protegido)}"
+							 oncomplete="dlgConfirmarEliminarRiesgo.show();"  
+							 process="@this panDetalleRiesgo" 
+							 styleClass="btnDefault" style="font-size:11px;">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" ajax="true" update="grdRiesgos" 
+							 onclick="dlgEditarRiesgo.hide()"
+							 process="@this" actionListener="#{viviendaBean.cerrarRiesgo}"
+							 style="font-size:11px;" 
+							 styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+
+
+		<!-- Modal para confirmar eliminar factor de riesgo  -->
+		
+		<p:confirmDialog message="Desea eliminar el factor de riesgo asociado a la vivienda?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarEliminarRiesgo">
+			<p:commandButton id="btnSiConfirmarEliminarRiesgo" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 actionListener="#{viviendaBean.eliminarRiesgo}"  
+							 onstart="dlgConfirmarEliminarRiesgo.hide();statusDialog.show()"
+							 oncomplete="statusDialog.hide();controlGuardarRiesgo(xhr, status, args);">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarRiesgo.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<!-- Detalle de Parámetro Epidemiológico -->
+
+		<p:dialog id="dlgEditarParametro" 
+				  header="Detalle de Parámetro Epidemiológico de Vivienda" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgEditarParametro" 
+				  styleClass="panDefault"
+				  height="240" width="520"
+				  resizable="false" >
+		
+			<p:panel id="panDetalleParametro" styleClass="panDetail" 
+					 style="position:absolute; top:10px; width:500px; height:180px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+					 
+				  <h:outputLabel for="cboParametroEpidemiologico" styleClass="lblDefaultSmall" 
+					   value="Parámetro Epidemiológico:" 
+					   style="position:absolute; left:10px; top:18px;"/>
+					<h:selectOneMenu id="cboParametroEpidemiologico" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:10px;top:30px;width:480px;" 
+						 value="#{viviendaBean.parametroEpidemiologicoSelectedId}" disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected!=null}">
+						<f:selectItem itemValue="0" itemLabel=" " noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+						<f:selectItems var="parametroEpidemiologico" 
+							   itemValue="#{parametroEpidemiologico.parametroEpidemiologicoId}" 
+							   itemLabel="#{parametroEpidemiologico.concepto}" 
+							   value="#{viviendaBean.parametrosEpidemiologicos}" />
+						<p:ajax event="change" process="@this" 
+								onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+								listener="#{viviendaBean.cambiarParametro}" 
+								update="cboValorParametro,grwMensaje"/>
+					</h:selectOneMenu>
+				  
+				  	<h:outputLabel for="cboValorParametro" styleClass="lblDefaultSmall" 
+					   value="Valor:"
+					   style="position:absolute; left:10px; top:63px;"/>
+					<h:selectOneMenu id="cboValorParametro" styleClass="txtDefault cboDefault"  
+						 style="position:absolute; left:10px;top:75px;width:275px;"
+						 disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected!=null and viviendaBean.parametroEpidemiologicoViviendaSelected.protegido}" 
+						 value="#{viviendaBean.valorParametroSelected}">
+						<f:selectItem itemValue="" itemLabel="" noSelectionOption="#{viviendaBean.viviendaId!=0}" /> 
+						<f:selectItems value="#{viviendaBean.valoresParametro}" />
+					</h:selectOneMenu>
+				  
+				  	<h:outputLabel for="txtFechaTomaParametro" styleClass="lblDefaultSmall" 
+					 	 		   value="Fecha Toma de Datos:" 
+						   		   style="position:absolute; left:395px; top:63px;"/>
+				  	<h:inputText id="txtFechaTomaParametro" style="position:absolute; left:395px; top:75px; width:90px;"
+				  				 disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected!=null and viviendaBean.parametroEpidemiologicoViviendaSelected.protegido}" 
+						 	   	 value="#{viviendaBean.fechaTomaParametro}" styleClass="txtDefault fecha"  />
+				  		<script type="text/javascript">
+							jQuery('.fecha').dateEntry({dateFormat: 'dmy/',minDate: '-365', maxDate: new Date()}); 
+						</script> 
+				  
+					<h:outputLabel for="txtObservacionParametro"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:10px; top:102px;"/>
+					<h:inputTextarea id="txtObservacionParametro" style="position:absolute; left:10px; top:120px; width:475px; overflow:auto; resize: none; height:40px;" 
+						 value="#{viviendaBean.observacionesParametro}" styleClass="txtAreaDefault"
+						 disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected!=null and viviendaBean.parametroEpidemiologicoViviendaSelected.protegido}" 
+						 onkeypress="ValidarCaracteres(this, 400);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 400);" 
+						 cols="56" rows="2" label="Observaciones"/>
+				  
+			</p:panel>
+		
+			<p:panel id="panButtonParametro" styleClass="panButton" 
+				 	 style="position:absolute; top:200px; width:500px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnGuardarParametro" 
+							 value="Guardar"  
+							 process="@this panDetalleParametro"
+							 disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected!=null and viviendaBean.parametroEpidemiologicoViviendaSelected.protegido}" 
+							 ajax="true" 
+							 actionListener="#{viviendaBean.guardarParametro}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onstart="statusDialog.show()" 
+							 oncomplete="statusDialog.hide();controlGuardarParametro(xhr, status, args)">
+				</p:commandButton>
+				
+				<p:commandButton id="btnEliminarParametro" 
+							 value="Eliminar"
+							 disabled="#{viviendaBean.parametroEpidemiologicoViviendaSelected==null or (viviendaBean.parametroEpidemiologicoViviendaSelected!=null and viviendaBean.parametroEpidemiologicoViviendaSelected.protegido)}"
+							 oncomplete="dlgConfirmarEliminarParametro.show();"  
+							 process="@this panDetalleParametro" 
+							 styleClass="btnDefault" style="font-size:11px;">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" ajax="true" update="grdParametros" 
+							 onclick="dlgEditarParametro.hide()"
+							 process="@this" actionListener="#{viviendaBean.cerrarParametro}"
+							 style="font-size:11px;" 
+							 styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+
+
+		<!-- Modal para confirmar eliminar parametro epidemiológico  -->
+		
+		<p:confirmDialog message="Desea eliminar el parámetro epidemiológico asociado a la vivienda?"
+				modal="true" styleClass="panDefault"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarEliminarParametro">
+			<p:commandButton id="btnSiConfirmarEliminarParametro" 
+							 value="Si"  
+							 process="@this"
+							 styleClass="btnDefault" 
+							 style="font-size:11px;"
+							 actionListener="#{viviendaBean.eliminarParametro}"  
+							 onstart="dlgConfirmarEliminarParametro.hide();statusDialog.show()"
+							 oncomplete="statusDialog.hide();controlGuardarParametro(xhr, status, args);">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarParametro.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+
+		<p:dialog id="dlgMapa" widgetVar="dlgMapa" width="840" height="480" modal="true" resizable="false">
+			<p:panel id="panMapa">
+				<p:gmap id="mapSitios" center="#{viviendaBean.centroMapa}" zoom="#{viviendaBean.zoom}" 
+						type="ROADMAP" rendered="#{viviendaBean.centroMapa!=null}"
+						model="#{viviendaBean.mapaModelo}"  
+						style="width:800px;height:450px">  
+    			</p:gmap>
+    		</p:panel>
+		</p:dialog>  
+
+
+		<script type="text/javascript">
+		  
+			function controlPeticionRegresar(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.cambiosPendientes) {   
+					dlgConfirmarRegresar.show();   
+				} 
+			}
+
+			function controlGuardarEncuesta(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.encuestaOK) {   
+					dlgEditarEncuesta.hide();   
+				} 
+			}
+
+			function controlGuardarRiesgo(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.riesgoOK) {   
+					dlgEditarRiesgo.hide();   
+				} 
+			}
+
+			function controlGuardarParametro(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.parametroOK) {   
+					dlgEditarParametro.hide();   
+				} 
+			}
+			
+		</script> 
+
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>

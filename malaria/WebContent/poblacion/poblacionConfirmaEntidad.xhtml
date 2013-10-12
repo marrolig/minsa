@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ni="http://minsa.gob.ni/mat">
+	
+<ui:define name="titulo">
+  Confirmación de Población por Entidad Administrativa
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmActividadConfirmaEntidad">
+
+		<ni:titleBar titleText="Población > Confirmación por Entidad" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+
+		<p:notificationBar id="notificacionBar" 
+						   position="bottom" 
+						   autoDisplay="#{poblacionConfirmaEntidadBean.poblacionConfirmada or !poblacionConfirmaEntidadBean.existePoblacion}"
+						   effect="slide" style="background:none; background-color:#242424;"
+						   widgetVar="notificacionBar" 
+						   styleClass="notificationBar">
+
+					<p:graphicImage value="/images/closeBar.png" onclick="notificacionBar.hide();"  
+						style="position:absolute; left:5px;top:5px;" />
+					
+					<div style="position:absolute;left:40px; top: 5px; padding-right:50px; text-align:left">
+						<h:outputText value="La población de la comunidades ya ha sido confirmada por la Entidad Administrativa."
+									  rendered="#{poblacionConfirmaEntidadBean.poblacionConfirmada}" 
+						   		  	  style="color:#FFCC00;font-size:32px;" />
+
+						<h:outputText rendered="#{!poblacionConfirmaEntidadBean.existePoblacion and !poblacionConfirmaEntidadBean.poblacionConfirmada}" 
+								  	  value="No existen datos de población asociados a la Entidad Administrativa." 
+								  	  style="color:#FFCC00;font-size:32px;" />
+					</div>
+
+		</p:notificationBar>
+
+		<!--  Selección de la Entidad Administrativa -->
+
+		<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+					   value="Entidad Administrativa:" 
+					   style="position:absolute; left:20px; top:35px;"/>
+		<h:selectOneMenu id="cboEntidad" styleClass="txtDefault cboDefault"    
+						 style="position:absolute; left:145px;top:35px;width:200px;" 
+						 value="#{poblacionConfirmaEntidadBean.entidadSelectedId}">
+				<f:selectItems value="#{poblacionConfirmaEntidadBean.entidades}" var="entidad"
+							   itemValue="#{entidad.entidadAdtvaId}"
+							   itemLabel="#{entidad.nombre}" />
+				<p:ajax event="change" process="cboEntidad,cboAño" 
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+						listener="#{poblacionConfirmaEntidadBean.cambiarEntidad}" 
+						update="notificacionBar,cboEntidad,grdUnidades,panButton,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<!--  Selección de Año de Trabajo -->
+
+		<h:outputLabel for="cboAño" styleClass="lblDefault" 
+					   value="Año:" 
+					   style="position:absolute; left:380px; top:35px;"/>
+		<h:selectOneMenu id="cboAño" styleClass="txtDefault cboDefault"    
+						 style="position:absolute; left:420px;top:35px;width:70px;" 
+						 value="#{poblacionConfirmaEntidadBean.añoSelected}">
+				<f:selectItems value="#{poblacionConfirmaEntidadBean.años}" />
+				<p:ajax event="change" process="cboEntidad,cboAño"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+						listener="#{poblacionConfirmaEntidadBean.cambiarAño}" 
+						update="notificacionBar,grdUnidades,panButton,grwMensaje"/>
+		</h:selectOneMenu>
+
+		<!-- Tabla de Unidades -->
+		
+		<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:340px;">
+		<p:dataTable id="grdUnidades" var="unidadSituacion" 
+					 rowStyleClass="#{unidadSituacion.situacion==3 ? 'rowNonActive' : null}"
+					 loadingMessage="Cargando registros ..." 
+					 errorMessage="Se ha presentado un error al cargar los datos"
+					 styleClass="panDefault panDetail" emptyMessage="No existen unidades de salud" 
+					 style="width:980px;" scrollHeight="315" scrollWidth="980"
+					 scrollable="true" value="#{poblacionConfirmaEntidadBean.unidadesSituacion}">
+					 
+			<p:column headerText="Municipio" style="text-align:left; width:200px;">
+				<h:outputText value="#{unidadSituacion.municipio}"/>
+			</p:column>
+			<p:column headerText="Unidad" style="text-align:left; width:450px;" >
+				<h:outputText value="#{unidadSituacion.unidad}" title="#{unidadSituacion.tipoUnidad}"/>
+			</p:column>
+			<p:column headerText="Com.Exist." style="text-align:right; width:50px;">
+				<h:outputText value="#{unidadSituacion.comunidadesExistentes}"/>
+			</p:column>
+			<p:column headerText="Com.Regist." style="text-align:right;width:50px;">
+				<h:outputText value="#{unidadSituacion.comunidadesConRegistro}"/>
+			</p:column>
+			<p:column headerText="Población" style="text-align:right;width:60px;">
+				<h:outputText value="#{unidadSituacion.poblacion}"/>
+			</p:column>
+			<p:column headerText="Situación" style="text-align:left;width:100px;">
+				<h:outputText value="Confirmada" rendered="#{unidadSituacion.situacion==1}" style="color: green;" />
+				<h:outputText value="Sin Confirmar" rendered="#{unidadSituacion.situacion==2}" style="color: orange;" />
+				<h:outputText value="Sin Datos" rendered="#{unidadSituacion.situacion==3}" style="color: red;" />
+			</p:column>
+			
+		</p:dataTable>
+		</div>
+
+		<!--   panel de botones -->		
+
+		<p:panel id="panButton" styleClass="panButton" 
+				 style="position:absolute; top:405px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+
+			<p:commandButton id="btnConfirmar" value="Confirmar"    
+					styleClass="btnDefault" style="font-size:11px;"
+					oncomplete="dlgConfirmarPoblacion.show();"
+					disabled="#{!poblacionConfirmaEntidadBean.poblacionUnidadesConfirmadas or poblacionConfirmaEntidadBean.poblacionConfirmada}"
+					update="btnSiConfirmarPoblacion"
+					process="@this" />
+			<p:commandButton id="btnSalir" widgetVar="btnSalir"
+							 value="Salir" styleClass="btnDefault"   
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+			
+		</p:panel>
+		
+		<!-- Modal para confirmar los datos de población de la entidad y año -->
+		
+		<p:confirmDialog message="Desea confirmar la población de la Entidad Administrativa para el año seleccionado?"
+				modal="true"  
+				header="Aviso" 
+				severity="alert"
+				widgetVar="dlgConfirmarPoblacion">
+			<p:commandButton id="btnSiConfirmarPoblacion" value="Si"  
+							 process="btnSiConfirmarPoblacion"
+							 onstart="dlgConfirmarPoblacion.hide();statusDialog.show();" 
+							 oncomplete="statusDialog.hide();"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 update="panButton,grwMensaje" 
+							 actionListener="#{poblacionConfirmaEntidadBean.confirmar}" >
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarPoblacion.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+	</h:form>
+	
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+	
+</h:body>
+
+</html>

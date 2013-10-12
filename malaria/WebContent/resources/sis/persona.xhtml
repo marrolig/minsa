@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:composite="http://java.sun.com/jsf/composite"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<composite:interface name="persona"
+                     displayName="Edición de Personas"
+                     shortDescription="Mantenimiento y Creación de Personas">
+                     
+    <composite:attribute name="widgetVarEdit" required="true" default="dlgPersona"/>
+    <composite:attribute name="widgetVarSearch" required="true" default="dlgBusquedaPersona"/>
+    <composite:attribute name="formName" required="true" shortDescription="Nombre del formulario cliente que utiliza el componente de persona" />
+    <composite:attribute name="headerEdit" shortDescription="Titulo de la ventana modal para edición de la persona" />
+    <composite:attribute name="headerSearch" shortDescription="Titulo de la ventana modal con los resultados de la búsqueda" />
+    <composite:attribute name="messageComponent" required="true" default="grwMensaje" />
+    <composite:attribute name="personDataPanel" required="true" default="panDatosPersona" />
+    <composite:attribute name="personSearchPanel" required="true" default="panBusquedaPersona" />
+    <composite:attribute name="personSearchTable" required="true" default="grdResultadoBusquedaPersonas" />
+    <composite:attribute name="buttonEditPanel" required="true" default="panButtonEdicion" />
+    <composite:attribute name="buttonSearchPanel" required="true" default="panButtonBusqueda" />
+    <composite:attribute name="value" required="true" type="ni.gob.minsa.ejbPersona.dto.Persona" />
+    <composite:attribute name="controlProperty" required="true" type="java.lang.Integer" 
+    					 shortDescription="Propiedad del bean cliente que controla la presentación de los datos de la persona, i.e. diseño en capas" />
+    <composite:attribute name="valueControlProperty" required="true" type="java.lang.Integer"
+    					 shortDescription="Valor que se asignará a la propiedad de control del bean cliente si la persona es válida." />
+    <composite:attribute name="update" required="true" shortDescription="Expresión con la lista de componentes que serán actualizados con ajax si la persona es válida"/>
+    <composite:attribute name="searchMode" required="true" shortDescription="true indica que se podrá utilizar la funcionalidad de búsqueda de personas"/>
+    
+</composite:interface>
+
+<composite:implementation>
+		<p:dialog id="#{cc.attrs.widgetVarEdit}" header="#{cc.attrs.headerEdit}" 
+				  widgetVar="#{cc.attrs.widgetVarEdit}" closable="false" position="center" 
+				  width="845" height="360" modal="true" resizable="false">
+				  
+    			<p:panel id="#{cc.attrs.personDataPanel}" styleClass="panDetail" style="position:absolute; top:5px; left:5px;height:310px;width:830px;background: #f7fcfe;">
+					<h:outputLabel for="txtPrimerNombre" styleClass="lblDefaultSmall required" 
+						   value="Primer Nombre:" 
+						   style="position:absolute; left:10px; top:8px;"/>
+    	     		<h:inputText id="txtPrimerNombre" styleClass="txtDefault"
+    	     					 disabled="#{personaBean.verificado}" 
+    	     					 style="position:absolute; top:25px;left:10px;width:180px;" 
+    	     					 value="#{personaBean.primerNombre}" />
+    	     					 
+    	     		<h:outputLabel for="txtSegundoNombre" styleClass="lblDefaultSmall" 
+						   value="Segundo Nombre:" 
+						   style="position:absolute; left:220px; top:8px;"/>
+    	     		<h:inputText id="txtSegundoNombre" styleClass="txtDefault"
+    	     					 disabled="#{personaBean.verificado}" 
+    	     					 style="position:absolute; top:25px;left:220px;width:180px;" 
+    	     					 value="#{personaBean.segundoNombre}" />
+    	     					 
+    	     		<h:outputLabel for="txtPrimerApellido" styleClass="lblDefaultSmall required" 
+						   value="Primer Apellido:" 
+						   style="position:absolute; left:430px; top:8px;"/>
+    	     		<h:inputText id="txtPrimerApellido" styleClass="txtDefault" 
+    	     					 style="position:absolute; top:25px;left:430px;width:180px;"
+    	     					 disabled="#{personaBean.verificado}" 
+    	     					 value="#{personaBean.primerApellido}" />
+    	     					 
+    	     		<h:outputLabel for="txtSegundoApellido" styleClass="lblDefaultSmall" 
+						   value="Segundo Apellido:" 
+						   style="position:absolute; left:640px; top:8px;"/>
+    	     		<h:inputText id="txtSegundoApellido" styleClass="txtDefault" 
+    	     					 style="position:absolute; top:25px;left:640px;width:180px;"
+    	     					 disabled="#{personaBean.verificado}" 
+    	     					 value="#{personaBean.segundoApellido}" />
+
+    	     		<h:outputLabel for="txtFechaNacimiento" styleClass="lblDefaultSmall required" 
+						   value="Fecha de Nacimiento:" 
+						   style="position:absolute; left:10px; top:55px;"/>
+    	     		<h:inputText id="txtFechaNacimiento" styleClass="txtDefault fecha" 
+    	     					 disabled="#{personaBean.verificado}"
+    	     					 style="position:absolute; top:71px;left:10px;width:110px;" 
+    	     					 value="#{personaBean.fechaNacimiento}" >
+    	     			 <f:convertDateTime pattern="dd/MM/yy"></f:convertDateTime>
+    	     			 <p:ajax event="change" 
+    	     			 		 process="@this" update="txtEdad"
+    	     			 		 listener="#{personaBean.calcularEdad}" />
+    	     		</h:inputText>
+    	     		<script type="text/javascript">
+						jQuery('.fecha').dateEntry({dateFormat: 'dmy/',minDate: '-36500', maxDate: new Date()}); 
+					</script> 
+
+    	     		<h:outputLabel for="txtEdad" styleClass="lblDefaultSmall" 
+						   value="Edad:" 
+						   style="position:absolute; left:140px; top:55px;"/>
+    	     		<h:inputText id="txtEdad" styleClass="txtDefault" disabled="true" 
+    	     					 style="position:absolute; top:71px;left:140px;width:50px;" 
+    	     					 value="#{personaBean.edadEnAnios}" >
+    	     		</h:inputText>
+    	     		
+    	     		<h:outputLabel for="cboTipoIdentificacion" styleClass="lblDefaultSmall" 
+					   		value="Identificación:" 
+					   		style="position:absolute; left:220px; top:55px;"/>
+					<h:selectOneMenu id="cboTipoIdentificacion" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:220px;top:71px;width:90px;" 
+						 		value="#{personaBean.tipoIdentificacionSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="tipoIdentificacion" 
+							   	itemValue="#{tipoIdentificacion.catalogoId}" 
+							   	itemLabel="#{tipoIdentificacion.valor}" 
+							   	value="#{personaBean.tiposIdentificaciones}" />
+					</h:selectOneMenu>
+    	     		
+    	     		<h:outputLabel for="txtNumeroIdentificacion" styleClass="lblDefaultSmall" 
+						   value="Número de Identificación:" 
+						   style="position:absolute; left:325px; top:55px;"/>
+    	     		<h:inputText id="txtNumeroIdentificacion" styleClass="txtDefault"  
+    	     					 style="position:absolute; top:71px;left:325px;width:115px;" 
+    	     					 value="#{personaBean.identNumero}" />
+    	     		
+    	     		<h:outputLabel for="cboSexo" styleClass="lblDefaultSmall required" 
+					   		value="Sexo:" 
+					   		style="position:absolute; left:460px; top:55px;"/>
+					<h:selectOneMenu id="cboSexo" styleClass="txtDefault cboDefault"
+								disabled="#{personaBean.verificado}"  
+						 		style="position:absolute; left:460px;top:71px;width:85px;" 
+						 		value="#{personaBean.sexoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="sexo" 
+							   	itemValue="#{sexo.catalogoId}" 
+							   	itemLabel="#{sexo.valor}" 
+							   	value="#{personaBean.sexos}" />
+					</h:selectOneMenu>
+
+    	     		<h:outputLabel for="cboEtnia" styleClass="lblDefaultSmall" 
+					   		value="Etnia:" 
+					   		style="position:absolute; left:560px; top:55px;"/>
+					<h:selectOneMenu id="cboEtnia" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:560px;top:71px;width:155px;" 
+						 		value="#{personaBean.etniaSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="etnia" 
+							   	itemValue="#{etnia.catalogoId}" 
+							   	itemLabel="#{etnia.valor}" 
+							   	value="#{personaBean.etnias}" />
+					</h:selectOneMenu>
+    	     		
+    	     		<h:outputLabel for="cboEstadoCivil" styleClass="lblDefaultSmall" 
+					   		value="Estado Civil:" 
+					   		style="position:absolute; left:730px; top:55px;"/>
+					<h:selectOneMenu id="cboEstadoCivil" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:730px;top:71px;width:95px;" 
+						 		value="#{personaBean.estadoCivilSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="estadoCivil" 
+							   	itemValue="#{estadoCivil.catalogoId}" 
+							   	itemLabel="#{estadoCivil.valor}" 
+							   	value="#{personaBean.estadosCiviles}" />
+					</h:selectOneMenu>
+
+    	     		<h:outputLabel for="cboPaisNacimiento" styleClass="lblDefaultSmall" 
+					   		value="País Nacimiento:" 
+					   		style="position:absolute; left:10px; top:102px;"/>
+					<h:selectOneMenu id="cboPaisNacimiento" styleClass="txtDefault cboDefault"
+								disabled="#{personaBean.verificado}"  
+						 		style="position:absolute; left:10px;top:118px;width:255px;" 
+						 		value="#{personaBean.paisNacimientoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="paisNacimiento" 
+							   	itemValue="#{paisNacimiento.paisId}" 
+							   	itemLabel="#{paisNacimiento.nombre}" 
+							   	value="#{personaBean.paisesNacimiento}" />
+						<p:ajax event="change" process="@this" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{personaBean.obtenerDepartamentosNacimiento}" 
+							update="cboDepartamentoNacimiento,cboMunicipioNacimiento,:#{cc.attrs.formName}:#{cc.attrs.messageComponent}"/>
+					</h:selectOneMenu>
+    	     		
+    	     		<h:outputLabel for="cboDepartamentoNacimiento" styleClass="lblDefaultSmall" 
+					   		value="Departamento Nacimiento:" 
+					   		style="position:absolute; left:305px; top:102px;"/>
+					<h:selectOneMenu id="cboDepartamentoNacimiento" styleClass="txtDefault cboDefault"
+								disabled="#{personaBean.verificado or !personaBean.esNacidoNacional}"  
+						 		style="position:absolute; left:305px;top:118px;width:200px;" 
+						 		value="#{personaBean.departamentoNacimientoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="departamentoNacimiento" 
+							   	itemValue="#{departamentoNacimiento.divisionPoliticaId}" 
+							   	itemLabel="#{departamentoNacimiento.nombre}" 
+							   	value="#{personaBean.departamentosNacimiento}" />
+						<p:ajax event="change" process="@this" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{personaBean.obtenerMunicipiosNacimiento}" 
+							update="cboMunicipioNacimiento,:#{cc.attrs.formName}:#{cc.attrs.messageComponent}"/>						
+					</h:selectOneMenu>
+					
+					<h:outputLabel for="cboMunicipioNacimiento" styleClass="lblDefaultSmall" 
+					   		value="Municipio Nacimiento:" 
+					   		style="position:absolute; left:535px; top:102px;"/>
+					<h:selectOneMenu id="cboMunicipioNacimiento" styleClass="txtDefault cboDefault" 
+								disabled="#{personaBean.verificado or !personaBean.esNacidoNacional}" 
+						 		style="position:absolute; left:535px;top:118px;width:290px;" 
+						 		value="#{personaBean.municipioNacimientoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="municipioNacimiento" 
+							   	itemValue="#{municipioNacimiento.divisionPoliticaId}" 
+							   	itemLabel="#{municipioNacimiento.nombre}" 
+							   	value="#{personaBean.municipiosNacimiento}" />
+					</h:selectOneMenu>
+					
+					<h:outputLabel for="cboDepartamentoResidencia" styleClass="lblDefaultSmall" 
+					   		value="Departamento Residencia:" 
+					   		style="position:absolute; left:10px; top:149px;"/>
+					<h:selectOneMenu id="cboDepartamentoResidencia" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:10px;top:165px;width:170px;" 
+						 		value="#{personaBean.departamentoResidenciaSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="departamentoResidencia" 
+							   	itemValue="#{departamentoResidencia.divisionPoliticaId}" 
+							   	itemLabel="#{departamentoResidencia.nombre}" 
+							   	value="#{personaBean.departamentosResidencia}" />
+						<p:ajax event="change" process="@this" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{personaBean.obtenerMunicipiosResidencia}" 
+							update="cboMunicipioResidencia,:#{cc.attrs.formName}:#{cc.attrs.messageComponent}"/>						
+					</h:selectOneMenu>
+					
+					<h:outputLabel for="cboMunicipioResidencia" styleClass="lblDefaultSmall" 
+					   		value="Municipio Residencia:" 
+					   		style="position:absolute; left:210px; top:149px;"/>
+					<h:selectOneMenu id="cboMunicipioResidencia" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:210px;top:165px;width:240px;" 
+						 		value="#{personaBean.municipioResidenciaSelectedId}" 
+						 		disabled="#{personaBean.departamentoResidenciaSelectedId==0}" >
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="municipioResidencia" 
+							   	itemValue="#{municipioResidencia.divisionPoliticaId}" 
+							   	itemLabel="#{municipioResidencia.nombre}" 
+							   	value="#{personaBean.municipiosResidencia}" />
+						<p:ajax event="change" process="@this"
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{personaBean.iniciarComunidadResidencia}" 
+							update="txtComunidadResidencia,:#{cc.attrs.formName}:#{cc.attrs.messageComponent}"/>						
+					</h:selectOneMenu>
+					
+					<h:outputLabel for="txtComunidadResidencia" styleClass="lblDefaultSmall" 
+					   		value="Comunidad/Barrio Residencia:" 
+					   		style="position:absolute; left:470px; top:149px;"/>
+		     		<p:autoComplete id="txtComunidadResidencia" value="#{personaBean.comunidadResidenciaSelected}" 
+     						minQueryLength="3" maxResults="10" queryDelay="300"  
+     						disabled="#{personaBean.municipioResidenciaSelectedId==0}"  
+     						forceSelection="true" styleClass="txtDefault"  
+		     				title="Para buscar, escriba parte del nombre de la comunidad o barrio. Unicamente se presentarán las primeras 10 comunidades/barrios que coinciden con el texto ingresado."   
+							completeMethod="#{personaBean.completarComunidad}" 
+							var="comunidadResidencia" style="position:absolute; left:470px; top:165px; width:270px;" 
+							itemLabel="#{comunidadResidencia.nombre}" size="66" 
+							converter="comunidadConverter"    
+							itemValue="#{comunidadResidencia}">
+					</p:autoComplete>
+					
+					<h:outputLabel for="txtDireccion" styleClass="lblDefaultSmall" 
+						   value="Dirección de Residencia:" 
+						   style="position:absolute; left:10px; top:196px;"/>
+    	     		<h:inputText id="txtDireccion" styleClass="txtDefault"  
+    	     					 style="position:absolute; top:212px;left:10px;width:490px;" 
+    	     					 value="#{personaBean.direccion}" />
+    	     					 
+    	   			<h:outputLabel for="txtTelefonoResidencia" styleClass="lblDefaultSmall" 
+						   value="Teléfono Residencia:" 
+						   style="position:absolute; left:520px; top:196px;"/>
+    	     		<h:inputText id="txtTelefonoResidencia" styleClass="txtDefault"  
+    	     					 style="position:absolute; top:212px;left:520px;width:140px;" 
+    	     					 value="#{personaBean.telefonoResidencia}" />
+
+    	   			<h:outputLabel for="txtTelefonoMovil" styleClass="lblDefaultSmall" 
+						   value="Teléfono Móvil:" 
+						   style="position:absolute; left:680px; top:196px;"/>
+    	     		<h:inputText id="txtTelefonoMovil" styleClass="txtDefault"  
+    	     					 style="position:absolute; top:212px;left:680px;width:140px;" 
+    	     					 value="#{personaBean.telefonoMovil}" />
+    	     					 
+    	     		<h:outputLabel for="cboEscolaridad" styleClass="lblDefaultSmall" 
+					   		value="Escolaridad:" 
+					   		style="position:absolute; left:10px; top:243px;"/>
+					<h:selectOneMenu id="cboEscolaridad" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:10px;top:259px;width:150px;" 
+						 		value="#{personaBean.escolaridadSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="escolaridad" 
+							   	itemValue="#{escolaridad.catalogoId}" 
+							   	itemLabel="#{escolaridad.valor}" 
+							   	value="#{personaBean.escolaridades}" />
+					</h:selectOneMenu>
+					
+					<h:outputLabel for="txtOcupacion" styleClass="lblDefaultSmall" 
+					   		value="Ocupación:" 
+					   		style="position:absolute; left:180px; top:243px;"/>
+		     		<p:autoComplete id="txtOcupacion" value="#{personaBean.ocupacionSelected}" 
+     						minQueryLength="3" maxResults="5" queryDelay="300"    
+     						forceSelection="true"  
+		     				title="Para buscar, escriba parte del nombre de la ocupación. Unicamente se presentarán las primeras 10 ocupaciones que coinciden con el texto ingresado."   
+							completeMethod="#{personaBean.completarOcupacion}" 
+							var="ocupacion" style="position:absolute; left:180px; top:259px; width:350px;" 
+							itemLabel="#{ocupacion.nombre}" size="62"
+							converter="ocupacionConverter"    
+							itemValue="#{ocupacion}">
+					</p:autoComplete>
+
+					<h:outputLabel for="cboTipoAsegurado" styleClass="lblDefaultSmall" 
+					   		value="Tipo de Asegurado:" 
+					   		style="position:absolute; left:520px; top:243px;"/>
+					<h:selectOneMenu id="cboTipoAsegurado" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:520px;top:259px;width:145px;" 
+						 		value="#{personaBean.tipoAseguradoSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="tipoAsegurado" 
+							   	itemValue="#{tipoAsegurado.catalogoId}" 
+							   	itemLabel="#{tipoAsegurado.valor}" 
+							   	value="#{personaBean.tiposAsegurados}" />
+						<p:ajax event="change" process="@this"
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{personaBean.iniciarNumeroAsegurado}" 
+							update="txtNumeroAsegurado,:#{cc.attrs.formName}:#{cc.attrs.messageComponent}"/>							   	
+					</h:selectOneMenu>    	     		
+
+					<h:outputLabel for="txtNumeroAsegurado" styleClass="lblDefaultSmall" 
+						   value="Número de Asegurado:" 
+						   style="position:absolute; left:680px; top:243px;"/>
+    	     		<h:inputText id="txtNumeroAsegurado" styleClass="txtDefault"
+    	     					 disabled="#{personaBean.tipoAseguradoSelectedId==0}"  
+    	     					 style="position:absolute; top:259px;left:680px;width:140px;" 
+    	     					 value="#{personaBean.numeroAsegurado}" />
+    	     					 		
+					<h:outputLabel id="lblVerificado" value="Datos Verificados:" 
+				 			    styleClass="lblDefaultSmall" 
+				 			    style="position:absolute; left:720px;top:293px;" /> 
+				 	<h:selectBooleanCheckbox id="chkVerificado" 
+				 			disabled="#{personaBean.verificado}"  
+				 			styleClass="txtDefault" style="position:absolute; left:810px;top:290px;" 
+				 			value="#{personaBean.verificado}" />
+    			</p:panel>
+
+				<p:panel id="#{cc.attrs.buttonEditPanel}" styleClass="panButton" 
+					 	 style="position:absolute; top:325px; width:830px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+					<p:commandButton id="btnAceptarPersona" 
+							 disabled="#{empty personaBean.personaSelected}"
+							 value="Aceptar"  
+							 process="@this #{cc.attrs.personDataPanel}"  
+							 actionListener="#{personaBean.aceptarPersona}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onstart="statusDialog.show();" oncomplete="statusDialog.hide();controlAceptarPersona(xhr, status, args);"
+							 update=":#{cc.attrs.formName}:#{cc.attrs.messageComponent}">
+					</p:commandButton>
+
+					<p:commandButton id="btnActivarBuscarPersona"  
+							 rendered="#{personaBean.modo==0}"
+							 value="Buscar" type="button"  
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onclick="#{cc.attrs.widgetVarEdit}.hide();#{cc.attrs.widgetVarSearch}.show();">
+					</p:commandButton>
+					
+					<p:commandButton value="Cancelar"
+							 process="@this" update="#{cc.attrs.personSearchPanel},#{cc.attrs.personSearchTable},#{cc.attrs.buttonSearchPanel}" 
+							 onstart="statusDialog.show();" oncomplete="statusDialog.hide();#{cc.attrs.widgetVarEdit}.hide();"
+							 style="font-size:11px;" actionListener="#{personaBean.cancelarEditarPersona}"
+							 styleClass="btnDefault"/>
+				</p:panel>
+
+    	</p:dialog>
+    	
+    	<p:dialog id="#{cc.attrs.widgetVarSearch}" header="#{cc.attrs.headerSearch}" 
+				  widgetVar="#{cc.attrs.widgetVarSearch}"  
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  styleClass="panDefault"
+				  height="440" width="720"
+				  resizable="false">
+
+				<p:panel id="#{cc.attrs.personSearchPanel}" styleClass="panDetail" style="position:absolute; top:5px; left:8px;height:45px;width:700px;background: #f7fcfe;">
+					<h:outputLabel for="txtBusqueda" styleClass="lblDefaultSmall" 
+						   value="Búsqueda por Nombre y Apellidos, Número de Identificación o Número de Teléfono:" 
+						   style="position:absolute; left:10px; top:8px;"/>
+    	     		<h:inputText id="txtBusqueda" styleClass="txtDefault" 
+    	     					 style="position:absolute; top:25px;left:10px;width:345px;" 
+    	     					 value="#{personaBean.textoBusqueda}" />
+    	     					 
+    	     		<p:commandButton id="btnBuscarPersona" icon="icon-search" ajax="true" 
+						 title="Haga clic para iniciar búsqueda" 
+						 style="position:absolute; left:370px;top:23px;width:22px;height:22px" 
+        				 actionListener="#{personaBean.buscarPersonas}"
+        				 onstart="statusDialog.show();" oncomplete="statusDialog.hide()" 
+        				 update="#{cc.attrs.personSearchTable},#{cc.attrs.buttonSearchPanel},:#{cc.attrs.formName}:#{cc.attrs.messageComponent}" 
+        				 process="@this,txtBusqueda" />
+    	     		
+    			</p:panel>
+		
+			<div style="float:left; position:absolute; top:60px; left:10px; width:700px; height:340px; border:1px solid rgb(211,211,211); border-radius:5px 5px 5px 5px;">
+				<p:dataTable id="#{cc.attrs.personSearchTable}" var="persona" widgetVar="tablaPersonas"
+						 rowKey="#{persona.personaId}"
+						 selectionMode="single" selection="#{personaBean.personaListaSelected}" 
+						 loadingMessage="Cargando registros ..." paginator="true" 
+						 rows="14" paginatorPosition="top" paginatorAlwaysVisible="true"
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail" emptyMessage="No hay resultados para la búsqueda" 
+						 style="width:700px;"  
+						 value="#{personaBean.personas}">
+
+					<p:ajax event="rowSelect"    
+    	        	        update=":#{cc.attrs.formName}:#{cc.attrs.id}:#{cc.attrs.buttonSearchPanel} :#{cc.attrs.formName}:#{cc.attrs.messageComponent}" />  
+	    	    	<p:ajax event="rowUnselect"  
+    	    				update=":#{cc.attrs.formName}:#{cc.attrs.id}:#{cc.attrs.buttonSearchPanel} :#{cc.attrs.formName}:#{cc.attrs.messageComponent}" />  
+
+					<p:column headerText="1er Nombre" style="text-align:left; width:125px;">
+						<h:outputText value="#{persona.primerNombre}" />
+					</p:column>
+					<p:column headerText="2do Nombre" style="text-align:left; width:125px;">
+						<h:outputText value="#{persona.segundoNombre}" />
+					</p:column>
+					<p:column headerText="1er Apellido" style="text-align:left; width:125px;">
+						<h:outputText value="#{persona.primerApellido}" />
+					</p:column>
+					<p:column headerText="2do Apellido" style="text-align:left; width:125px;">
+						<h:outputText value="#{persona.segundoApellido}" />
+					</p:column>
+					<p:column headerText="Fecha Nacimiento" style="text-align:left; width:60px;">
+						<h:outputText value="#{persona.fechaNacimiento}">
+							<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+					<p:column headerText="Identificación" style="text-align:left; width:100px;">
+						<h:outputText value="#{persona.identNumero}" />
+					</p:column>
+			
+				</p:dataTable>
+			</div>
+		
+			<p:panel id="#{cc.attrs.buttonSearchPanel}" styleClass="panButton" 
+				 	 style="position:absolute; top:407px; width:700px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnSeleccionarPersona" 
+							 disabled="#{empty personaBean.personaListaSelected}"
+							 value="Aceptar"  
+							 process="@this"  
+							 actionListener="#{personaBean.seleccionarPersona}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 update="#{cc.attrs.personDataPanel},#{cc.attrs.buttonEditPanel},:#{cc.attrs.formName}:#{cc.attrs.messageComponent}" 
+							 oncomplete="#{cc.attrs.widgetVarSearch}.hide();#{cc.attrs.widgetVarEdit}.show();">
+				</p:commandButton>
+
+				<p:commandButton id="btnAgregarPersona" 
+							 value="Agregar"  
+							 process="@this"  
+							 actionListener="#{personaBean.agregarPersona}"
+							 styleClass="btnDefault" style="font-size:11px;" 
+							 oncomplete="#{cc.attrs.widgetVarSearch}.hide();#{cc.attrs.widgetVarEdit}.show();"
+							 update="#{cc.attrs.personDataPanel},#{cc.attrs.buttonEditPanel},:#{cc.attrs.formName}:#{cc.attrs.messageComponent}">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" onclick="#{cc.attrs.widgetVarSearch}.hide()"
+							 style="font-size:11px;"
+							 type="button" styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+		
+		
+		<script type="text/javascript">
+		  
+			function controlAceptarPersona(xhr, status, args) {   
+				if(!args.validationFailed &amp;&amp; args.personaValida) {   
+					#{cc.attrs.widgetVarEdit}.hide();   
+				} 
+			}
+			
+		</script>
+		
+
+ </composite:implementation>
+</html>

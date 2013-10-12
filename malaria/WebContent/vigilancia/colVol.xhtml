@@ -1,0 +1,609 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sis="http://java.sun.com/jsf/composite/sis"    
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+  Colaboradores Voluntarios
+</ui:define>
+
+<h:body>
+
+	<ui:composition template="/templates/main-template.xhtml" >
+
+
+	<ui:define name="content">
+	
+		<script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+	
+		<style type="text/css">
+			.ui-datatable-scrollable-body {
+				overflow-y:auto !important;
+				overflow-x:hidden !important;
+			}
+			.ui-inputfield {
+				padding:0px !important;
+			}
+			
+		</style>
+
+	<f:view>
+	
+	<h:form id="frmColVol">
+	
+		<ni:titleBar titleText="Vigilancia > Puestos de Notificación > Colaboradores Voluntarios" />
+
+		<p:growl id="grwMensaje" showDetail="true" life="5000" />
+		
+		<p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+			<f:facet name="start">
+				<h:graphicImage value="../images/loading.gif" />
+			</f:facet>
+			
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+		
+		<p:panel id="panControl"  styleClass="panDefault">
+		
+			<!--  Selección de entidad administrativa y unidad de salud -->
+
+			<h:outputLabel for="cboEntidad" styleClass="lblDefault" 
+						   value="Entidad Administrativa:" 
+						   style="position:absolute; left:20px; top:35px;"/>
+			<h:selectOneMenu id="cboEntidad" styleClass="txtDefault cboDefault" 
+							 disabled="#{colVolBean.capaActiva==2}"
+							 style="position:absolute; left:145px;top:35px;width:200px;" 
+							 value="#{colVolBean.entidadSelectedId}">
+					<f:selectItems value="#{colVolBean.entidades}" var="entidad"
+								   itemValue="#{entidad.entidadAdtvaId}"
+								   itemLabel="#{entidad.nombre}" />
+					<p:ajax event="change" process="cboEntidad,cboUnidad" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+							listener="#{colVolBean.obtenerUnidades}" 
+							update="cboEntidad,cboUnidad,grdColVoles,panButton1,grwMensaje"/>
+			</h:selectOneMenu>
+
+			<h:outputLabel for="cboUnidad" styleClass="lblDefault" 
+						   value="Unidad:" 
+						   style="position:absolute; left:360px; top:35px;"/>
+			<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault" 
+							 disabled="#{colVolBean.capaActiva==2}"  
+							 style="position:absolute; left:410px;top:35px;width:420px;" 
+							 value="#{colVolBean.unidadSelectedId}"> 
+					<f:selectItem itemValue="0" itemLabel=" " /> 
+					<f:selectItems var="unidad" 
+								   itemValue="#{unidad.unidadId}" 
+								   itemLabel="#{unidad.nombre}" 
+								   value="#{colVolBean.unidades}" />
+					<p:ajax event="change" process="cboUnidad" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+							listener="#{colVolBean.cambiarUnidad}" 
+							update="cboUnidad,grdColVoles,panButton1,grwMensaje"/>
+				
+			</h:selectOneMenu>
+		
+			<p:commandButton id="btnMapa" icon="icon-world" ajax="true" 
+							 disabled="#{colVolBean.unidadSelected==null or colVolBean.capaActiva==2}"
+							 style="position:absolute; left:900px;top:32px;" 
+        					 value="Ver Mapa" actionListener="#{colVolBean.generarMapa}"
+        					 onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgMapa.show()" 
+        					 update="panMapa" process="@this" />
+        </p:panel>
+
+		<p:panel id="capa1"  styleClass="panDefault" visible="#{colVolBean.capaActiva==1}">
+		
+			<!-- Tabla de Colaboradores -->
+			<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:235px;">
+				<p:dataTable id="grdColVoles" var="colVol" widgetVar="tablaColVoles" 
+							 rowKey="#{colVol.colVolId}"
+							 selectionMode="single" selection="#{colVolBean.colVolSelected}" 
+							 loadingMessage="Cargando registros ..." 
+							 errorMessage="Se ha presentado un error al cargar los datos"
+							 styleClass="panDetail" paginator="true" 
+							 rows="12" paginatorPosition="top" paginatorAlwaysVisible="true"
+							 emptyMessage="No existen Colaboradores" 
+							 style="width:980px;" value="#{colVolBean.colVoles}">
+
+					<p:ajax event="rowSelect" process="@this" 
+							listener="#{colVolBean.onColVolSelected}"   
+        	    	        update=":frmColVol:capa1 :frmColVol:capa2 :frmColVol:panControl :frmColVol:panPersona:panDatosPersona :frmColVol:panPersona:panBotonesEdicion :frmColVol:grwMensaje :frmColVol:grdComunidades" />  
+
+					<p:column headerText="Comunidad Residencia" style="text-align:left; width:380px;">
+						<h:outputText value="#{colVol.sisPersona.comunidadResidencia.nombre}"/>
+					</p:column>
+					<p:column headerText="Nombre Completo" style="text-align:left; width:400px;">
+						<h:outputText value="#{colVol.sisPersona.primerNombre} #{colVol.sisPersona.segundoNombre} #{colVol.sisPersona.primerApellido} #{colVol.sisPersona.segundoApellido}" />
+					</p:column>
+					<p:column headerText="Sexo" style="text-align:left; width:100px;">
+						<h:outputText value="#{colVol.sisPersona.sexo.valor}" />
+					</p:column>
+					<p:column headerText="Clave" style="text-align:left; width:100px;">
+						<h:outputText value="#{colVol.puestoNotificacion.clave}" />
+					</p:column>
+			
+				</p:dataTable>
+			</div>
+
+			<p:panel id="panButton1" styleClass="panButton" 
+				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+				<p:commandButton id="btnAgregar1" value="Agregar" 
+							 process="@this" 
+							 update="panPersona" 
+							 actionListener="#{colVolBean.agregar}"
+							 onclick="dlgBusquedaPersona.show();" 
+							 styleClass="btnDefault" style="font-size:11px;"  />
+						     							 
+				<p:commandButton value="Salir" styleClass="btnDefault" 
+							 style="font-size:11px;" 
+							 process="@this" 
+							 onclick="document.location.replace('../inicio.xhtml');" />
+			</p:panel>
+		
+		</p:panel>   <!-- fin capa 1 -->
+
+		<p:panel id="capa2"  styleClass="panDefault" visible="#{colVolBean.capaActiva==2}">
+
+			<p:panel id="panDetalle" header="Datos del Colaborador Voluntario" 
+				 style="position:absolute;top:70px;left:10px;width:980px;height:326px;padding-left:0em; padding-top:0em; padding-bottom:0em;" 
+				 styleClass="panDetail">
+
+				<h:outputLabel for="txtNombre" styleClass="lblDefaultSmall" 
+							   value="Nombre y apellidos del Colaborador Voluntario:" 
+							   style="position:absolute; left:10px; top:28px;"/>
+				<h:inputText id="txtNombre" style="position:absolute; left:10px; top:43px; width:310px;"
+							 value="#{colVolBean.personaSelected.primerNombre} #{colVolBean.personaSelected.segundoNombre} #{colVolBean.personaSelected.primerApellido} #{colVolBean.personaSelected.segundoApellido}" 
+							 styleClass="txtDefault" disabled="true" />
+
+				<p:commandButton id="btnEditarPersona" icon="icon-user" ajax="true" 
+						 title="Haga clic para modificar los datos de la persona"
+						 style="position:absolute; left:337px;top:43px;width:21px;height:21px;"
+        				 oncomplete="dlgPersona.show();"  
+        				 process="@this panDetalle" />
+
+				<h:outputLabel for="txtCVEdad" styleClass="lblDefaultSmall" 
+							   value="Edad:" 
+							   style="position:absolute; left:365px; top:28px;"/>
+				<h:inputText id="txtCVEdad" style="position:absolute; left:365px; top:43px; width:45px;"
+							 value="#{colVolBean.personaSelected.edadEnAnios}" 
+							 styleClass="txtDefault" disabled="true" />
+
+				<h:outputLabel for="txtCVSexo" styleClass="lblDefaultSmall" 
+							   value="Sexo:" 
+							   style="position:absolute; left:430px; top:28px;"/>
+				<h:inputText id="txtCVSexo" style="position:absolute; left:430px; top:43px; width:85px;"
+							 value="#{colVolBean.personaSelected.sexoValor}" 
+							 styleClass="txtDefault" disabled="true" />
+
+				<h:outputLabel for="txtCVTipoIdentificacion" styleClass="lblDefaultSmall" 
+							   value="Identificación:" 
+							   style="position:absolute; left:537px; top:28px;"/>
+				<h:inputText id="txtCVTipoIdentificacion" style="position:absolute; left:537px; top:43px; width:85px;"
+							 value="#{colVolBean.personaSelected.identValor}" 
+							 styleClass="txtDefault" disabled="true" />
+							 
+				<h:outputLabel for="txtCVNumIdentificacion" styleClass="lblDefaultSmall" 
+							   value="Número:" 
+							   style="position:absolute; left:640px; top:28px;"/>
+				<h:inputText id="txtCVNumIdentificacion" style="position:absolute; left:640px; top:43px; width:115px;"
+							 value="#{colVolBean.personaSelected.identNumero}" 
+							 styleClass="txtDefault" disabled="true" />							 
+
+				<h:outputLabel for="txtCVTelefono" styleClass="lblDefaultSmall" 
+							   value="Teléfonos:" 
+							   style="position:absolute; left:770px; top:28px;"/>
+				<h:inputText id="txtCVTelefono" style="position:absolute; left:770px; top:43px; width:200px;"
+							 value="#{colVolBean.personaSelected.telefonoResi} #{colVolBean.personaSelected.telefonoMovil}" 
+							 styleClass="txtDefault" disabled="true" />							 
+
+				<h:outputLabel for="txtCVResidencia" styleClass="lblDefaultSmall" 
+							   value="Municipio, Comunidad (Barrio o Localidad) de Residencia :" 
+							   style="position:absolute; left:10px; top:73px;"/>
+				<h:inputText id="txtCVResidencia" style="position:absolute; left:10px; top:88px; width:470px;"
+							 value="#{colVolBean.personaSelected.muniResiNombre}, #{colVolBean.personaSelected.comuResiNombre}" 
+							 styleClass="txtDefault" disabled="true" />
+
+				<h:outputLabel for="txtCVDirResidencia" styleClass="lblDefaultSmall" 
+							   value="Dirección de Residencia :" 
+							   style="position:absolute; left:500px; top:73px;"/>
+				<h:inputText id="txtCVDirResidencia" style="position:absolute; left:500px; top:88px; width:470px;"
+							 value="#{colVolBean.personaSelected.direccionResi}" 
+							 styleClass="txtDefault" disabled="true" />
+							 
+				<h:outputLabel for="txtFechaInicio" styleClass="lblDefaultSmall" 
+							   value="Fecha Inicio :" 
+							   style="position:absolute; left:10px; top:118px;"/>
+				<h:inputText id="txtFechaInicio" style="position:absolute; left:10px; top:133px; width:100px;"
+							 value="#{colVolBean.fechaInicio}" 
+							 styleClass="txtDefault fechaInicio">
+						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+				</h:inputText>
+				<script type="text/javascript">
+						jQuery('.fechaInicio').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+				</script> 
+
+				<h:outputLabel for="txtFechaFin" styleClass="lblDefaultSmall" 
+							   value="Fecha Fin :" 
+							   style="position:absolute; left:130px; top:118px;"/>
+				<h:inputText id="txtFechaFin" style="position:absolute; left:130px; top:133px; width:100px;"
+							 value="#{colVolBean.fechaFin}" 
+							 styleClass="txtDefault fechaFin">
+						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+				</h:inputText>
+				<script type="text/javascript">
+						jQuery('.fechaFin').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+				</script> 
+				
+				<h:outputLabel for="txtLatitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Latitud:" 
+						 style="position:absolute; left:250px; top:118px;"/>
+				<h:inputText id="txtLatitud" style="position:absolute; left:250px; top:133px; width:100px;" 
+						     value="#{colVolBean.latitud}" 
+						     title="GPS Y"
+						     styleClass="txtDefault gpsY" size="57" />
+				<script type="text/javascript">
+						jQuery(".gpsY").format({precision: 6,allow_negative:false,autofix:true});
+				</script>
+
+				<h:outputLabel for="txtLongitud"
+						 styleClass="lblDefaultSmall" 
+						 value="Longitud:" 
+						 style="position:absolute; left:370px; top:118px;"/>
+				<h:inputText id="txtLongitud" style="position:absolute; left:370px; top:133px; width:100px;" 
+						     value="#{colVolBean.longitud}" 
+						     title="GPS X"
+						     styleClass="txtDefault gpsX" size="57" />
+				<script type="text/javascript">
+					jQuery(".gpsX").format({precision: 6,allow_negative:true,autofix:true});
+				</script>
+				
+				<h:outputLabel for="txtObservacion"
+						 styleClass="lblDefaultSmall" 
+						 value="Observaciones:" 
+						 style="position:absolute; left:500px; top:118px;"/>
+				<h:inputTextarea id="txtObservacion" style="position:absolute; left:500px; top:133px; width:470px; overflow:auto; resize: none; height:65px;" 
+						 value="#{colVolBean.observaciones}" styleClass="txtAreaDefault"  
+						 onkeypress="ValidarCaracteres(this, 500);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 500);" 
+						 cols="56" rows="2" label="Observaciones"/>
+				
+				<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
+							   value="Puesto (Clave) :" 
+							   style="position:absolute; left:10px; top:163px;"/>
+				<h:inputText id="txtClave" style="position:absolute; left:10px; top:178px; width:100px;"
+							 value="#{colVolBean.clave}" maxlength="5"
+							 styleClass="txtDefault" />
+
+				<h:outputLabel for="txtFechaApertura" styleClass="lblDefaultSmall" 
+							   value="Fecha Apertura :" 
+							   style="position:absolute; left:130px; top:163px;"/>
+				<h:inputText id="txtFechaApertura" style="position:absolute; left:130px; top:178px; width:100px;"
+							 value="#{colVolBean.fechaApertura}"  
+							 styleClass="txtDefault fechaApertura">
+						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+				</h:inputText>
+				<script type="text/javascript">
+						jQuery('.fechaApertura').dateEntry({dateFormat: 'dmy/'}); 
+				</script> 			
+
+				<h:outputLabel for="txtFechaCierre" styleClass="lblDefaultSmall" 
+							   value="Fecha de Cierre :" 
+							   style="position:absolute; left:250px; top:163px;"/>
+				<h:inputText id="txtFechaCierre" style="position:absolute; left:250px; top:178px; width:100px;"
+							 value="#{colVolBean.fechaCierre}"  
+							 styleClass="txtDefault fechaApertura">
+						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+				</h:inputText>
+				<script type="text/javascript">
+						jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/'}); 
+				</script>
+				
+				<p:commandButton id="btnComunidades" icon="icon-house"
+							 disabled="#{colVolBean.puestoNotificacionId==0}"
+							 style="position:absolute; left:370px;top:175px;font-weight:lighter;font-size:7pt !important;" 
+        					 value="Comunidades (#{fn:length(colVolBean.puestosComunidades)})" 
+        					 onstart="statusDialog.show();"
+        					 oncomplete="statusDialog.hide();dlgComunidades.show()" 
+        					 process="@this" update="grdComunidades,panDetalleComunidadPuesto" />
+
+				<h:outputLabel for="txtComoLlegar"
+						 styleClass="lblDefaultSmall" 
+						 value="Como llegar:" 
+						 style="position:absolute; left:10px; top:208px;"/>
+				<h:inputTextarea id="txtComoLlegar" style="position:absolute; left:10px; top:223px; width:475px; overflow:auto; resize: none; height:65px;" 
+						 value="#{colVolBean.comoLlegar}" styleClass="txtAreaDefault"  
+						 onkeypress="ValidarCaracteres(this, 500);return (ValidarEnter(this, event));"
+						 onkeyup="ValidarCaracteres(this, 500);" 
+						 cols="56" rows="2" label="Observaciones"/>
+
+				<h:outputLabel for="txtPuntoReferencia" styleClass="lblDefaultSmall" 
+							   value="Punto de Referencia:" 
+							   style="position:absolute; left:500px; top:208px;"/>
+				<h:inputText id="txtPuntoReferencia" style="position:absolute; left:500px; top:223px; width:470px;"
+							 value="#{colVolBean.puntoReferencia}"
+							 styleClass="txtDefault" />
+
+    	     	<h:outputLabel for="cboTipoTransporte" styleClass="lblDefaultSmall" 
+					   		value="Tipo de Transporte:" 
+					   		style="position:absolute; left:500px; top:253px;"/>
+				<h:selectOneMenu id="cboTipoTransporte" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:500px;top:268px;width:150px;" 
+						 		value="#{colVolBean.tipoTransporteSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="tipoTransporte" 
+							   	itemValue="#{tipoTransporte.catalogoId}" 
+							   	itemLabel="#{tipoTransporte.valor}" 
+							   	value="#{colVolBean.tiposTransportes}" />
+				</h:selectOneMenu>
+		
+    	     	<h:outputLabel for="cboClaseAccesibilidad" styleClass="lblDefaultSmall" 
+					   		value="Accesibilidad:" 
+					   		style="position:absolute; left:660px; top:253px;"/>
+				<h:selectOneMenu id="cboClaseAccesibilidad" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:660px;top:268px;width:160px;" 
+						 		value="#{colVolBean.claseAccesibilidadSelectedId}">
+						<f:selectItem itemValue="0" itemLabel=" " /> 
+						<f:selectItems var="claseAccesibilidad" 
+							   	itemValue="#{claseAccesibilidad.catalogoId}" 
+							   	itemLabel="#{claseAccesibilidad.valor}" 
+							   	value="#{colVolBean.clasesAccesibilidad}" />
+				</h:selectOneMenu>
+				
+				<h:outputLabel for="txtDistancia" styleClass="lblDefaultSmall" 
+					 	 		 value="Distancia (Km):" 
+						   		 style="position:absolute; left:830px; top:253px;"/>
+				<h:inputText id="txtDistancia" style="position:absolute; left:830px; top:268px; width:60px;"
+						 value="#{colVolBean.distancia}" maxlength="3"
+						 styleClass="txtDefault dist" />
+				<script type="text/javascript">
+						jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
+				</script>
+				
+				<h:outputLabel for="txtTiempo" styleClass="lblDefaultSmall" 
+					 	 		 value="Tiempo (min):" 
+						   		 style="position:absolute; left:908px; top:253px;"/>
+				<h:inputText id="txtTiempo" style="position:absolute; left:908px; top:268px; width:60px;"
+						 value="#{colVolBean.tiempo}" maxlength="3"
+						 styleClass="txtDefault tiempo" />
+				<script type="text/javascript">
+						jQuery(".tiempo").format({precision: 0,allow_negative:false,autofix:true});
+				</script>
+		
+			</p:panel>
+				
+			<!--   panel de botones capa 2 -->		
+
+			<p:panel id="panButton2" styleClass="panButton" 
+					 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+			
+				<p:commandButton id="btnGuardar" value="Guardar" 
+								 styleClass="btnDefault" style="font-size:11px;"  
+								 update="capa1,capa2,panControl,grwMensaje" 
+								 process="@this,panDetalle" 
+								 actionListener="#{colVolBean.guardar}" />
+
+				<p:commandButton id="btnEliminar" value="Eliminar"  
+								 disabled="#{colVolBean.colVolId==0}"
+								 oncomplete="dlgEliminarColVol.show()"
+								 process="@this,panDetalle" 
+							     styleClass="btnDefault" style="font-size:11px;"/>
+
+				<p:commandButton id="btnRegresar" value="Regresar"
+								 onstart="statusDialog.show()" 
+								 oncomplete="statusDialog.hide();"
+								 styleClass="btnDefault" style="font-size:11px;" 
+								 process="@this" update="panControl capa1 capa2 panPersona:panBusquedaPersona" 
+								 actionListener="#{colVolBean.activarPrimerCapa}" />
+								 
+				<p:commandButton value="Salir" styleClass="btnDefault" 
+								 style="font-size:11px;" 
+								 process="@this" 
+								 onclick="document.location.replace('../inicio.xhtml');" />
+			</p:panel>
+		
+		</p:panel>
+
+		<p:confirmDialog message="Desea eliminar el registro del Colaborador Voluntario?"
+				modal="true" position="center"  
+				header="Aviso"  
+				severity="alert" 
+				widgetVar="dlgEliminarColVol">
+			<p:commandButton id="btnSiEliminarColVol" value="Si"  process="@this" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 update="capa1,capa2,panControl,grwMensaje" 
+							 actionListener="#{colVolBean.eliminar}"  
+							 oncomplete="dlgEliminarColVol.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgEliminarColVol.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		<p:dialog id="dlgMapa" widgetVar="dlgMapa" width="840" height="480" modal="true" resizable="false">
+			<p:panel id="panMapa">
+				<p:gmap id="mapColVoles" center="#{colVolBean.centroMapa}" zoom="#{colVolBean.zoom}" 
+						type="ROADMAP" rendered="#{colVolBean.centroMapa!=null}"
+						model="#{colVolBean.mapaModelo}"   
+						style="width:800px;height:450px">  
+    			</p:gmap>
+    		</p:panel>
+		</p:dialog>  
+
+		<sis:persona id="panPersona" 
+					 widgetVarEdit="dlgPersona" 
+					 widgetVarSerch="dlgBusquedaPersona" 
+					 value="#{colVolBean.personaSelected}"
+					 headerEdit="Datos de la Persona"
+					 headerList="Lista de Personas" 
+					 formName="frmColVol" update="frmColVol:panControl frmColVol:capa1 frmColVol:capa2"
+					 controlProperty="#{colVolBean.capaActiva}" 
+					 valueControlProperty="2"
+					 personDataPanel="panDatosPersona"
+					 buttonEditPanel="panBotonesEdicion"
+					 personSearchTable="grdResultadoBusquedaPersonas"
+					 searchMode="#{colVolBean.colVolId==0?true:false}"
+					 messageComponent="grwMensaje"  />
+
+		<!-- Detalle de comunidades vinculadas al Puesto de Notificación -->
+					 
+		<p:dialog id="dlgComunidades" 
+				  header="Comunidades atendidas por el Puesto de Notificación" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgComunidades" 
+				  styleClass="panDefault"
+				  height="280" width="820"
+				  resizable="false">
+		
+			<div style="float:left; position:absolute; top:10px; left:10px; width:800px; height:225px;">
+				<p:dataTable id="grdComunidades" var="puestoComunidad" widgetVar="tablaComunidades"
+						 rowKey="#{puestoComunidad.puestoComunidadId}"
+						 loadingMessage="Cargando registros ..." 
+						 scrollable="true" scrollHeight="200" scrollWidth="800"
+						 errorMessage="Se ha presentado un error al cargar los datos"
+						 styleClass="panDetail" emptyMessage="&nbsp;" 
+						 style="width:800px;"  
+						 value="#{colVolBean.puestosComunidades}">
+
+					<p:column headerText="Código" style="text-align:left; width:70px;">
+						<h:outputText value="#{puestoComunidad.comunidad.codigo}" />
+					</p:column>
+					<p:column headerText="Nombre" style="text-align:left; width:200px;">
+						<h:outputText value="#{puestoComunidad.comunidad.nombre}"/>
+					</p:column>
+					<p:column headerText="Area" style="text-align:left; width:40px; ">
+						<h:outputText value="#{puestoComunidad.comunidad.tipoArea=='U' ? 'Urbano' : (comunidad.tipoArea=='R' ? 'Rural': '')}" />
+					</p:column>
+					<p:column headerText="Municipio" style="text-align:left;">
+						<h:outputText value="#{puestoComunidad.comunidad.sector.municipio.nombre}" />
+					</p:column>
+					
+					<p:column style="width:40px;text-align:center;" >
+						<p:commandButton id="btnEliminarComunidad"
+								 disabled="#{colVolBean.puestosComunidades.size()==1}" 
+								 oncomplete="dlgEliminarComunidad.show()" 
+								 styleClass="navLink button-delete" icon="icon-delete"   
+								 title="Elimina la comunidad de la lista de comunidades atendidas por el puesto de notificación" 
+								 update=":frmColVol:btnSiEliminarComunidad :frmColVol:grwMensaje" 
+								 process="btnEliminarComunidad">
+							<f:setPropertyActionListener value="#{puestoComunidad.puestoComunidadId}" 
+												 target="#{colVolBean.puestoComunidadSelectedId}" /> 
+						</p:commandButton>
+					</p:column>
+			
+				</p:dataTable>
+			</div>
+
+			<p:panel id="panButtonComunidad" styleClass="panButton" 
+				 	 style="position:absolute; top:240px; width:800px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnAgregarComunidad" type="button" 
+							 value="Agregar" process="@this" ajax="true" 
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onclick="dlgComunidades.hide(); dlgAgregarComunidad.show();">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" onclick="dlgComunidades.hide()"
+							 style="font-size:11px;"
+							 type="button" styleClass="btnDefault"/>
+			</p:panel>
+		
+		</p:dialog>
+		
+		<!-- Detalle Comunidad Puesto -->
+
+		<p:dialog id="dlgAgregarComunidad" 
+				  header="Agregar Comunidad al Puesto de Notificación" 
+				  showEffect="fade" hideEffect="fade"
+				  modal="true" position="center" closable="false"
+				  widgetVar="dlgAgregarComunidad" 
+				  styleClass="panDefault"
+				  height="200" width="420"
+				  resizable="false" >
+		
+			<p:panel id="panDetalleComunidadPuesto" styleClass="panDetail" 
+					 style="position:absolute; top:10px; width:400px; height:140px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+
+					<h:outputText styleClass="lblDefaultSmall" 
+								  style="position:absolute; left:10px; top:10px; width:370px;" 
+								  value="Las comunidades elegibles únicamente serán aquellas que son atendidas por la unidad de salud que coordina la actividad del colaborador voluntario.  Escriba parte del nombre de la comunidad para obtener una lista de comunidades." />					 
+
+					<h:outputLabel for="txtComunidadPuesto" styleClass="lblDefaultSmall" 
+					   		value="Comunidad/Barrio atendido por el Puesto:" 
+					   		style="position:absolute; left:10px; top:70px;"/>
+		     		<p:autoComplete id="txtComunidadPuesto" 
+		     				value="#{colVolBean.comunidadPuestoSelected}" 
+     						minQueryLength="3" maxResults="10" queryDelay="300"  
+     						disabled="#{colVolBean.unidadSelectedId==0}"  
+     						forceSelection="true" styleClass="txtDefault"  
+		     				title="Para buscar, escriba parte del nombre de la comunidad o barrio. Unicamente se presentarán las primeras 10 comunidades/barrios que coinciden con el texto ingresado."   
+							completeMethod="#{colVolBean.completarComunidad}"
+							var="comunidadPuesto" style="position:absolute; left:8px; top:85px; width:270px;" 
+							itemLabel="#{comunidadPuesto.nombre}" size="66" 
+							converter="comunidadConverter"     
+							itemValue="#{comunidadPuesto}">
+					</p:autoComplete>
+				  
+			</p:panel>
+		
+			<p:panel id="panButtonComunidadPuesto" styleClass="panButton" 
+				 	 style="position:absolute; top:160px; width:400px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+				
+				<p:commandButton id="btnGuardarComunidad" 
+							 value="Guardar"  
+							 process="@this panDetalleComunidadPuesto" ajax="true"
+							 actionListener="#{colVolBean.guardarComunidad}"
+							 styleClass="btnDefault" style="font-size:11px;"
+							 onstart="statusDialog.show()" 
+							 update="btnComunidades,grdComunidades,grwMensaje"
+							 oncomplete="statusDialog.hide(); dlgAgregarComunidad.hide(); dlgComunidades.show();">
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" ajax="true" type="button" 
+							 onclick="dlgAgregarComunidad.hide();dlgComunidades.show();"
+							 style="font-size:11px;" styleClass="btnDefault"/>
+			</p:panel>
+		
+		
+		</p:dialog>
+
+		<!-- Modal para confirmar eliminación de la comunidad -->
+		
+		<p:confirmDialog message="Desea eliminar la comunidad de la lista de comunidades atendidas por el puesto de notificación?"
+				modal="true" 
+				header="Aviso" 
+				severity="alert" 
+				widgetVar="dlgEliminarComunidad">
+			<p:commandButton id="btnSiEliminarComunidad" value="Si"  process="btnSiEliminarComunidad" 
+							 immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 update="grdComunidades,btnComunidades,grwMensaje" 
+							 actionListener="#{colVolBean.eliminarPuestoComunidad}"  
+							 oncomplete="dlgEliminarComunidad.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgEliminarComunidad.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		
+	</h:form>
+
+	</f:view>
+	
+	</ui:define>
+	</ui:composition>
+
+</h:body>
+
+</html>
