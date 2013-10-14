@@ -4,6 +4,5 @@ import ni.gob.minsa.ciportal.dto.InfoResultado;
 
 public interface EncuestaEntomologicaServices {
 
-	public InfoResultado guardarEncuesta();
 	
 }
