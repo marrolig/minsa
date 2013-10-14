@@ -36,7 +36,7 @@
 	
 	<h:form id="frmMuestreo">
 	
-		<ni:titleBar titleText="Vigilancia > Muestreo Hemático" />
+		<ni:titleBar titleText="Vigilancia > Registro de Muestreo Hemático" />
 
 		<p:growl id="grwMensaje" showDetail="true" life="5000" />
 		
@@ -91,7 +91,7 @@
 			<h:outputLabel for="txtColVol" styleClass="lblDefaultSmall" 
 							   value="Nombre del Colaborador Voluntario:" 
 							   style="position:absolute; left:220px; top:50px;"/>
-		    <h:inputText id="txtColVol" style="position:absolute; left:216px; top:65px; width:405px;"
+		    <h:inputText id="txtColVol" style="position:absolute; left:220px; top:65px; width:312px;"
 					value="#{muestreoHematicoBean.nombreColVol}"
 					disabled="true"
 					styleClass="txtDefault" > 
@@ -99,21 +99,17 @@
 			
 			<h:outputLink id="lnkBuscar" value="javascript:void(0)" 
 					styleClass="navDelLink"     
-            		style="position: absolute; top: 65px; left: 630px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+            		style="position: absolute; top: 65px; left: 540px;cursor:pointer;border:0.08em solid #9d9d9d;" >
 				<h:graphicImage height="17" title="Haga clic para búsqueda de colaboradores voluntarios"  
 					style="position: absolute; top: 0px; left:0px; border:0px;"
 					url="/images/buscar.gif">
 				</h:graphicImage>
-				<p:ajax event="click" process="@this"
-					listener="#{muestroHematicoBean.buscarColVol}" 
+				<p:ajax event="click" process="@this,cboUnidad"
+					listener="#{muestreoHematicoBean.obtenerColVoles}" 
 					onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgColVol.show();"
 					update="frmMuestreo:grdColVoles,frmMuestreo:txtFiltroColVol,frmMuestreo:panButtonColVol,grwMensaje">
 				</p:ajax>
 			</h:outputLink>
-
-
-
-
 
 			<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
 					value="Clave:" 
@@ -718,21 +714,21 @@
 		<p:dialog id="dlgColVol" header="Colaboradores Voluntarios asociados a la Unidad de Salud"  
 				  modal="true" 
 				  widgetVar="dlgColVol" 
-				  height="475" width="775" 
+				  height="475" width="680" 
 				  styleClass="txtDefault"
 				  resizable="false">
 			
-			<div style="float: left; overflow: auto; position:relative; top:5px;left:0px; width:752px; height:410px; border:1px solid rgb(211,211,211); border-radius:5px 5px 5px 5px;">
+			<div style="float: left; overflow: auto; position:relative; top:5px;left:0px; width:652px; height:410px; border:1px solid rgb(211,211,211); border-radius:5px 5px 5px 5px;">
 			
 				<p:dataTable id="grdColVoles" var="colVolPuesto" rowKey="#{colVolPuesto.puestoNotificacionId}"
 							 styleClass="panDetail" 
 							 widgetVar="tablaColVoles"
 							 selectionMode="single" 
 							 selection="#{muestreoHematicoBean.colVolPuestoSelected}"
-							 emptyMessage="No existen colaboradores voluntarios declarados" 
-							 style="width:750px;"  
+							 emptyMessage="Sin resultados" 
+							 style="width:650px;"  
 						 	 value="#{muestreoHematicoBean.colVolPuestos}" 
-					 		 scrollable="true" scrollHeight="158" scrollWidth="750">
+					 		 scrollable="true" scrollHeight="357" scrollWidth="650">
 					
 					<p:ajax event="rowSelect" update=":frmMuestreo:panButtonColVol" />
 					<p:ajax event="rowUnselect" update=":frmMuestreo:panButtonColVol" />
@@ -743,12 +739,12 @@
             	    	</p:outputPanel>
             		</f:facet>
 					
-					<p:column headerText="Clave" style="text-align:left;width:100px;">
+					<p:column headerText="Clave" style="text-align:left;width:50px;">
 						<h:outputText value="#{colVolPuesto.clave}" />
 					</p:column>
 
-					<p:column headerText="Nombre ColVol" style="text-align:left;width:490px">
-						<h:outputText value="#{colVolPuesto.colVolNombre}" />
+					<p:column headerText="Nombre Colaborador Voluntario" style="text-align:left;width:350px">
+						<h:outputText value="#{colVolPuesto.nombreColVol}" />
 					</p:column>
 					
 				</p:dataTable>
@@ -756,27 +752,28 @@
 			
 			<!-- Busqueda de ColVoles -->
 
-         	<h:outputText value="Buscar:" style="position:absolute; top:8px;left:260px;color:#ffffff; font-weight:bold;"  />
+         	<h:outputText value="Buscar:" style="position:absolute; top:15px;left:310px;color:#ffffff; font-weight:bold;"  />
          	<h:inputText id="txtFiltroColVol" value="#{muestreoHematicoBean.filtroColVol}" 
          			  onkeydown="if (event.keyCode==13) {event.keyCode=9; document.getElementById('lnkBuscarColVol').click(); return event.keyCode}"
-         			  style="width:200px; position: absolute; top: 8px; left: 330px;" />
+         			  style="width:200px; position: absolute; top: 15px; left: 380px;" />
                     
 	        <h:outputLink id="lnkBuscarColVol" value="javascript:void(0)" 
 					styleClass="navDelLink"    
-            		style="position: absolute; top: 8px; left: 540px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+            		style="position: absolute; top: 15px; left: 590px;cursor:pointer;border:0.08em solid #9d9d9d;" >
 				<h:graphicImage height="17" title="Haga clic para iniciar búsqueda"  
 					style="position: absolute; top: 0px; left:0px; border:0px;"
 					url="/images/buscar.gif">
 				</h:graphicImage>
 				<p:ajax event="click" process="@this,txtFiltroColVol"
-					listener="#{muestreoHematicoBean.buscarColVol}" 
+					listener="#{muestreoHematicoBean.buscarColVol}"
+					onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
 					update="grdColVoles,panButtonColVol,grwMensaje">
 				</p:ajax>
 			</h:outputLink>
 
         	<h:outputLink id="lnkQuitarFiltroColVol" value="javascript:void(0)" 
 				styleClass="navDelLink"    
-            	style="position: absolute; top: 8px; left: 565px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
+            	style="position: absolute; top: 15px; left: 613px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
 				<h:graphicImage height="17" title="Haga clic para limpiar filtro de búsqueda"  
 					style="position: absolute; top: 0px; left:0px; border:0px;"
 					url="/images/edit-clear.png">
@@ -788,13 +785,13 @@
 			</h:outputLink>
 			
 			<p></p>
-			<p:panel id="panButtonColVol" style="position:absolute; top:425px; width: 752px; left:9px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
+			<p:panel id="panButtonColVol" style="position:absolute; top:425px; width: 652px; left:9px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
 				<p:commandButton id="btnAceptarColVol" 
 								 disabled="#{empty muestreoHematicoBean.colVolPuestoSelected}" 
 								 value="Aceptar" 
 								 process="@this" ajax="true" immediate="true" 
 								 styleClass="btnDefault" style="font-size:11px;"
-								 update="txtColVol,grwMensaje" 
+								 update="txtColVol,txtClave,grwMensaje" 
 								 actionListener="#{muestreoHematicoBean.aceptarColVol}"  
 								 oncomplete="dlgColVol.hide()">
 				</p:commandButton>

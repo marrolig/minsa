@@ -510,22 +510,6 @@ public class MuestreoHematicoBean implements Serializable {
 		personaBean.setPersonaListaSelected(null);
 
 	}
-
-	public List<ColVolPuesto> completarColVol(String query) {
-
-		List<ColVolPuesto> oColVolesPuestos = new ArrayList<ColVolPuesto>();
-
-		if (this.unidadSelectedId==0) {
-			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_INFO, "Debe seleccionar primero la unidad de salud que coordina al Colaborador Voluntario","");
-			if (msg!=null)
-				FacesContext.getCurrentInstance().addMessage(null, msg);
-			return oColVolesPuestos;
-		}
-		
-		oColVolesPuestos=puestoNotificacionService.ListarColVolPorUnidad(this.unidadSelectedId,query,true,0,10,200);
-		return oColVolesPuestos;
-
-	}
 	
 	/**
 	 * Ejecutado cuando el usuario selecciona una manzana y pulsa el
@@ -889,7 +873,13 @@ public class MuestreoHematicoBean implements Serializable {
 	 * están asociados a una unidad de salud autorizada para el usuario.
 	 */
 	public void cambiarClave() {
-		
+
+		this.colVolPuestoSelected=null;
+		this.unidadSelected=null;
+		this.unidadSelectedId=0;
+		this.nombreColVol=null;
+		this.puestoNotificacionId=0;
+
 		if (this.clave.trim().isEmpty()) {
 			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "Debe especificar una clave válida","");
 			if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -906,33 +896,57 @@ public class MuestreoHematicoBean implements Serializable {
 		// verifica si la unidad de salud asociada se encuentra autorizada al usuario
 		// las unidades autorizadas forman parte de la lista del combo
 
-		this.colVolPuestoSelected=null;
-		this.unidadSelected=null;
-		this.unidadSelectedId=0;
-		
 		if (!this.unidades.isEmpty()) {
 			for (Unidad oUnidad:this.unidades) {
-				if (oUnidad.getUnidadId()==oPuestoNotificacion.getUnidad().getUnidadId()) {
-					this.unidadSelected=oPuestoNotificacion.getUnidad();
-					this.unidadSelectedId=oPuestoNotificacion.getUnidad().getUnidadId();
-					break;
+
+				// implica que la unidad es un puesto de notificación
+
+				if (oPuestoNotificacion.getUnidad()!=null) {
+					if (oUnidad.getUnidadId()==oPuestoNotificacion.getUnidad().getUnidadId()) {
+						this.unidadSelected=oPuestoNotificacion.getUnidad();
+						this.unidadSelectedId=this.unidadSelected.getUnidadId();
+						this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
+						break;
+					}
+				} else {
+					
+					// si la clave proporcionada corresponde a un puesto de notificación
+					// y no pertenece a una unidad de salud, implica que es un colaborador
+					// voluntario, y se debe verificar si dicho colvol esta relacionado
+					// a una unidad de salud autorizada
+
+					if (oUnidad.getUnidadId()==oPuestoNotificacion.getColVol().getUnidad().getUnidadId()) {
+						this.unidadSelected=oPuestoNotificacion.getColVol().getUnidad();
+						this.unidadSelectedId=this.unidadSelected.getUnidadId();
+						this.nombreColVol=oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto();
+						this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
+
+						ColVolPuesto oColVolPuesto = new ColVolPuesto();
+						oColVolPuesto.setClave(oPuestoNotificacion.getClave());
+						oColVolPuesto.setNombreColVol(oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto());
+						oColVolPuesto.setPuestoNotificacionId(oPuestoNotificacion.getPuestoNotificacionId());
+						this.colVolPuestoSelected=oColVolPuesto;
+						break;
+					}
 				}
 			}
-		}
-		
-		// verifica si dicho puesto pertenece a un colaborador voluntario
-		
-		if (oPuestoNotificacion.getColVol()!=null) {
-			ColVolPuesto oColVolPuesto = new ColVolPuesto();
-			oColVolPuesto.setClave(oPuestoNotificacion.getClave());
-			oColVolPuesto.setNombreColVol(oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto());
-			oColVolPuesto.setPuestoNotificacionId(oPuestoNotificacion.getPuestoNotificacionId());
-			this.colVolPuestoSelected=oColVolPuesto;
+			
+			// si al finalizar, unidadSelected es nulo, implica que la unidad no esta autorizada
+			if (this.unidadSelected==null) {
+				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "La clave no corresponde a una unidad de salud autorizada al usuario","Notifique al administrador del sistema para obtener dicha autorización");
+				if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
+				return; 
+			}
+			
 		}
 		
 	}
 
 	public void cambiarUnidad() {
+		
+		this.clave=null;
+		this.nombreColVol=null;
+		this.puestoNotificacionId=0;
 		
 		if (this.unidadSelectedId==0) {
 			return;
@@ -947,9 +961,11 @@ public class MuestreoHematicoBean implements Serializable {
 		Unidad oUnidad=(Unidad)oResultado.getObjeto();
 		this.unidadSelected=oUnidad;
 		
-		this.clave=null;
+		// si el resultado oPuestoUnidad es nulo, implica que la unidad no es puesto
+		// de notificación y solamente coordina a los colaboradores voluntarios para
+		// la recepción de los muestreos hemáticos
 		PuestoNotificacion oPuestoUnidad = puestoNotificacionService.EncontrarPorUnidad(oUnidad.getUnidadId(), 1);
-		if (oPuestoUnidad.getClave()!=null) {
+		if (oPuestoUnidad!=null && oPuestoUnidad.getClave()!=null) {
 			this.clave = oPuestoUnidad.getClave();
 		} 
 		
@@ -1133,7 +1149,7 @@ public class MuestreoHematicoBean implements Serializable {
 			return;
 		}
 		
-		this.colVolPuestos=puestoNotificacionService.ListarColVolPorUnidad(this.unidadSelectedId,true);
+		this.colVolPuestos=puestoNotificacionService.ListarColVolPorUnidad(this.unidadSelectedId,this.filtroColVol,true);
 		return;
 
 	}
@@ -2079,6 +2095,20 @@ public class MuestreoHematicoBean implements Serializable {
 
 	public String getNombreColVol() {
 		return nombreColVol;
+	}
+
+	/**
+	 * @return the filtroColVol
+	 */
+	public String getFiltroColVol() {
+		return filtroColVol;
+	}
+
+	/**
+	 * @param filtroColVol the filtroColVol to set
+	 */
+	public void setFiltroColVol(String filtroColVol) {
+		this.filtroColVol = filtroColVol;
 	}
 
 }

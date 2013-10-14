@@ -146,8 +146,6 @@ public interface PuestoNotificacionService {
 	 * @return
 	 */
 	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, 
-			boolean pSoloActivos, int pPaginaActual, 
-			int pTotalPorPagina, int pNumRegistros);
+			boolean pSoloActivos);
 	
-	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, boolean pSoloActivos);
 }

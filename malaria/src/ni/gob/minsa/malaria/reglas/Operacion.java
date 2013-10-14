@@ -216,13 +216,14 @@ public class Operacion {
 			if (pPropiedad.contains(Utilidades.ES_PUESTO_NOTIFICACION)) {
 				if (puestoNotificacionService.EncontrarPorUnidad(oUnidad.getUnidadId(),1)!=null) {
 					oUnidades.add(oUnidad);
-					break;
+					continue;
 				}
 			}
 		
 			if (pPropiedad.contains(Utilidades.DECLARA_MUESTREO_HEMATICO)) {
 				if (propiedadUnidadService.TienePropiedad(oUnidad.getUnidadId(), Utilidades.DECLARA_MUESTREO_HEMATICO)) {
 					oUnidades.add(oUnidad);
+					continue;
 				}
 			}
 		}

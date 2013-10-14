@@ -586,8 +586,6 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         		ctx = new InitialContext();
         		PersonaBTMService personaBTMService = (PersonaBTMService)ctx.lookup("ejb/PersonaBTM");
         		oCodigoSND=personaBTMService.obtenerCodigoSND(pNombre).toString();
-        		System.out.println("-------------------------------------------------------");
-        		System.out.println("Código: " + oCodigoSND);
         	} catch (NamingException e) {
         		FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_FATAL, "El servicio para el enlace a personas no se encuentra activo",Mensajes.NOTIFICACION_ADMINISTRADOR);
         		if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -618,8 +616,7 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	
 	@SuppressWarnings("unchecked")
 	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, 
-										boolean pSoloActivos, int pPaginaActual, 
-										int pTotalPorPagina, int pNumRegistros) {
+										boolean pSoloActivos) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 
@@ -652,17 +649,12 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 					     "		 SIVE.COLVOLS t1, " +
 					     "		 SIS.SIS_PERSONAS t0 " +
 					     "       INNER JOIN params p ON 1=1 " +
-					     "	WHERE ((((t3.UNIDAD_ID = p.pUnidadId AND " +
-					     "		  NOT (t2.COLVOL IS NULL)) AND " +
-					     "		  ((p.pTodos = 1) OR ((p.pTodos = 0) AND " + 
-					     "        ((t2.FECHA_CIERRE IS NULL) OR (t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE)))))) AND " +
-					     "		  (((t1.COLVOL_ID = t2.COLVOL) AND " +
-					     "		  (t3.CODIGO = t1.UNIDAD)) AND " +
-					     "		  (t0.PERSONA_ID = t1.PERSONA))) " +
-					     "	ORDER BY t0.PRIMER_APELLIDO ASC, " +
-					     "			 t0.SEGUNDO_APELLIDO ASC, " +
-					     "			 t0.PRIMER_NOMBRE ASC, " +
-					     "			 t0.SEGUNDO_NOMBRE ASC)");
+					     "	WHERE ((t3.UNIDAD_ID = p.pUnidadId AND " +
+					     "		  NOT (t2.COLVOL IS NULL) AND " +
+					     "		  (p.pTodos = 1 OR (p.pTodos = 0 AND " + 
+					     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE))))) AND " +
+					     "		  (t1.COLVOL_ID = t2.COLVOL AND t3.CODIGO = t1.UNIDAD AND t0.PERSONA_ID = t1.PERSONA)) " +
+					     "	ORDER BY t0.PRIMER_APELLIDO ASC, t0.SEGUNDO_APELLIDO ASC, t0.PRIMER_NOMBRE ASC, t0.SEGUNDO_NOMBRE ASC");
 
 	    		query.setParameter(1, pUnidadId);
             	query.setParameter(2, iTodos);
@@ -676,88 +668,17 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	    								     "		 SIVE.COLVOLS t1, " +
 	    								     "		 SIS.SIS_PERSONAS t0 " +
 	    								     "       INNER JOIN params p ON 1=1 " +
-	    								     "	WHERE ((((t3.UNIDAD_ID = p.pUnidadId AND " +
-	    								     "		  NOT (t2.COLVOL IS NULL)) AND " +
-	    								     "		  ((p.pTodos = 1) OR ((p.pTodos = 0) AND " + 
-	    								     "        ((t2.FECHA_CIERRE IS NULL) OR (t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE)))))) AND " +
-	    								     "        (CATSEARCH(t0.SND_NOMBRE, p.pCodigoSND, null) > 0)) AND " +
-	    								     "		  (((t1.COLVOL_ID = t2.COLVOL) AND " +
-	    								     "		  (t3.CODIGO = t1.UNIDAD)) AND " +
-	    								     "		  (t0.PERSONA_ID = t1.PERSONA))) " +
-	    								     "	ORDER BY t0.PRIMER_APELLIDO ASC, " +
-	    								     "			 t0.SEGUNDO_APELLIDO ASC, " +
-	    								     "			 t0.PRIMER_NOMBRE ASC, " +
-	    								     "			 t0.SEGUNDO_NOMBRE ASC");
+	    								     "	WHERE ((t3.UNIDAD_ID = p.pUnidadId AND NOT (t2.COLVOL IS NULL) AND " +
+	    								     "		  (p.pTodos = 1 OR (p.pTodos = 0 AND " + 
+	    								     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE))))) AND " +
+	    								     "        (CATSEARCH(t0.SND_NOMBRE, p.pCodigoSND, null) > 0) AND " +
+	    								     "		  (t1.COLVOL_ID = t2.COLVOL AND t3.CODIGO = t1.UNIDAD AND t0.PERSONA_ID = t1.PERSONA)) " +
+	    								     "	ORDER BY t0.PRIMER_APELLIDO ASC, t0.SEGUNDO_APELLIDO ASC, t0.PRIMER_NOMBRE ASC, t0.SEGUNDO_NOMBRE ASC");
 	            	
 	    			query.setParameter(1, pUnidadId);
 	            	query.setParameter(2, iTodos);
 	            	query.setParameter(3, oCodigoSND);
 	    	}
-	    	
-	        if (pNumRegistros<=pPaginaActual) pPaginaActual-=pNumRegistros;
-	        pPaginaActual=pNumRegistros<=pPaginaActual ? 0: pPaginaActual;
-
-	        query.setFirstResult(pPaginaActual);
-	        query.setMaxResults(pTotalPorPagina);
-	            	
-	        List<Object[]> oFilasResultados=query.getResultList();
-	        Object[] oFilaResultado;
-
-	        List<ColVolPuesto> oColVolPuestos = new ArrayList<ColVolPuesto>();
-	            	
-	        for(int i=0;i<oFilasResultados.size();i++){
-	        	ColVolPuesto oColVolPuesto = new ColVolPuesto();
-	            oFilaResultado=oFilasResultados.get(i);
-	            oColVolPuesto.setPuestoNotificacionId(((BigDecimal)oFilaResultado[0]).longValue());
-	            oColVolPuesto.setClave((String)oFilaResultado[1]);
-
-	            String iApellido2=(oFilaResultado[5]!=null && !((String)oFilaResultado[5]).isEmpty())?" "+(String)oFilaResultado[5]:"";
-	            String iNombre2=(oFilaResultado[3]!=null && !((String)oFilaResultado[3]).isEmpty())?" "+(String)oFilaResultado[3]:"";
-
-	            oColVolPuesto.setNombreColVol((String)oFilaResultado[2]+iNombre2+", "+(String)oFilaResultado[4]+iApellido2);
-	            oColVolPuestos.add(oColVolPuesto);
-	        }
-	            	
-	        return oColVolPuestos;
-	        
-	    } finally{
-	    	em.close();
-	    }		
-
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, boolean pSoloActivos) {
-		
-        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
-
-    	BigDecimal iTodos = pSoloActivos?(new BigDecimal(0)):(new BigDecimal(1));
-        
-	    try {
-
-	    	Query query = null;
-    		query = em.createNativeQuery("WITH params AS (SELECT ? AS pUnidadId, ? AS pTodos, ? AS pCodigoSND FROM DUAL) " +
-					     "SELECT t2.PUESTO_NOTIFICACION_ID AS a1, " +
-					     "	     t2.CLAVE AS a2, t0.PRIMER_NOMBRE AS a3, t0.SEGUNDO_NOMBRE AS a4, t0.PRIMER_APELLIDO AS a5, t0.SEGUNDO_APELLIDO AS a6 " +
-					     "	FROM GENERAL.UNIDADES t3, " +
-					     "		 SIVE.PUESTOS_NOTIFICACION t2, " +
-					     "		 SIVE.COLVOLS t1, " +
-					     "		 SIS.SIS_PERSONAS t0 " +
-					     "       INNER JOIN params p ON 1=1 " +
-					     "	WHERE ((((t3.UNIDAD_ID = p.pUnidadId AND " +
-					     "		  NOT (t2.COLVOL IS NULL)) AND " +
-					     "		  ((p.pTodos = 1) OR ((p.pTodos = 0) AND " + 
-					     "        ((t2.FECHA_CIERRE IS NULL) OR (t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE)))))) AND " +
-					     "		  (((t1.COLVOL_ID = t2.COLVOL) AND " +
-					     "		  (t3.CODIGO = t1.UNIDAD)) AND " +
-					     "		  (t0.PERSONA_ID = t1.PERSONA))) " +
-					     "	ORDER BY t0.PRIMER_APELLIDO ASC, " +
-					     "			 t0.SEGUNDO_APELLIDO ASC, " +
-					     "			 t0.PRIMER_NOMBRE ASC, " +
-					     "			 t0.SEGUNDO_NOMBRE ASC)");
-
-	    	query.setParameter(1, pUnidadId);
-            query.setParameter(2, iTodos);
 	    	
 	        List<Object[]> oFilasResultados=query.getResultList();
 	        Object[] oFilaResultado;
