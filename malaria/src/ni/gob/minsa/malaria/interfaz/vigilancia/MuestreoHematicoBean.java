@@ -6,6 +6,7 @@ package ni.gob.minsa.malaria.interfaz.vigilancia;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,7 +36,9 @@ import ni.gob.minsa.malaria.datos.poblacion.ComunidadDA;
 import ni.gob.minsa.malaria.datos.poblacion.DivisionPoliticaDA;
 import ni.gob.minsa.malaria.datos.poblacion.ManzanaDA;
 import ni.gob.minsa.malaria.datos.poblacion.ViviendaDA;
+import ni.gob.minsa.malaria.datos.sis.SisPersonaDA;
 import ni.gob.minsa.malaria.datos.vigilancia.ColVolDA;
+import ni.gob.minsa.malaria.datos.vigilancia.MuestreoHematicoDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoComunidadDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoNotificacionDA;
 import ni.gob.minsa.malaria.interfaz.sis.PersonaBean;
@@ -77,7 +80,9 @@ import ni.gob.minsa.malaria.servicios.general.ParametroService;
 import ni.gob.minsa.malaria.servicios.poblacion.ComunidadService;
 import ni.gob.minsa.malaria.servicios.poblacion.ManzanaService;
 import ni.gob.minsa.malaria.servicios.poblacion.ViviendaService;
+import ni.gob.minsa.malaria.servicios.sis.SisPersonaService;
 import ni.gob.minsa.malaria.servicios.vigilancia.ColVolService;
+import ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoNotificacionService;
 import ni.gob.minsa.malaria.soporte.CalendarioEPI;
 import ni.gob.minsa.malaria.soporte.TipoBusqueda;
@@ -297,12 +302,16 @@ public class MuestreoHematicoBean implements Serializable {
 	private static CatalogoElementoService<DensidadCruces,Integer> densidadCrucesService=new CatalogoElementoDA(DensidadCruces.class,"DensidadCruces");
 	private static CatalogoElementoService<EstadioPFalciparum,Integer> estadioPFalciparumService=new CatalogoElementoDA(EstadioPFalciparum.class,"EstadioPFalciparum");
 	private static CatalogoElementoService<MotivoFaltaDiagnostico,Integer> motivoFaltaDiagnosticoService=new CatalogoElementoDA(MotivoFaltaDiagnostico.class,"MotivoFaltaDiagnostico");
+	private static CatalogoElementoService<Sexo,Integer> sexoService=new CatalogoElementoDA(Sexo.class,"Sexo");
+	private static CatalogoElementoService<Etnia,Integer> etniaService=new CatalogoElementoDA(Etnia.class,"Etnia");
 	
+	private static MuestreoHematicoService muestreoHematicoService = new MuestreoHematicoDA();
 	private static PuestoNotificacionService puestoNotificacionService = new PuestoNotificacionDA();
 	private static ManzanaService manzanaService = new ManzanaDA();
 	private static ViviendaService viviendaService = new ViviendaDA();
 	
 	private static EntidadAdtvaService entidadAdtvaService = new EntidadAdtvaDA();
+	private static SisPersonaService sisPersonaService = new SisPersonaDA();
 	
 	public MuestreoHematicoBean() {
 		
@@ -906,6 +915,8 @@ public class MuestreoHematicoBean implements Serializable {
 						this.unidadSelected=oPuestoNotificacion.getUnidad();
 						this.unidadSelectedId=this.unidadSelected.getUnidadId();
 						this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
+						this.entidadSelectedId=this.unidadSelected.getEntidadAdtva().getEntidadAdtvaId();
+						comprobarLamina();
 						break;
 					}
 				} else {
@@ -920,12 +931,14 @@ public class MuestreoHematicoBean implements Serializable {
 						this.unidadSelectedId=this.unidadSelected.getUnidadId();
 						this.nombreColVol=oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto();
 						this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
+						this.entidadSelectedId=this.unidadSelected.getEntidadAdtva().getEntidadAdtvaId();
 
 						ColVolPuesto oColVolPuesto = new ColVolPuesto();
 						oColVolPuesto.setClave(oPuestoNotificacion.getClave());
 						oColVolPuesto.setNombreColVol(oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto());
 						oColVolPuesto.setPuestoNotificacionId(oPuestoNotificacion.getPuestoNotificacionId());
 						this.colVolPuestoSelected=oColVolPuesto;
+						comprobarLamina();
 						break;
 					}
 				}
@@ -978,22 +991,6 @@ public class MuestreoHematicoBean implements Serializable {
 		this.semanaEpidemiologica=String.valueOf(CalendarioEPI.semana(this.fechaTomaMuestra));
 		this.anioEpidemiologico=String.valueOf(CalendarioEPI.año(this.fechaTomaMuestra));
 	}
-	
-	/**
-	 * Se ejecuta cuando el usuario selecciona un colaborador voluntario.  La lista de colaboradores
-	 * voluntarios únicamente corresponde a los colvoles activos como puesto de notificación y que 
-	 * son coordinados por la unidad de salud seleccionada, que a su vez corresponde a la unidad de 
-	 * salud a la cual el colvol ha notificado el caso malárico.  Al seleccionar un colvol (puesto
-	 * de notificación) se actualiza la clave
-	 *  
-	 */
-	public void onColVolPuestoSelected() { 
-
-		this.puestoNotificacionId=this.colVolPuestoSelected.getPuestoNotificacionId();
-		this.clave=colVolPuestoSelected.getClave();
-		
-	}
-	
 	
 	
 /*		this.capaActiva=2;
@@ -1136,7 +1133,8 @@ public class MuestreoHematicoBean implements Serializable {
 	}
 
 	/**
-	 * Obtiene los colvoles asociados a una unidad de salud.
+	 * Obtiene los colvoles asociados a una unidad de salud, la cual puede o no ser
+	 * un puesto de notificación
 	 */
 	public void obtenerColVoles() {
 		
@@ -1172,6 +1170,12 @@ public class MuestreoHematicoBean implements Serializable {
 		
 	}
 	
+	/**
+	 * Una vez seleccionado el colVol de la grilla, el usuario debe confirmar dicha selección
+	 * pulsando en el botón Aceptar.  En este caso, el ColVol es seleccionado a partir de
+	 * la selección de la unidad de salud, por lo cual no es necesario actualizar dicha información.
+	 * 
+	 */
 	public void aceptarColVol(ActionEvent pEvento) {
 
 		this.puestoNotificacionId=this.colVolPuestoSelected.getPuestoNotificacionId();
@@ -1193,34 +1197,121 @@ public class MuestreoHematicoBean implements Serializable {
 	}
 	
 	/**
+	 * Verifica si la lámina ya ha sido utilizada por la clave asociada al
+	 * puesto de notificación y envía un mensaje al usuario solo de advertencia
+	 * 
+	 */
+	public void comprobarLamina() {
+		
+		if (this.clave!=null && !this.clave.trim().isEmpty() && this.numeroLamina!=null && this.numeroLamina.compareTo(BigDecimal.ZERO)==1) {
+			MuestreoHematico oMuestreoHematico = muestreoHematicoService.EncontrarPorLamina(this.clave, this.numeroLamina);
+			
+			// si el resultado es nulo, implica que no existe una pareja de valores
+			// de clave y lámina declarados, el número de lámina se declara por numeración
+			// consecutiva del block de formatos E-2 proporcionados al puesto de notificación
+			// sin embargo, finalizado el block no hay garantía de que puedan volver a numerarla
+			// a partir de uno (1).  Al momento del registro, puede ser que la lámina ya haya
+			// sido entregada al laboratorio, por lo que si la numeración existe, no puede modificarse
+			// por tanto, solo se alertará de dicho evento
+			
+			if (oMuestreoHematico!=null) {
+				String patronFecha = "dd/MM/yyyy";
+				SimpleDateFormat formatoFecha = new SimpleDateFormat(patronFecha);
+				FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_INFO, "Existe una caso registrado para esa clave y número de lámina. Es importante garantizar la identificación única para la lámina.","La lámina existente pertenece a "+oMuestreoHematico.getSisPersona().getNombreCompleto().toUpperCase()+", cuya muestra fue tomada el "+formatoFecha.format(oMuestreoHematico.getFechaToma())));
+			}
+		
+		}
+	}
+	
+	/**
 	 * Se ejecuta cuando el usuario pulsa en el botón guardar.
 	 * Este proceso incluye guardar un nuevo registro o actualizar
 	 * un registro existente. <br>
 	 */
 	public void guardar(ActionEvent pEvento) {
 		
+		if (this.puestoNotificacionId==0) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "Debe especificar un puesto de notificación válido","Verifique la clave. Si la clave es válida es posible que usted no tenga autorización a registrar muestreos hemáticos para dicha clave."));
+			return;
+		}
+
+		if (this.numeroLamina==null || this.numeroLamina.compareTo(BigDecimal.ZERO)<1) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "Debe especificar un número válido para la lámina",""));
+			return;
+		}
+		
+		if (this.fechaTomaMuestra==null) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "Debe especificar una fecha de toma de muestra",""));
+			return;
+		}
+			
 		if (this.personaSelected==null) {
-			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La declaración de la persona a la cual se realiza el muestreo hemático es requerida","");
-			if (msg!=null)
-				FacesContext.getCurrentInstance().addMessage(null, msg);
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La declaración de la persona a la cual se realiza el muestreo hemático es requerida",""));
 			return;
 		}
 		
-		if (this.clave.trim().isEmpty()) {
-			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La declaración de la clave asociada al muestreo hemático es requerida","");
-			if (msg!=null)
-				FacesContext.getCurrentInstance().addMessage(null, msg);
-			return;
-		}
-		
-		
-		// A una ficha de muestreo hemático existente no puede modificarse la persona asociada
+		// Para una ficha de muestreo hemático existente no puede modificarse la persona asociada
 
 		InfoResultado oResultado = new InfoResultado();
 		
 		MuestreoHematico oMuestreoHematico = new MuestreoHematico();
 		oMuestreoHematico.setAñoEpidemiologico(Integer.getInteger(this.anioEpidemiologico));
 		oMuestreoHematico.setClave(this.clave);
+		oMuestreoHematico.setNumeroLamina(this.numeroLamina);
+		oMuestreoHematico.setComunidadResidencia(this.comunidadSelected);
+		oMuestreoHematico.setCloroquina(this.cloroquina);
+		oMuestreoHematico.setDireccionResidencia(this.direccionResidencia);
+		oMuestreoHematico.setEmbarazada(this.embarazada);
+		oMuestreoHematico.setFechaNacimiento(this.fechaNacimiento);
+		oMuestreoHematico.setFechaToma(this.fechaTomaMuestra);
+		oMuestreoHematico.setFinTratamiento(this.finTratamiento);
+		oMuestreoHematico.setInicioSintomas(this.inicioSintomas);
+		oMuestreoHematico.setInicioTratamiento(this.inicioTratamiento);
+		oMuestreoHematico.setManejoClinico(this.manejoClinico);
+		oMuestreoHematico.setPersonaReferente(this.personaReferente);
+		oMuestreoHematico.setPrimaquina15mg(this.primaquina15mg);
+		oMuestreoHematico.setPrimaquina5mg(this.primaquina5mg);
+		oMuestreoHematico.setSemanaEpidemiologica(Integer.getInteger(this.semanaEpidemiologica));
+		oMuestreoHematico.setTelefonoReferente(this.telefonoReferente);
+		oMuestreoHematico.setTipoBusqueda(Integer.getInteger(this.tipoBusquedaSelected.getCodigo()));
+		oMuestreoHematico.setTratamientoEnBoca(this.tratamientoEnBoca);
+		oMuestreoHematico.setTratamientoRemanente(this.tratamientoRemanente);
+		oMuestreoHematico.setUnidadNotificacion(this.unidadSelected);
+		oMuestreoHematico.setManzana(this.manzanaSelected);
+		oMuestreoHematico.setVivienda(this.viviendaSelected);
+		oMuestreoHematico.setEntidadNotificacion(this.unidadSelected.getEntidadAdtva());
+		oMuestreoHematico.setSexo((Sexo)sexoService.Encontrar(this.personaSelected.getSexoId()).getObjeto());
+		oMuestreoHematico.setEtnia((Etnia)etniaService.Encontrar(this.personaSelected.getEtniaId()).getObjeto());
+		oMuestreoHematico.setPuestoNotificacion((PuestoNotificacion)puestoNotificacionService.Encontrar(this.puestoNotificacionId).getObjeto());
+		
+		//TODO -- En el método guardar debe considerarse el parámetro para guardar
+		//a la persona
+		
+		MuestreoDiagnostico oMuestreoDiagnostico = new MuestreoDiagnostico();
+		oMuestreoDiagnostico.setDensidadPFalciparum(this.densidadPFalciparumSelected);
+		oMuestreoDiagnostico.setDensidadPVivax(this.densidadPVivaxSelected);
+		oMuestreoDiagnostico.setEntidadAdtvaLaboratorio(this.entidadLaboratorioSelected);
+		oMuestreoDiagnostico.setEstadioPFalciparum(this.estadioPFalciparumSelected);
+		oMuestreoDiagnostico.setEstadiosAsexuales(this.estadiosAsexuales);
+		oMuestreoDiagnostico.setFechaDiagnostico(this.fechaDiagnostico);
+		oMuestreoDiagnostico.setFechaRecepcion(this.fechaRecepcion);
+		oMuestreoDiagnostico.setGametocitos(this.gametocitos);
+		oMuestreoDiagnostico.setLaboratorista(this.laboratorista);
+		oMuestreoDiagnostico.setLeucocitos(this.leucocitos);
+		oMuestreoDiagnostico.setMotivoFaltaDiagnostico(this.motivoFaltaDiagnosticoSelected);
+		oMuestreoDiagnostico.setMuestreoHematico(oMuestreoHematico);
+		if (this.positivoPFalciparum!=null) {
+			oMuestreoDiagnostico.setPositivoPFalciparum(this.positivoPFalciparum?BigDecimal.ONE:BigDecimal.ZERO);
+		}
+		if (this.positivoPVivax!=null) {
+			oMuestreoDiagnostico.setPositivoPVivax(this.positivoPVivax?BigDecimal.ONE:BigDecimal.ZERO);
+		}
+		oMuestreoDiagnostico.setResultado(this.resultado);
+		oMuestreoDiagnostico.setUnidadLaboratorio(this.unidadLaboratorioSelected);
+		oMuestreoDiagnostico.setMunicipioLaboratorio(this.unidadLaboratorioSelected.getMunicipio());
+		oMuestreoDiagnostico.setFechaRegistro(Calendar.getInstance().getTime());
+		oMuestreoDiagnostico.setUsuarioRegistro(this.infoSesion.getUsername());
+		
 		
 		
 		

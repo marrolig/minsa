@@ -668,4 +668,5 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
             em.close();
         }			
 	}
+	
 }

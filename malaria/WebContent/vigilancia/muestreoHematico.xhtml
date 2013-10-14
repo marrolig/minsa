@@ -121,7 +121,7 @@
 
 				<p:ajax event="change" process="@this" 
 						listener="#{muestreoHematicoBean.cambiarClave}" 
-						update="grwMensaje,txtClave,txtColVol,cboUnidad"/>
+						update="grwMensaje,txtClave,txtColVol,cboUnidad,cboEntidad"/>
 			</h:inputText>
 
 			<h:outputLabel for="txtLamina" styleClass="lblDefaultSmall" 
@@ -130,7 +130,11 @@
 			<h:inputText id="txtLamina" style="position:absolute; left:693px; top:23px; width:87px; height:60px; font-size:30px !important;"
 					value="#{muestreoHematicoBean.numeroLamina}"
 					disabled="#{muestreoHematicoBean.estado!=0}"
-					styleClass="txtDefault" />
+					styleClass="txtDefault" >
+				<p:ajax event="change" process="@this" 
+						listener="#{muestreoHematicoBean.comprobarLamina}" 
+						update="grwMensaje"/>
+			</h:inputText>
 
 			<h:outputLink id="lnkAceptarLamina" value="javascript:void(0)" 
 					styleClass="btLinkControl" rendered="#{muestreoHematicoBean.estado==0}"
