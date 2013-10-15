@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.modelo.inventario;
 
-public class Medicamento {
+import ni.gob.minsa.malaria.modelo.general.Catalogo;
+
+public class Medicamento extends Catalogo{
 
 }
