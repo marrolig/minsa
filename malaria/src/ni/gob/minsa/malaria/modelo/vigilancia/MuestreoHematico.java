@@ -110,11 +110,11 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 
 	@NotNull(message="La declaración del sexo de la persona es requerida")
 	@ManyToOne
-	@JoinColumn(name="CODIGO_SEXO",referencedColumnName="CODIGO")
+	@JoinColumn(name="SEXO",referencedColumnName="CODIGO")
 	private Sexo sexo;
 
 	@ManyToOne
-	@JoinColumn(name="CODIGO_ETNIA",referencedColumnName="CODIGO")
+	@JoinColumn(name="ETNIA",referencedColumnName="CODIGO")
 	private Etnia etnia;
 	
 	@DecimalMin(value="0",message="El valor del indicador de embarazo no es válido")
@@ -147,11 +147,11 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	private Vivienda vivienda;
 
     @Size(min=1,max=100,message="El total de caracteres para la persona referente no debe superar los 100 caracteres")
-    @Column(nullable=true,length=100)
+    @Column(name="PERSONA_REFERENTE",nullable=true,length=100)
 	private String personaReferente;
 	
     @Size(min=1,max=50,message="El total de caracteres para indicar el número de teléfono de la persona referente no debe superar los 50 caracteres")
-    @Column(nullable=true,length=50)
+    @Column(name="TELEFONO_REFERENTE",nullable=true,length=50)
 	private String telefonoReferente;
 	
 	@Temporal( TemporalType.TIMESTAMP)

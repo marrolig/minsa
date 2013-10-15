@@ -9,7 +9,6 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import ni.gob.minsa.malaria.modelo.BaseEntidadAcceso;
 import ni.gob.minsa.malaria.modelo.BaseEntidadCreacion;
 
 import org.eclipse.persistence.annotations.Cache;

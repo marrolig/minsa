@@ -3,7 +3,6 @@ package ni.gob.minsa.malaria.reglas;
 import java.math.BigDecimal;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
-import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 
 public class Validacion {
 

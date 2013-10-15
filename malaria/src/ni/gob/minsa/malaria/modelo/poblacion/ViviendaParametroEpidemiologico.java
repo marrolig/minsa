@@ -64,7 +64,7 @@ public class ViviendaParametroEpidemiologico extends BaseEntidadCreacion impleme
 	private String valor;
 
     @Size(min=1,max=400,message="Solo se admiten 400 caracteres para las observaciones")
-    @Column(nullable=true,length=400)
+    @Column(name="OBSERVACION",nullable=true,length=400)
     private String observaciones;
 
 	@Temporal(TemporalType.DATE)
