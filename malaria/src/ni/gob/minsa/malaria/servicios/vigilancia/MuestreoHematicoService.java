@@ -95,7 +95,7 @@ public interface MuestreoHematicoService {
 	 * @param pUnidadId Identificador de la unidad
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPostivosPorUnidad(long pUnidadId);
+	public List<MuestreoHematico> ListarPositivosPorUnidad(long pUnidadId);
 
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante

@@ -669,9 +669,13 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         }			
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService#ListarPositivosPorUnidad(long)
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<MuestreoHematico> ListarPostivosPorUnidad(long pUnidadId) {
+	public List<MuestreoHematico> ListarPositivosPorUnidad(long pUnidadId) {
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		try {
 			Query query = null;
