@@ -17,6 +17,7 @@ import javax.validation.constraints.Size;
 import ni.gob.minsa.malaria.modelo.BaseEntidadCreacion;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
+import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Manzana;
@@ -39,6 +40,15 @@ import org.eclipse.persistence.annotations.Cache;
 @Entity
 @Table(name="MUESTREOS_HEMATICOS",schema="SIVE")
 @Cache(alwaysRefresh=true,disableHits=true)
+@NamedQueries({
+	@NamedQuery(
+			name="MuestreoHematico.listarPositivosPorUnidad",
+			query="select tm from MuestreoHematico tm " +
+				    "where tm.unidadNotificacion.unidadId=:pUnidadId and " +
+				    "      tm.muestreoDiagnostico.resultado=1 and" +
+				    "	   tm.investigacion IS NULL" +
+				    "order by tm.fechaToma"),
+})
 public class MuestreoHematico extends BaseEntidadCreacion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -208,6 +218,9 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 
 	@OneToOne(mappedBy="muestreoHematico",targetEntity=MuestreoDiagnostico.class,fetch=FetchType.LAZY,optional=true,cascade=CascadeType.ALL)
 	private MuestreoDiagnostico diagnostico;
+	
+	@OneToOne(mappedBy="muestreoHematico",targetEntity=InvestigacionMalaria.class,fetch=FetchType.LAZY,optional=true,cascade=CascadeType.ALL)
+	private InvestigacionMalaria investigacion;
 	
     public MuestreoHematico() {
     }
@@ -783,6 +796,14 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 
 	public String getDireccionResidencia() {
 		return direccionResidencia;
+	}
+
+	public void setInvestigacion(InvestigacionMalaria investigacion) {
+		this.investigacion = investigacion;
+	}
+
+	public InvestigacionMalaria getInvestigacion() {
+		return investigacion;
 	}
 
 }

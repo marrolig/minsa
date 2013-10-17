@@ -34,8 +34,9 @@ public class InvestigacionHospitalario implements Serializable {
 	@Column(name="FECHA_INGRESO")
 	private Date fechaIngreso;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+    @Temporal(TemporalType.TIMESTAMP)
+	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
+	private Date fechaRegistro;
 
 	@Column(name="INVESTIGACION_MALARIA", nullable=false, precision=10)
 	private BigDecimal investigacionMalaria;
@@ -88,11 +89,11 @@ public class InvestigacionHospitalario implements Serializable {
 		this.fechaIngreso = fechaIngreso;
 	}
 
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

@@ -37,8 +37,9 @@ public class UsuarioUnidadDA implements ni.gob.minsa.malaria.servicios.poblacion
     @SuppressWarnings("unchecked")
     @Override
 	public List<UsuarioUnidad> UnidadesPorUsuario(long pUsuarioId){
-        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+    	EntityManager em=jpaResourceBean.getEMF().createEntityManager();
         try{
+            
             Query query = em.createNamedQuery("unidadesPorUsuario");
             query.setParameter("pUsuarioId", pUsuarioId);
             query.setHint(QueryHints.FETCH, "tuu.usuario");
@@ -49,7 +50,8 @@ public class UsuarioUnidadDA implements ni.gob.minsa.malaria.servicios.poblacion
             query.setHint(QueryHints.FETCH, "tuu.unidad.regimen");
             query.setHint(QueryHints.FETCH, "tuu.unidad.tipoUnidad");
             return query.getResultList();
-        }finally{
+        }
+        finally{
             em.close();
         }
     }

@@ -668,4 +668,20 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
             em.close();
         }			
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<MuestreoHematico> ListarPostivosPorUnidad(long pUnidadId) {
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		try {
+			Query query = null;
+			query = em.createNamedQuery("MuestreoHematico.listarPositivosPorUnidad");
+			query.setParameter("pUnidadId", pUnidadId);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			return (query.getResultList());
+		} finally {
+			em.close();
+		}
+	}
+
 }

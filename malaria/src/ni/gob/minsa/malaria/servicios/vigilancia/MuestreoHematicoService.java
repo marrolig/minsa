@@ -83,6 +83,19 @@ public interface MuestreoHematicoService {
 	 * @return Lista de {@link MuestreoHematico}
 	 */
 	public List<MuestreoHematico> ListarPorPersona(long pPersonaId,Date fechaToma);
+	
+	/**
+	 * Busca una lista de objetos {@link MuestreoHematico} que correspondan a aquellos 
+	 * muestreos hemáticos con resultado positivo para el método por gota gruesa y 
+	 * que no tienen un registro de M10 vinculado. Solo se mostrarán aquellos muestredos
+	 * que correspondan a pacientes en a la unidad de salud seleccionada.
+	 * Retorna <code>null</code> si no encuentra ningún registro de muestreo hemático que
+	 * cumpla las condiciones indicadas.
+	 * 
+	 * @param pUnidadId Identificador de la unidad
+	 * @return Lista de {@link MuestreoHematico}
+	 */
+	public List<MuestreoHematico> ListarPostivosPorUnidad(long pUnidadId);
 
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante

@@ -1,6 +1,8 @@
 package ni.gob.minsa.malaria.modelo.investigacion;
 
 import java.io.Serializable;
+import java.util.Date;
+
 import javax.persistence.*;
 
 
@@ -19,8 +21,9 @@ public class InvestigacionMedicamento implements Serializable {
 	@Column(name="INVESTIGACION_MEDICAMENTO_ID", unique=true, nullable=false, precision=10)
 	private long investigacionMedicamentoId;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
+	private Date fechaRegistro;
 
 	@ManyToOne
 	@JoinColumn(name="MEDICAMENTO", referencedColumnName="CODIGO",nullable=false)
@@ -44,12 +47,12 @@ public class InvestigacionMedicamento implements Serializable {
 	public void setInvestigacionMedicamentoId(long investigacionMedicamentoId) {
 		this.investigacionMedicamentoId = investigacionMedicamentoId;
 	}
-
-	public Object getFechaRegistro() {
+	
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

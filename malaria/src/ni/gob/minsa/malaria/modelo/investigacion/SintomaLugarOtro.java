@@ -8,6 +8,7 @@ import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Pais;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 
 /**
@@ -41,8 +42,9 @@ public class SintomaLugarOtro implements Serializable {
 	@Column(nullable=false, precision=4)
 	private BigDecimal estadia;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
+	private Date fechaRegistro;
 
 	@Column(name="MES_INICIO", nullable=false, precision=2)
 	private BigDecimal mesInicio;
@@ -117,11 +119,11 @@ public class SintomaLugarOtro implements Serializable {
 		this.estadia = estadia;
 	}
 
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

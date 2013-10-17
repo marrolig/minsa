@@ -33,8 +33,9 @@ public class SintomaLugarAnte implements Serializable {
 	@Column(nullable=false, precision=4)
 	private BigDecimal estadia;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
+	private Date fechaRegistro;
 
     @Temporal( TemporalType.DATE)
 	@Column(name="FECHA_ULTIMA", nullable=false)
@@ -86,11 +87,11 @@ public class SintomaLugarAnte implements Serializable {
 		this.estadia = estadia;
 	}
 
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

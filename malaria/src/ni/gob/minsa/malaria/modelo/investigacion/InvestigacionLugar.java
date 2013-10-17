@@ -7,6 +7,7 @@ import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 
 /**
@@ -28,8 +29,9 @@ public class InvestigacionLugar implements Serializable {
 	@JoinColumn(name="COMUNIDAD", referencedColumnName="CODIGO")
 	private Comunidad comunidad;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
+	private Date fechaRegistro;
 
 	@Column(name="INFECCION_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal infeccionResidencia;
@@ -66,11 +68,11 @@ public class InvestigacionLugar implements Serializable {
 		this.comunidad = comunidad;
 	}
 
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

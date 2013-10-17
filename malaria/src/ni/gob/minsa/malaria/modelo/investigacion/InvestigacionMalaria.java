@@ -98,8 +98,8 @@ public class InvestigacionMalaria implements Serializable {
 	@Column(name="MEDICAMENTOS_AUTOMEDICACION", length=300)
 	private String medicamentosAutomedicacion;
 
-	@ManyToOne
-	@JoinColumn(name="MUESTREO_HEMATICO", nullable=false)
+	@OneToOne(targetEntity=MuestreoHematico.class)
+	@JoinColumn(name="MUESTREO_HEMATICO", nullable=false,updatable=false)
 	private MuestreoHematico muestreoHematico;
 
 	@Column(name="NIVEL_AUTORIZACION", nullable=false, precision=1)
