@@ -2,6 +2,7 @@ package ni.gob.minsa.malaria.modelo.investigacion;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Set;
@@ -11,6 +12,11 @@ import java.util.Set;
  * The persistent class for the INVESTIGACIONES_SINTOMAS database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionSintoma.encontrarPorInvestigacionMalaria",
+		query="select ti from InvestigacionSintoma " +
+				"where ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
+})
 @Entity
 @Table(name="INVESTIGACIONES_SINTOMAS")
 public class InvestigacionSintoma implements Serializable {
@@ -32,21 +38,26 @@ public class InvestigacionSintoma implements Serializable {
 	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal inicioResidencia;
 
-	@Column(name="INVESTIGACION_MALARIA", nullable=false, precision=10)
-	private BigDecimal investigacionMalaria;
+	@OneToOne
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	private InvestigacionMalaria investigacionMalaria;
 
 	@Column(name="PERSONAS_SINTOMAS", nullable=false, precision=1)
 	private BigDecimal personasSintomas;
 
 	@Column(nullable=false, precision=1)
 	private BigDecimal sintomatico;
-
+	
 	//bi-directional many-to-one association to SintomasLugaresAnte
-	@OneToMany(mappedBy="investigacionSintoma")
+	@OneToOne(mappedBy="investigacionSintoma",targetEntity=SintomaLugarInicio.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	private SintomaLugarInicio sintomaLugarInicio;
+	
+	//bi-directional many-to-one association to SintomasLugaresAnte
+	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarAnte.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
 	private Set<SintomaLugarAnte> sintomaLugarAntes;
 
 	//bi-directional many-to-one association to SintomasLugaresOtro
-	@OneToMany(mappedBy="investigacionSintoma")
+	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarOtro.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
 	private Set<SintomaLugarOtro> sintomaLugarOtros;
 
     public InvestigacionSintoma() {
@@ -84,11 +95,11 @@ public class InvestigacionSintoma implements Serializable {
 		this.inicioResidencia = inicioResidencia;
 	}
 
-	public BigDecimal getInvestigacionMalaria() {
+	public InvestigacionMalaria getInvestigacionMalaria() {
 		return this.investigacionMalaria;
 	}
 
-	public void setInvestigacionMalaria(BigDecimal investigacionMalaria) {
+	public void setInvestigacionMalaria(InvestigacionMalaria investigacionMalaria) {
 		this.investigacionMalaria = investigacionMalaria;
 	}
 
@@ -122,6 +133,14 @@ public class InvestigacionSintoma implements Serializable {
 
 	public void setSintomasLugaresOtros(Set<SintomaLugarOtro> sintomaLugarOtros) {
 		this.sintomaLugarOtros = sintomaLugarOtros;
+	}
+
+	public void setSintomaLugarInicio(SintomaLugarInicio sintomaLugarInicio) {
+		this.sintomaLugarInicio = sintomaLugarInicio;
+	}
+
+	public SintomaLugarInicio getSintomaLugarInicio() {
+		return sintomaLugarInicio;
 	}
 	
 }

@@ -15,6 +15,11 @@ import java.util.Date;
  * The persistent class for the SINTOMAS_LUGARES_OTROS database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="SintomaLugarOtro.listar",
+			query="select ts from SintomaLugarOtro ts " 
+					+ "where ts.investigacionSintoma.investigacionSintomaId=:pInvestigacionSintomaId")
+})
 @Entity
 @Table(name="SINTOMAS_LUGARES_OTROS")
 public class SintomaLugarOtro implements Serializable {

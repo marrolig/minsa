@@ -14,6 +14,11 @@ import java.util.Set;
  * The persistent class for the INVESTIGACIONES_MALARIA database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionMalaria.encontrarPorMuestreoHematico",
+			query="select ti from InvestigacionMalaria ti " +
+					"where ti.muestreoHematico.muestreoHematicoId = :pMuestreoHematicoId")
+})
 @Entity
 @Table(name="INVESTIGACIONES_MALARIA")
 public class InvestigacionMalaria implements Serializable {
@@ -144,8 +149,20 @@ public class InvestigacionMalaria implements Serializable {
 	private BigDecimal viajesZonaRiesgo;
 
 	//bi-directional many-to-one association to InvestigacionesMedicamento
-	@OneToMany(mappedBy="investigacionMalaria")
+	@OneToMany(mappedBy="investigacionMalaria",targetEntity=InvestigacionMedicamento.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
 	private Set<InvestigacionMedicamento> investigacionMedicamentos;
+	
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionSintoma.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	private InvestigacionSintoma investigacionSintomas;
+	
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionLugar.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	private InvestigacionLugar investigacionLugares;
+	
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionTransfusion.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	private InvestigacionTransfusion investigacionTransfusiones; 
+	
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionHospitalario.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	private InvestigacionHospitalario investigacionHospitalarios;
 
     public InvestigacionMalaria() {
     }
@@ -453,5 +470,48 @@ public class InvestigacionMalaria implements Serializable {
 	public void setInvestigacionesMedicamentos(Set<InvestigacionMedicamento> investigacionMedicamentos) {
 		this.investigacionMedicamentos = investigacionMedicamentos;
 	}
-	
+
+	public Set<InvestigacionMedicamento> getInvestigacionMedicamentos() {
+		return investigacionMedicamentos;
+	}
+
+	public void setInvestigacionMedicamentos(
+			Set<InvestigacionMedicamento> investigacionMedicamentos) {
+		this.investigacionMedicamentos = investigacionMedicamentos;
+	}
+
+	public InvestigacionSintoma getInvestigacionSintomas() {
+		return investigacionSintomas;
+	}
+
+	public void setInvestigacionSintomas(InvestigacionSintoma investigacionSintomas) {
+		this.investigacionSintomas = investigacionSintomas;
+	}
+
+	public InvestigacionLugar getInvestigacionLugares() {
+		return investigacionLugares;
+	}
+
+	public void setInvestigacionLugares(InvestigacionLugar investigacionLugares) {
+		this.investigacionLugares = investigacionLugares;
+	}
+
+	public InvestigacionTransfusion getInvestigacionTransfusiones() {
+		return investigacionTransfusiones;
+	}
+
+	public void setInvestigacionTransfusiones(
+			InvestigacionTransfusion investigacionTransfusiones) {
+		this.investigacionTransfusiones = investigacionTransfusiones;
+	}
+
+	public InvestigacionHospitalario getInvestigacionHospitalarios() {
+		return investigacionHospitalarios;
+	}
+
+	public void setInvestigacionHospitalarios(
+			InvestigacionHospitalario investigacionHospitalarios) {
+		this.investigacionHospitalarios = investigacionHospitalarios;
+	}
+
 }

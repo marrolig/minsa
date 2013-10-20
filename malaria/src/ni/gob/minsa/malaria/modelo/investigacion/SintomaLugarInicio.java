@@ -15,6 +15,11 @@ import java.util.Date;
  * The persistent class for the SINTOMAS_LUGARES_INICIO database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="SintomaLugarInicio.encontrarPorInvestigacionSintoma",
+			query="select ts from SintomaLugarInicio ts " 
+				+ "where ts.investigacionSintoma.investigacionSintomaId = :pInvestigacionSintomaId")
+})
 @Entity
 @Table(name="SINTOMAS_LUGARES_INICIO")
 public class SintomaLugarInicio implements Serializable {
@@ -39,9 +44,10 @@ public class SintomaLugarInicio implements Serializable {
 
 	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal inicioResidencia;
-
-	@Column(name="INVESTIGACION_SINTOMA", nullable=false, precision=10)
-	private BigDecimal investigacionSintoma;
+	
+	@OneToOne
+	@JoinColumn(name="INVESTIGACION_SINTOMA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	private InvestigacionSintoma investigacionSintoma;
 
 	@ManyToOne
 	@JoinColumn(name="MUNICIPIO", referencedColumnName="CODIGO_NACIONAL")
@@ -97,11 +103,11 @@ public class SintomaLugarInicio implements Serializable {
 		this.inicioResidencia = inicioResidencia;
 	}
 
-	public BigDecimal getInvestigacionSintoma() {
+	public InvestigacionSintoma getInvestigacionSintoma() {
 		return this.investigacionSintoma;
 	}
 
-	public void setInvestigacionSintoma(BigDecimal investigacionSintoma) {
+	public void setInvestigacionSintoma(InvestigacionSintoma investigacionSintoma) {
 		this.investigacionSintoma = investigacionSintoma;
 	}
 

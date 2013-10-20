@@ -94,7 +94,8 @@ public interface ColVolService {
 	 * @return Lista de objetos {@link ColVol}
 	 */
 	public List<ColVol> ListarPorUnidad(long pUnidadId); 
-
+	
+	
 	public int ContarPorUnidad(long pUnidadId, String pNombre, boolean pSoloActivos);
 	
 	/**

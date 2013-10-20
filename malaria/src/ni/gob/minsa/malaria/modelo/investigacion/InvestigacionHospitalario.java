@@ -3,6 +3,7 @@ package ni.gob.minsa.malaria.modelo.investigacion;
 import java.io.Serializable;
 import javax.persistence.*;
 
+import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 
 import java.math.BigDecimal;
@@ -13,6 +14,11 @@ import java.util.Date;
  * The persistent class for the INVESTIGACIONES_HOSPITALARIOS database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionHospitalario.encontrarPorInvestigacionMalaria",
+			query="select ti from InvestigacionHospitalario ti " 
+				+ "where ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
+})
 @Entity
 @Table(name="INVESTIGACIONES_HOSPITALARIOS")
 public class InvestigacionHospitalario implements Serializable {
@@ -38,8 +44,9 @@ public class InvestigacionHospitalario implements Serializable {
 	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
 	private Date fechaRegistro;
 
-	@Column(name="INVESTIGACION_MALARIA", nullable=false, precision=10)
-	private BigDecimal investigacionMalaria;
+    @OneToOne
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	private InvestigacionMalaria investigacionMalaria;
 
 	@Column(name="MANEJO_CLINICO", nullable=false, precision=1)
 	private BigDecimal manejoClinico;
@@ -48,8 +55,9 @@ public class InvestigacionHospitalario implements Serializable {
 	@JoinColumn(name="MUNICIPIO", referencedColumnName="CODIGO_NACIONAL",nullable=false)
 	private DivisionPolitica municipio;
 
-	@Column(nullable=false, precision=10)
-	private BigDecimal unidad;
+	@ManyToOne
+	@JoinColumn(name="UNIDAD", referencedColumnName="CODIGO",nullable=false)
+	private Unidad unidad;
 
 	@Column(name="USUARIO_REGISTRO", nullable=false, length=100)
 	private String usuarioRegistro;
@@ -97,11 +105,11 @@ public class InvestigacionHospitalario implements Serializable {
 		this.fechaRegistro = fechaRegistro;
 	}
 
-	public BigDecimal getInvestigacionMalaria() {
+	public InvestigacionMalaria getInvestigacionMalaria() {
 		return this.investigacionMalaria;
 	}
 
-	public void setInvestigacionMalaria(BigDecimal investigacionMalaria) {
+	public void setInvestigacionMalaria(InvestigacionMalaria investigacionMalaria) {
 		this.investigacionMalaria = investigacionMalaria;
 	}
 
@@ -121,11 +129,11 @@ public class InvestigacionHospitalario implements Serializable {
 		this.municipio = municipio;
 	}
 
-	public BigDecimal getUnidad() {
+	public Unidad getUnidad() {
 		return this.unidad;
 	}
 
-	public void setUnidad(BigDecimal unidad) {
+	public void setUnidad(Unidad unidad) {
 		this.unidad = unidad;
 	}
 

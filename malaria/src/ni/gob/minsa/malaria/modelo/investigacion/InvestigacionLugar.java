@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
+import ni.gob.minsa.malaria.modelo.poblacion.Pais;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -14,6 +15,11 @@ import java.util.Date;
  * The persistent class for the INVESTIGACIONES_LUGARES database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionLugar.encontrarPorInvestigacionMalaria",
+			query="select ti from InvestigacionLugar ti " 
+				+ " where ti.investigacionMalaria.investigacionMalariaId = :pInvestigacionMalariaId")
+})
 @Entity
 @Table(name="INVESTIGACIONES_LUGARES")
 public class InvestigacionLugar implements Serializable {
@@ -36,15 +42,17 @@ public class InvestigacionLugar implements Serializable {
 	@Column(name="INFECCION_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal infeccionResidencia;
 
-	@Column(name="INVESTIGACION_MALARIA", nullable=false, precision=10)
-	private BigDecimal investigacionMalaria;
+	@OneToOne
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	private InvestigacionMalaria investigacionMalaria;
 
 	@ManyToOne
 	@JoinColumn(name="MUNICIPIO", referencedColumnName="CODIGO_NACIONAL")
 	private DivisionPolitica municipio;
-
-	@Column(length=2)
-	private String pais;
+	
+	@ManyToOne
+	@JoinColumn(name="PAIS", referencedColumnName="CODIGO_ALFADOS")
+	private Pais pais;
 
 	@Column(name="USUARIO_REGISTRO", nullable=false, length=100)
 	private String usuarioRegistro;
@@ -84,11 +92,11 @@ public class InvestigacionLugar implements Serializable {
 		this.infeccionResidencia = infeccionResidencia;
 	}
 
-	public BigDecimal getInvestigacionMalaria() {
+	public InvestigacionMalaria getInvestigacionMalaria() {
 		return this.investigacionMalaria;
 	}
 
-	public void setInvestigacionMalaria(BigDecimal investigacionMalaria) {
+	public void setInvestigacionMalaria(InvestigacionMalaria investigacionMalaria) {
 		this.investigacionMalaria = investigacionMalaria;
 	}
 
@@ -100,11 +108,11 @@ public class InvestigacionLugar implements Serializable {
 		this.municipio = municipio;
 	}
 
-	public String getPais() {
+	public Pais getPais() {
 		return this.pais;
 	}
 
-	public void setPais(String pais) {
+	public void setPais(Pais pais) {
 		this.pais = pais;
 	}
 

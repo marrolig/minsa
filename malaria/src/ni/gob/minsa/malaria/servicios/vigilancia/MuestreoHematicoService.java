@@ -86,17 +86,39 @@ public interface MuestreoHematicoService {
 	
 	/**
 	 * Busca una lista de objetos {@link MuestreoHematico} que correspondan a aquellos 
-	 * muestreos hemáticos con resultado positivo para el método por gota gruesa y 
-	 * que no tienen un registro de M10 vinculado. Solo se mostrarán aquellos muestredos
-	 * que correspondan a pacientes en a la unidad de salud seleccionada.
+	 * muestreos hemáticos con resultado positivo para el método por gota gruesa.
+	 * Solo se retornarán aquellos muestredos que correspondan a pacientes en a la unidad 
+	 * de salud seleccionada.
 	 * Retorna <code>null</code> si no encuentra ningún registro de muestreo hemático que
 	 * cumpla las condiciones indicadas.
 	 * 
 	 * @param pUnidadId Identificador de la unidad
+	 * @param pAnioEpi Anio epidemiológico en el cual se tomó la muestra.
+	 * @param pMesEpi Mes epidemiológico en el cual se tomó la muetra.
+	 * @param pSoloActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
+	 * o bien con una M10 sin cerrar.
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPositivosPorUnidad(long pUnidadId);
-
+	public List<MuestreoHematico> ListarPositivosPorUnidad(long pUnidadId,
+			int pAnioEpi,
+			int pSemanaEpi,
+			boolean pSoloActivos,
+			int pPaginaActual, 
+			int pTotalPorPagina, 
+			int pNumRegistros);
+	/**
+	 * 
+	 * @param pUnidadId Identificador de la unidad
+	 * @param pAnioEpi Anio epidemiológico en el cual se tomó la muestra.
+	 * @param pMesEpi Mes epidemiológico en el cual se tomó la muetra.
+	 * @param pSoloActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
+	 * o bien con una M10 sin cerrar.
+	 * @return Entero con el número de objetos {@link MuestreoHematico}.
+	 */
+	public int ContarPositivosPorUnidadActivos(long pUnidadId,
+			int pAnioEpi,
+			int pSemanaEpi,
+			boolean pSoloActivos);
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante
 	 * la clave y número de lámina.  Retorna <code>null</code>

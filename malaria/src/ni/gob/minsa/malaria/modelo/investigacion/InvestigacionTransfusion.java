@@ -4,6 +4,8 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
+import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
+import ni.gob.minsa.malaria.modelo.poblacion.Pais;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -13,6 +15,11 @@ import java.util.Date;
  * The persistent class for the INVESTIGACIONES_TRANSFUSIONES database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionTransfusion.encontrarPorInvestigacionMalaria",
+			query="select ti from InvestigacionTransfusion " 
+					+ "ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
+})
 @Entity
 @Table(name="INVESTIGACIONES_TRANSFUSIONES")
 public class InvestigacionTransfusion implements Serializable {
@@ -28,14 +35,17 @@ public class InvestigacionTransfusion implements Serializable {
 	@Column(name="FECHA_TRANSFUSION")
 	private Date fechaTransfusion;
 
-	@Column(name="INVESTIGACION_MALARIA", nullable=false, precision=10)
-	private BigDecimal investigacionMalaria;
+    @OneToOne
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	private InvestigacionMalaria investigacionMalaria;
 
-	@Column(length=4)
-	private String municipio;
+    @ManyToOne
+	@JoinColumn(name="MUNICIPIO", referencedColumnName="CODIGO_NACIONAL")
+	private DivisionPolitica municipio;
 
-	@Column(length=2)
-	private String pais;
+    @ManyToOne
+	@JoinColumn(name="PAIS", referencedColumnName="CODIGO_ALFADOS")
+	private Pais pais;
 
 	@Column(nullable=false, precision=1)
 	private BigDecimal transfusion;
@@ -63,27 +73,27 @@ public class InvestigacionTransfusion implements Serializable {
 		this.fechaTransfusion = fechaTransfusion;
 	}
 
-	public BigDecimal getInvestigacionMalaria() {
+	public InvestigacionMalaria getInvestigacionMalaria() {
 		return this.investigacionMalaria;
 	}
 
-	public void setInvestigacionMalaria(BigDecimal investigacionMalaria) {
+	public void setInvestigacionMalaria(InvestigacionMalaria investigacionMalaria) {
 		this.investigacionMalaria = investigacionMalaria;
 	}
 
-	public String getMunicipio() {
-		return this.municipio;
+	public DivisionPolitica getMunicipio() {
+		return municipio;
 	}
 
-	public void setMunicipio(String municipio) {
+	public void setMunicipio(DivisionPolitica municipio) {
 		this.municipio = municipio;
 	}
 
-	public String getPais() {
-		return this.pais;
+	public Pais getPais() {
+		return pais;
 	}
 
-	public void setPais(String pais) {
+	public void setPais(Pais pais) {
 		this.pais = pais;
 	}
 

@@ -38,17 +38,27 @@ import org.eclipse.persistence.annotations.Cache;
  * @since jdk1.6.0_21
  */
 @Entity
-@Table(name="MUESTREOS_HEMATICOS",schema="SIVE")
-@Cache(alwaysRefresh=true,disableHits=true)
+@Table(name = "MUESTREOS_HEMATICOS", schema = "SIVE")
+@Cache(alwaysRefresh = true, disableHits = true)
 @NamedQueries({
-	@NamedQuery(
-			name="MuestreoHematico.listarPositivosPorUnidad",
-			query="select tm from MuestreoHematico tm " +
-				    "where tm.unidadNotificacion.unidadId=:pUnidadId and " +
-				    "      tm.muestreoDiagnostico.resultado=1 and" +
-				    "	   tm.investigacion IS NULL" +
-				    "order by tm.fechaToma"),
-})
+		@NamedQuery(name = "MuestreoHematico.listarPositivosPorUnidadActivos",
+				query = "select tm from MuestreoHematico tm "
+				+ "where tm.unidadNotificacion.unidadId=:pUnidadId and "
+				+ "tm.muestreoDiagnostico.resultado=1 and "
+				+ "(tm.investigacion IS NULL or tm.investigacion.cerrado = 0) " 
+				+ "tm.investigacion.cerrado = 1 and " 
+				+ "tm.añoEpidemiologico = :pAnioEpi and " 
+				+ "tm.semanaEpidemiologica = :pSemanaEpi "
+				+ "order by tm.fechaToma"), 
+		@NamedQuery(name = "MuestreoHematico.listarPositivosPorUnidadCerrados",
+					query = "select tm from MuestreoHematico tm "
+					+ "where tm.unidadNotificacion.unidadId=:pUnidadId and "
+					+ "tm.muestreoDiagnostico.resultado=1 and "
+					+ "tm.investigacion.cerrado = 1 and " 
+					+ "tm.añoEpidemiologico = :pAnioEpi and " 
+					+ "tm.semanaEpidemiologica = :pSemanaEpi "
+					+ "order by tm.fechaToma")
+	})
 public class MuestreoHematico extends BaseEntidadCreacion implements Serializable {
 	private static final long serialVersionUID = 1L;
 

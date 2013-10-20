@@ -10,6 +10,11 @@ import javax.persistence.*;
  * The persistent class for the INVESTIGACIONES_MEDICAMENTOS database table.
  * 
  */
+@NamedQueries({
+	@NamedQuery(name="InvestigacionMedicamento.listar",
+			query="select tm from InvestigacionMedicamento tm " +
+				  "where tm.investigacionMalaria.investigacionMalariaId = :pInvestigacionMalaria")
+})
 @Entity
 @Table(name="INVESTIGACIONES_MEDICAMENTOS")
 public class InvestigacionMedicamento implements Serializable {
