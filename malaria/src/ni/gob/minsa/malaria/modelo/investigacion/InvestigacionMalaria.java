@@ -50,11 +50,13 @@ public class InvestigacionMalaria implements Serializable {
 	@Column(name="CONDICION_FINAL_VIVO", nullable=false, precision=1)
 	private BigDecimal condicionFinalVivo;
 
-	@Column(name="CONFIRMACION_CNDR", nullable=false, length=50)
-	private String confirmacionCndr;
+	@ManyToOne
+	@JoinColumn(name="CONFIRMACION_CNDR", referencedColumnName="CODIGO",nullable=false)
+	private ConfirmacionDiagnostico confirmacionCndr;
 
-	@Column(name="CONFIRMACION_ENTIDAD", nullable=false, length=50)
-	private String confirmacionEntidad;
+	@ManyToOne
+	@JoinColumn(name="CONFIRMACION_ENTIDAD", referencedColumnName="CODIGO",nullable=false)
+	private ConfirmacionDiagnostico confirmacionEntidad;
 
 	@Column(name="CONTROL_PARASITARIO", nullable=false, precision=1)
 	private BigDecimal controlParasitario;
@@ -223,19 +225,19 @@ public class InvestigacionMalaria implements Serializable {
 		this.condicionFinalVivo = condicionFinalVivo;
 	}
 
-	public String getConfirmacionCndr() {
+	public ConfirmacionDiagnostico getConfirmacionCndr() {
 		return this.confirmacionCndr;
 	}
 
-	public void setConfirmacionCndr(String confirmacionCndr) {
+	public void setConfirmacionCndr(ConfirmacionDiagnostico confirmacionCndr) {
 		this.confirmacionCndr = confirmacionCndr;
 	}
 
-	public String getConfirmacionEntidad() {
+	public ConfirmacionDiagnostico getConfirmacionEntidad() {
 		return this.confirmacionEntidad;
 	}
 
-	public void setConfirmacionEntidad(String confirmacionEntidad) {
+	public void setConfirmacionEntidad(ConfirmacionDiagnostico confirmacionEntidad) {
 		this.confirmacionEntidad = confirmacionEntidad;
 	}
 

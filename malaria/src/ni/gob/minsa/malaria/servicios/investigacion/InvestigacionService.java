@@ -1,9 +1,12 @@
 package ni.gob.minsa.malaria.servicios.investigacion;
 
+import java.util.List;
+
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionHospitalario;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionLugar;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria;
+import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMedicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
@@ -65,12 +68,14 @@ public interface InvestigacionService {
 	 * @param pInvestigacionMalaria objeto {@link InvestigacionMalaria} a ser almacenado en la base de datos.
 	 * @return  Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado Guardar(InvestigacionMalaria pInvestigacionMalaria,
+	public InfoResultado Guardar(
+			InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
 			SintomaLugarInicio pSintomaLugarInicio,
-			SintomaLugarAnte pSintomaLugarAnte,
-			SintomaLugarOtro pSintomaLugarOtro,
-			InvestigacionLugar pInvestigacionLugar, 
+			List<SintomaLugarAnte> pSintomaLugarAnte,
+			List<SintomaLugarOtro> pSintomaLugarOtro,
+			List<InvestigacionMedicamento> pInvestigacionMedicamento,
+			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
 			InvestigacionHospitalario pInvestigacionHospitalario);
 	/**
@@ -85,9 +90,10 @@ public interface InvestigacionService {
 	public InfoResultado Agregar(InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
 			SintomaLugarInicio pSintomaLugarInicio,
-			SintomaLugarAnte pSintomaLugarAnte,
-			SintomaLugarOtro pSintomaLugarOtro,
-			InvestigacionLugar pInvestigacionLugar, 
+			List<SintomaLugarAnte> pSintomaLugarAnte,
+			List<SintomaLugarOtro> pSintomaLugarOtro,
+			List<InvestigacionMedicamento> pInvestigacionMedicamento,
+			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
 			InvestigacionHospitalario pInvestigacionHospitalario);
 }

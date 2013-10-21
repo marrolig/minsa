@@ -2,6 +2,9 @@ package ni.gob.minsa.malaria.servicios.investigacion;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
 
 /**
  * Esta clase define el interface para las operaciones a ser
@@ -39,20 +42,29 @@ public interface InvestigacionSintomaService {
 	 * resultado de la operación en un objeto {@link InfoResultado}.
 	 * <p>
 	 * Realiza una operación UPDATE en la base de datos
+	 * 
 	 * @param pInvestigacionSintoma Objeto {@link InvestigacionSintoma} a ser almacenado en la base de datos
+	 * @param pSintomaLugarInicio Objeto {@link SintomaLugarInicio} a ser almacenado en la base de datos
+	 * @param pSintomaLugarAnte Objeto {@link SintomaLugarAnte} a ser almacenado en la base de datos
+	 * @param pSintomaLugarOtro  Objeto {@link SintomaLugarOtro} a ser almacenado en la base de datos
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado Guardar(InvestigacionSintoma pInvestigacionSintoma);
+	public InfoResultado Guardar(InvestigacionSintoma pInvestigacionSintoma, SintomaLugarInicio pSintomaLugarInicio, 
+			SintomaLugarAnte pSintomaLugarAnte, SintomaLugarOtro pSintomaLugarOtro);
 	/**
 	 * Agrega un objeto {@link InvestigacionSintoma} en la base de datos y retorna el
 	 * resultado de la operación en un objeto {@link InfoResultado}
 	 * <p>
 	 * Realiza una operación INSERT en la base de datos
 	 *  
-	 * @param pInvestigacionSintoma Objeto {@link EventoSalud} a ser agregado en la base de datos
+	 * @param pInvestigacionSintoma Objeto {@link InvestigacionSintoma} a ser almacenado en la base de datos
+	 * @param pSintomaLugarInicio Objeto {@link SintomaLugarInicio} a ser almacenado en la base de datos
+	 * @param pSintomaLugarAnte Objeto {@link SintomaLugarAnte} a ser almacenado en la base de datos
+	 * @param pSintomaLugarOtro  Objeto {@link SintomaLugarOtro} a ser almacenado en la base de datos
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado Agregar(InvestigacionSintoma pInvestigacionSintoma);
+	public InfoResultado Agregar(InvestigacionSintoma pInvestigacionSintoma,SintomaLugarInicio pSintomaLugarInicio, 
+			SintomaLugarAnte pSintomaLugarAnte, SintomaLugarOtro pSintomaLugarOtro);
 	/**
 	 * Elimina el objeto {@link InvestigacionSintoma} de la base de datos utilizando
 	 * su identificador o clave primaria.

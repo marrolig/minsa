@@ -141,7 +141,8 @@ public class InvestigacionHospitalarioDA implements InvestigacionHospitalarioSer
 		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
 
         try{
-        	InvestigacionHospitalario oDetachedInvestHospitalario = (InvestigacionHospitalario)oEM.find(InvestigacionHospitalario.class, pInvestigacionHospitalario.getInvestigacionHospitalarioId());
+        	InvestigacionHospitalario oDetachedInvestHospitalario = (InvestigacionHospitalario)oEM.find(InvestigacionHospitalario.class,
+        			pInvestigacionHospitalario.getInvestigacionHospitalarioId());
         	InvestigacionHospitalario oInvestigacionHospitalario=oEM.merge(oDetachedInvestHospitalario);
         	
         	oInvestigacionHospitalario.setManejoClinico(pInvestigacionHospitalario.getManejoClinico());

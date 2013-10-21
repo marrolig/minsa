@@ -10,6 +10,9 @@ import javax.validation.ConstraintViolationException;
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
 import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
@@ -28,7 +31,7 @@ import ni.gob.minsa.malaria.soporte.Mensajes;
 public class InvestigacionSintomaDA implements InvestigacionSintomaService {
 	//almacena una referencia al EMF global para adquirir el EntityManager
     private static JPAResourceBean jpaResourceBean = new JPAResourceBean();
-    
+  
 	/*
 	 * (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService#Encontrar(long)
@@ -131,7 +134,8 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService#Guardar(ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma)
 	 */
 	@Override
-	public InfoResultado Guardar(InvestigacionSintoma pInvestigacionSintoma) {
+	public InfoResultado Guardar(InvestigacionSintoma pInvestigacionSintoma,SintomaLugarInicio pSintomaLugarInicio, 
+			SintomaLugarAnte pSintomaLugarAnte, SintomaLugarOtro pSintomaLugarOtro) {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
@@ -199,7 +203,8 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService#Agregar(ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma)
 	 */
 	@Override
-	public InfoResultado Agregar(InvestigacionSintoma pInvestigacionSintoma) {
+	public InfoResultado Agregar(InvestigacionSintoma pInvestigacionSintoma,SintomaLugarInicio pSintomaLugarInicio, 
+			SintomaLugarAnte pSintomaLugarAnte, SintomaLugarOtro pSintomaLugarOtro) {
 		InfoResultado oResultado=new InfoResultado();
 		
 		oResultado=InvestigacionValidacion.validarInvestigacionSintoma(pInvestigacionSintoma);
@@ -218,7 +223,7 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
             oResultado.setObjeto(pInvestigacionSintoma);
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
-   			
+
     		return oResultado;
    			
     	} catch (EntityExistsException iExPersistencia) {

@@ -1,5 +1,9 @@
 package ni.gob.minsa.malaria.datos.investigacion;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -11,11 +15,13 @@ import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionHospitalario;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionLugar;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria;
+import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMedicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
+import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 
@@ -192,8 +198,9 @@ public class InvestigacionDA implements InvestigacionService {
 	public InfoResultado Guardar(InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
 			SintomaLugarInicio pSintomaLugarInicio,
-			SintomaLugarAnte pSintomaLugarAnte,
-			SintomaLugarOtro pSintomaLugarOtro,
+			List<SintomaLugarAnte> pSintomaLugarAnte,
+			List<SintomaLugarOtro> pSintomaLugarOtro,
+			List<InvestigacionMedicamento> pInvestigacionMedicamento,
 			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
 			InvestigacionHospitalario pInvestigacionHospitalario) {
@@ -208,15 +215,132 @@ public class InvestigacionDA implements InvestigacionService {
 	public InfoResultado Agregar(InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
 			SintomaLugarInicio pSintomaLugarInicio,
-			SintomaLugarAnte pSintomaLugarAnte,
-			SintomaLugarOtro pSintomaLugarOtro,
+			List<SintomaLugarAnte> pSintomaLugarAnte,
+			List<SintomaLugarOtro> pSintomaLugarOtro,
+			List<InvestigacionMedicamento> pInvestigacionMedicamento,
 			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
 			InvestigacionHospitalario pInvestigacionHospitalario) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+		
+		InfoResultado oResultado=new InfoResultado();
+		
+		oResultado=InvestigacionValidacion.validarInvestigacionMalaria(
+				pInvestigacionMalaria,
+				pInvestigacionSintoma,
+				pInvestigacionMedicamento,
+				pInvestigacionTransfusion,
+				pInvestigacionHospitalario);
+		if (!oResultado.isOk()) return oResultado;
+		
+		
+		
+		EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+    	oEM.getTransaction().begin();
+		@SuppressWarnings("unused")
+		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
 
-	
+        try{
+        	
+        	oEM.persist(pInvestigacionMalaria);
+           
+        	//Agregando los objetos relacionados a Investigación de sintomas.
+            if(pInvestigacionSintoma!=null){
+            	if(pInvestigacionSintoma.getSintomatico() == BigDecimal.valueOf(1)){
+            		pInvestigacionSintoma.setInvestigacionMalaria(pInvestigacionMalaria);
+            		oEM.persist(pInvestigacionSintoma);
+            		
+            		if(pSintomaLugarAnte!=null){
+            			for(SintomaLugarAnte oLugarAnte:pSintomaLugarAnte){
+                			if(oLugarAnte.getInvestigacionesSintoma()!=null && oLugarAnte.getFechaUltima()!=null){
+                				oLugarAnte.setInvestigacionesSintoma(pInvestigacionSintoma);
+                    			oEM.persist(oLugarAnte);
+                			}
+                		}
+            		}
+            		
+            		if(pSintomaLugarOtro!=null){
+            			for(SintomaLugarOtro oLugarOtro:pSintomaLugarOtro){
+                			if(oLugarOtro.getInvestigacionesSintoma()!=null && oLugarOtro.getEstadia()!=null 
+                					&& oLugarOtro.getMesInicio()!=null && oLugarOtro.getAñoInicio()!=null){
+                				oLugarOtro.setInvestigacionesSintoma(pInvestigacionSintoma);
+                    			oEM.persist(oLugarOtro);
+                			}
+                		}
+            		}
+            	}
+            }
+            
+            //Agregando los objetos relacionados a Investigación medicamentos.
+            if(pInvestigacionMedicamento!=null){
+            	for(InvestigacionMedicamento oMedicamento:pInvestigacionMedicamento){
+        			if(oMedicamento.getInvestigacionesMalaria()!=null && oMedicamento.getMedicamento()!=null){
+        				oMedicamento.setInvestigacionesMalaria(pInvestigacionMalaria);
+            			oEM.persist(oMedicamento);
+        			}
+        		}
+            }
+            
+           //Agregando los objetos relacionados a Investigación Lugar.
+            if(pInvestigacionLugar!=null){
+            	pInvestigacionLugar.setInvestigacionMalaria(pInvestigacionMalaria);
+            	oEM.persist(pInvestigacionLugar);
+            }
+           //Agregando los objetos relacionados a Investigación Transfusión.
+            if(pInvestigacionTransfusion!=null){
+            	pInvestigacionTransfusion.setInvestigacionMalaria(pInvestigacionMalaria);
+            	oEM.persist(pInvestigacionTransfusion);
+            }
+          //Agregando los objetos relacionados a atención hospitalaria.
+            if(pInvestigacionHospitalario!=null){
+            	pInvestigacionHospitalario.setInvestigacionMalaria(pInvestigacionMalaria);
+            	oEM.persist(pInvestigacionHospitalario);
+            }
+          
+            oEM.getTransaction().commit();
+            oResultado.setObjeto(pInvestigacionMalaria);
+       		oResultado.setFilasAfectadas(1);
+       		oResultado.setOk(true);
+        	
+        	return oResultado;
+        } catch (EntityExistsException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar");
+    		oResultado.setMensaje(Mensajes.REGISTRO_DUPLICADO);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+    		oResultado.setOk(false);
+    		return oResultado;
+    	} catch (ConstraintViolationException iExcepcion) {
+    		oResultado.setExcepcion(true);
+    		ConstraintViolation<?> oConstraintViolation = iExcepcion.getConstraintViolations().iterator().next();
+    		oResultado.setMensaje(oConstraintViolation.getMessage());
+    		oResultado.setFuenteError(oConstraintViolation.getPropertyPath().toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    	} catch (PersistenceException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar");
+    		oResultado.setMensaje("Error al agregar el registro. " + Mensajes.REGISTRO_DUPLICADO);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setOk(false);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    		
+    	} finally{
+    		oEM.close();
+    	}
+        
+	}
 
 }
