@@ -82,12 +82,12 @@ public class Criadero implements Serializable {
 	@NotNull(message="Identificion de abundancia relativa de vegetacion flotante requerido")
 	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="VEG_FLOTANTE",referencedColumnName="CODIGO",nullable=false)
-	private String vegFlotante;
+	private AbundanciaVegetacion vegFlotante;
 
 	@NotNull(message="Identificion de abundancia relativa de vegetacion sumergida requerido")
 	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="VEG_SUMERGIDA",referencedColumnName="CODIGO",nullable=false)	
-	private String vegSumergida;
+	private AbundanciaVegetacion vegSumergida;
 
 	@NotNull(message="Identificion de abundancia relativa de insectos requerido")
 	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
@@ -300,22 +300,22 @@ public class Criadero implements Serializable {
 	}
 
 
-	public String getVegFlotante() {
+	public AbundanciaVegetacion getVegFlotante() {
 		return vegFlotante;
 	}
 
 
-	public void setVegFlotante(String vegFlotante) {
+	public void setVegFlotante(AbundanciaVegetacion vegFlotante) {
 		this.vegFlotante = vegFlotante;
 	}
 
 
-	public String getVegSumergida() {
+	public AbundanciaVegetacion getVegSumergida() {
 		return vegSumergida;
 	}
 
 
-	public void setVegSumergida(String vegSumergida) {
+	public void setVegSumergida(AbundanciaVegetacion vegSumergida) {
 		this.vegSumergida = vegSumergida;
 	}
 

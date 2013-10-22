@@ -31,6 +31,8 @@ import ni.gob.minsa.malaria.soporte.Mensajes;
  */
 public class ComunidadDA implements ComunidadService {
 
+	
+	
 	//almacena una referencia al EMF global para adquirir el EntityManager
     private static JPAResourceBean jpaResourceBean = new JPAResourceBean();
 
@@ -38,6 +40,31 @@ public class ComunidadDA implements ComunidadService {
     }
 
 	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.poblacion.ComunidadService#ComunidadesPorMunicipioNombre(java.lang.String, java.lang.String, java.lang.Integer)
+	 */
+	@Override
+	public List<Comunidad> ComunidadesPorMunicipioNombre(String pCodMunicipio,
+			String pNombre, Integer pRegistros) {
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		 
+		try{
+		    query = em.createQuery("select tc from Comunidad tc " +
+					" where tc.sector.municipio.codigoNacional=:pCodMunicipio and " +
+					" and UPPER(tc.nombre) LIKE :pNombre " +
+					" order by tc.nombre");
+			query.setParameter("pCodMunicipio", pCodMunicipio);
+			query.setParameter("pNombre", "%" + pNombre.toUpperCase() + "%");
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			query.setMaxResults(pRegistros);
+			return(query.getResultList());
+		}finally{
+		    em.close();
+		}	
+	}
+
+    
+    /* (non-Javadoc)
 	 * @see ni.gob.minsa.servicios.poblacion.ComunidadService#ComunidadesPorSector(long)
 	 */
 	@SuppressWarnings("unchecked")
@@ -494,4 +521,5 @@ public class ComunidadDA implements ComunidadService {
             em.close();
         }
     }
+
 }

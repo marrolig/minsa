@@ -186,6 +186,31 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
 	}
 
 	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderosEspecieServices#obtenerListaCriaderosEspecies()
+	 */
+	@Override
+	public List<CriaderosEspecie> obtenerListaCriaderosEspecies() {
+		List<CriaderosEspecie> resultado = null;
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		String strJPQL = "select esp from CriaderosEspecie order by criaderoEspecieId";
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			return( query.getResultList());
+            
+		}catch(Exception iExcepcion){
+    		return null;
+		}
+
+	}	
+	
+	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderosEspecieServices#guardarEspecie(ni.gob.minsa.malaria.modelo.encuesta.CriaderosEspecie)
 	 */
 	@Override

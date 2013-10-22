@@ -266,4 +266,57 @@ public class IntervencionDA implements IntervencionServices {
 
 	}
 
+	@Override
+	public InfoResultado eliminarIntervencionPorPesquisa(
+			CriaderosPesquisa pPesquisa) {
+		InfoResultado oResultado=new InfoResultado();
+    	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+    	oEM.getTransaction().begin();
+    	@SuppressWarnings("unused")
+		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+    	Query query = null;
+    	int n = 0;
+    	
+		try{
+			
+			query = oEM.createNamedQuery("DELETE FROM CRIADEROS_INTERVENCIONES " +
+					" WHERE PESQUISA = " + pPesquisa.getCriaderoPesquisaId());
+			n = query.executeUpdate();
+			
+			if( n == 0 ){
+				oResultado.setOk(false);
+				oResultado.setMensaje("No se encontraron coincidencias de registro para eliminar");
+				oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+				return oResultado;
+			}
+			
+			oResultado.setOk(true);
+			oResultado.setMensaje("Registros Eliminados");
+			
+		} catch (PersistenceException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Eliminar");
+    		oResultado.setMensaje(Mensajes.ELIMINAR_RESTRICCION);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (Exception iExcepcion) {
+    		
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);
+    		
+    		return oResultado;
+    	}
+		
+		
+		return oResultado;
+
+	}
+
 }

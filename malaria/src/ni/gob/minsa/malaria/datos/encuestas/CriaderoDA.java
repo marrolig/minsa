@@ -3,6 +3,7 @@
  */
 package ni.gob.minsa.malaria.datos.encuestas;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityExistsException;
@@ -14,8 +15,11 @@ import javax.validation.ConstraintViolationException;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
+import ni.gob.minsa.malaria.modelo.encuesta.AddCatalogo;
+import ni.gob.minsa.malaria.modelo.encuesta.AddSistemaCatalogo;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
+import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.general.ClaseEvento;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
@@ -23,6 +27,7 @@ import ni.gob.minsa.malaria.modelo.vigilancia.ColVol;
 import ni.gob.minsa.malaria.modelo.vigilancia.EventoSalud;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices;
 import ni.gob.minsa.malaria.soporte.Mensajes;
+import ni.gob.minsa.malaria.soporte.Utilidades;
 
 /**
  * @author dev
@@ -300,7 +305,6 @@ public class CriaderoDA implements CriaderoServices {
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
    			
-   			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);
     		oResultado.setExcepcion(false);
@@ -398,6 +402,159 @@ public class CriaderoDA implements CriaderoServices {
     	finally{
     		oEM.close();
     	}
+	}
+
+	@Override
+	public InfoResultado obtenerMunicipiosPorSilais(long pCodSilais) {
+		InfoResultado oResultado = new InfoResultado();
+		List<DivisionPolitica> resultado = null;
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pCodSilais == 0 ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Silais no identificado");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strJPQL = 
+				" select mun from DivisionPolitica mun " +
+				" where mun.codigoNacional in " +
+				" ( select u.municipio.codigoNacional from Unidad u " +
+				"	where u.entidadAdtva.codigo = :pCodSilais ) " +
+				" order by mun.nombre ";
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setParameter("pCodSilais", pCodSilais);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			resultado = (List<DivisionPolitica>) query.getResultList();
+			if( resultado.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+
+	}
+
+	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#agregarCatOtros(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public InfoResultado agregarCatOtros(String pValor, String pCodigo,
+			String pDependencia) {
+		InfoResultado oResultado = new InfoResultado();
+    	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+    	oEM.getTransaction().begin();
+    	@SuppressWarnings("unused")
+		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);				
+		
+    	
+    	if( pValor == null || pValor.isEmpty() ){
+    		oResultado.setOk(false);
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setMensajeDetalle("Nombre del catalogo no identificado");
+    		return oResultado;
+    	}
+    	
+    	if( pCodigo == null || pCodigo.isEmpty() ){
+    		oResultado.setOk(false);
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setMensajeDetalle("Codigo del catalogo no identificado");
+    		return oResultado;    		
+    	}
+    	
+    	if( pDependencia == null || pDependencia.isEmpty() ){
+    		oResultado.setOk(false);
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setMensajeDetalle("Codigo Nodo Padre no Identificado");
+    		return oResultado;    		    		
+    	}
+    	
+    	AddCatalogo oCatalogo = new AddCatalogo();
+    	oCatalogo.setValor(pValor);
+		oCatalogo.setCodigo(pDependencia+ "|" + pCodigo);
+		oCatalogo.setDependencia(pDependencia);
+		oCatalogo.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+		oCatalogo.setFechaRegistro(new Date());
+		
+		AddSistemaCatalogo oSisCat = new AddSistemaCatalogo();
+		oSisCat.setCatalogo(pCodigo);
+		oSisCat.setSistema(Utilidades.obtenerInfoSesion().getSistemaSesion());
+		oSisCat.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+		oSisCat.setFechaRegistro(new Date());
+		
+		try{
+			
+			oEM.persist(oCatalogo);
+			oEM.persist(oSisCat);
+			
+            oEM.getTransaction().commit();
+    		oResultado.setFilasAfectadas(1);
+    		oResultado.setOk(true);		
+			
+    	} catch (EntityExistsException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar Cat");
+    		oResultado.setMensaje(Mensajes.EXCEPCION_REGISTRO_EXISTE);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+    		oResultado.setOk(false);
+    		return oResultado;
+    	} catch (ConstraintViolationException iExcepcion) {
+    		oResultado.setExcepcion(true);
+    		ConstraintViolation<?> oConstraintViolation = iExcepcion.getConstraintViolations().iterator().next();
+    		oResultado.setMensaje(oConstraintViolation.getMessage());
+    		oResultado.setFuenteError(oConstraintViolation.getPropertyPath().toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    	} 
+    	catch (PersistenceException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar Cat");
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    		
+    	} finally{
+    		oEM.close();
+    	}    	
+
+		
+		return oResultado;
 	}
 
 }

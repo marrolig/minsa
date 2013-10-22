@@ -55,4 +55,13 @@ public interface PosInspeccionServices {
 	 */
 	public InfoResultado eliminarPosInspeccion(long pPosInspeccionId);
 	
+	/**
+	 * Metodo que elimina una coleccion de PosInspecciones {@link CriaderosPosInspeccion}
+	 * que dependen de una intervencion {@link CriaderosIntervencion}
+	 * 
+	 * @param pIntervencion objeto {@link CriaderosIntervencion} 
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado eliminarPosInspeccionPorIntervencion(CriaderosIntervencion pIntervencion);
+	
 }

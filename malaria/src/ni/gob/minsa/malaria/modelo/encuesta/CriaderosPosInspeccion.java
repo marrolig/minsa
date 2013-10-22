@@ -20,7 +20,7 @@ public class CriaderosPosInspeccion implements Serializable {
 	private BigDecimal cuchColectadas;
 	private BigDecimal cuchPositivas;
 	private Date fechaInspeccion;
-	private Object fechaRegistro;
+	private Date fechaRegistro;
 	private BigDecimal larvasAdultas;
 	private BigDecimal larvasJovenes;
 	private String observacion;
@@ -76,13 +76,13 @@ public class CriaderosPosInspeccion implements Serializable {
 		this.fechaInspeccion = fechaInspeccion;
 	}
 
-
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="FECHA_REGISTRO")
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

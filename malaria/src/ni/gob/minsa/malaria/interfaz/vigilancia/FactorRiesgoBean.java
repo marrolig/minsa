@@ -1,5 +1,4 @@
 // -----------------------------------------------
-// FactorRiesgoBean.java
 // -----------------------------------------------
 package ni.gob.minsa.malaria.interfaz.vigilancia;
 

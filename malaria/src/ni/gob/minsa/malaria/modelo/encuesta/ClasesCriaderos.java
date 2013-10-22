@@ -11,7 +11,7 @@ import org.eclipse.persistence.annotations.Cache;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="MHm_Dsd+")
+@DiscriminatorValue(value="ML_CLASFCRIADEROS")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class ClasesCriaderos extends Catalogo {
 

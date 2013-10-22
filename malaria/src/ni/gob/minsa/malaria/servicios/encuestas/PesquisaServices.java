@@ -58,4 +58,5 @@ public interface PesquisaServices {
 	 */
 	public InfoResultado eliminarPesquisa(long pPesquisaId);
 	
+	
 }

@@ -23,6 +23,17 @@ import ni.gob.minsa.malaria.modelo.poblacion.Sector;
  * @since jdk1.6.0_21
  */
 public interface ComunidadService {
+	
+	/**
+	 * Metodo que retorna una lista de objeto {@link Comunidad} que posean la
+	 * literal de busqueda pNombre como parte del nombre de la comunidad
+	 * <p>
+	 * @param pCodMunicipio  	Identificador codigo del municipio
+	 * @param pNombre			Literal de filtro de busqueda de la comunidad
+	 * @param pRegistros		Cantidad de Registros a mostrar
+	 * @return					Lista de objetos de Comunidad {@link Comunidad}
+	 */
+	public List<Comunidad> ComunidadesPorMunicipioNombre(String pCodMunicipio, String pNombre, Integer pRegistros);
 
 	/**
 	 * Retorna una lista de objetos {@link Comunidad} que poseen la

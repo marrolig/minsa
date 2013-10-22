@@ -54,7 +54,15 @@ public interface IntervencionServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado eliminarIntervencion(long pIntervencionId);
-	
+
+	/**
+	 * Metodo que elimina una coleccion de Intervenciones {@link CriaderosIntervencion}
+	 * que dependen de una pesquisa {@link CriaderosPesquisa}
+	 * 
+	 * @param pPesquisa objeto {@link CriaderosPesquisa}
+	 * @return
+	 */
+	public InfoResultado eliminarIntervencionPorPesquisa(CriaderosPesquisa pPesquisa);
 	
 
 }

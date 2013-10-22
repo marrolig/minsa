@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.servicios.encuestas;
 
+import java.util.List;
+
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.encuesta.CriaderosEspecie;
@@ -43,6 +45,13 @@ public interface CriaderosEspecieServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado obtenerEspeciesPorCriadero(Criadero pCriadero);
+
+	/**
+	 * Metodo que permite obtener la lista de Especies de Criaderos 
+	 * 
+	 * @return List de objetos {@link CriaderosEspecie}
+	 */
+	public List<CriaderosEspecie> obtenerListaCriaderosEspecies();	
 	
 	/**
 	 * Metodo que permite acceder a la capa de persistencia y guardar un objeto de tipo

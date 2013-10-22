@@ -3,6 +3,7 @@ package ni.gob.minsa.malaria.servicios.encuestas;
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
+import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 
@@ -11,6 +12,14 @@ import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
  * Interfaz que define las operaciones a ser implementadas en la clase CriaderoDA
  * Su implementacion permite el acceso a la capa de persistencia, permitiendo de
  * este modo persistir los datos al modelo de datos
+ */
+/**
+ * @author dev
+ *
+ */
+/**
+ * @author dev
+ *
  */
 /**
  * @author dev
@@ -91,4 +100,27 @@ public interface CriaderoServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado eliminarCriadero(long pCriaderoId); 
+	
+	
+	/**
+	 * Metodo que devuelve la lista de menicipios objetos de tipo {@link DivisionPolitica}
+	 * a partir de las unidades {@link Unidad} que dependen de una entidad administrativa
+	 * especifica
+	 * 
+	 * @param pCodSilais Entero Largo Identificaion Codigo Silais
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado obtenerMunicipiosPorSilais(long pCodSilais);
+	
+	/**
+	 * Metodo que Permite Agregar nuevos Valores de Catalogos a partir de su Valor
+	 * codigo y dependencia
+	 * 
+	 * @param pValor		Objeto de Tipo {@link String} contiene el valor o nombre del catalogo
+	 * @param pCodigo		Objeto de Tipo {@link String} contiene el codigo del catalogo
+	 * @param pDependencia	Objeto de Tipo {@link String} contiene el codigo del padre del cual dependera el catalogo
+	 * @return  Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado agregarCatOtros(String pValor, String pCodigo, String pDependencia);
+	
 }

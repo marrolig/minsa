@@ -14,7 +14,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  * 
  */
 @Entity
-@Table(name="CRIADEROS_ESPECIES")
+@Table(name="ML_CRIADEROSESPECIES")
 public class CriaderosEspecie implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoEspecieId;
