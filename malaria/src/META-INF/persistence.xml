@@ -62,7 +62,17 @@
 		<class>ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa</class>
 		<class>ni.gob.minsa.malaria.modelo.encuesta.CriaderosEspecie</class>
 		<class>ni.gob.minsa.malaria.modelo.encuesta.CriaderosIntervencion</class>
-		<class>ni.gob.minsa.malaria.modelo.encuesta.CriaderosPosInspeccion</class>		
+		<class>ni.gob.minsa.malaria.modelo.encuesta.CriaderosPosInspeccion</class>	
+		<class>ni.gob.minsa.malaria.modelo.encuesta.AbundanciaFauna</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.AbundanciaVegetacion</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.AddCatalogo</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.AddSistemaCatalogo</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.ClasesCriaderos</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.EspeciesAnopheles</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.ExposicionSol</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.MovimientoAgua</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.TiposCriaderos</class>
+		<class>ni.gob.minsa.malaria.modelo.encuesta.TurbidezAgua</class>
 		<properties>
 			<property name="eclipselink.logging.level" value="FINEST"/>
 			<property name="eclipselink.logging.timestamp" value="true"/>

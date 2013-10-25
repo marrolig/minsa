@@ -148,7 +148,7 @@ public class CriaderosPosInspeccion implements Serializable {
 	//bi-directional many-to-one association to CriaderosIntervencion
 	@NotNull(message="Criadero intervencion requerido")
     @ManyToOne(targetEntity=CriaderosIntervencion.class,fetch=FetchType.LAZY)
-	@JoinColumn(name="INTERVENCION",nullable=false)
+	@JoinColumn(name="INTERVENCION",nullable=false,updatable=true)
 	public CriaderosIntervencion getCriaderosIntervencione() {
 		return this.criaderosIntervencione;
 	}

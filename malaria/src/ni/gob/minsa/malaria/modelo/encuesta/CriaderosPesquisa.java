@@ -65,7 +65,7 @@ public class CriaderosPesquisa implements Serializable {
 
 	@NotNull(message="La identificacion del criadero es requerido")
 	@ManyToOne(targetEntity=Criadero.class,fetch=FetchType.LAZY)
-	@JoinColumn(name="CRIADERO",referencedColumnName="CODIGO",nullable=false)
+	@JoinColumn(name="CRIADERO",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	public Criadero getCriadero() {
 		return this.criadero;
 	}

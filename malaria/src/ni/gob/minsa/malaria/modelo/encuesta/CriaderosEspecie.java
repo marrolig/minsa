@@ -42,7 +42,7 @@ public class CriaderosEspecie implements Serializable {
 
 	@NotNull(message="Criadero es requerido")
 	@ManyToOne(targetEntity=Criadero.class,fetch=FetchType.LAZY)
-	@JoinColumn(name="CRIADERO",referencedColumnName="CODIGO",nullable=false)
+	@JoinColumn(name="CRIADERO",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	public Criadero getCriadero() {
 		return this.criadero;
 	}
@@ -54,7 +54,7 @@ public class CriaderosEspecie implements Serializable {
 
 	@NotNull(message="Identificacion del tipo de especie anophele requerido")
 	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
-	@JoinColumn(name="ESPECIE_ANOPHELE",referencedColumnName="CATALOGO",nullable=false)
+	@JoinColumn(name="ESPECIE_ANOPHELE",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	public EspeciesAnopheles getEspecieAnophele() {
 		return this.especieAnophele;
 	}

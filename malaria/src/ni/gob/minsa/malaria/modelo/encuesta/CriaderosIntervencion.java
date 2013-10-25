@@ -154,7 +154,7 @@ public class CriaderosIntervencion implements Serializable {
 	//bi-directional many-to-one association to CriaderosPesquisa
 	@NotNull(message="Criadero pesquisa requerido")
     @ManyToOne(targetEntity=CriaderosPesquisa.class,fetch=FetchType.LAZY)
-	@JoinColumn(name="PESQUISA",nullable=false)
+	@JoinColumn(name="PESQUISA",nullable=false,updatable=true)
 	public CriaderosPesquisa getCriaderosPesquisa() {
 		return this.criaderosPesquisa;
 	}
