@@ -167,7 +167,8 @@ public class Operacion {
 	 * @param pPropiedad            Filtro de unidades por una propiedad específica.  Pendiente de implementación.     
 	 * @return
 	 */
-	public static List<Unidad> unidadesAutorizadasPorEntidad(long pUsuarioId,long pEntidadId,long pTipoUnidadId,boolean pDirecta, String pPropiedad) {
+	public static List<Unidad> unidadesAutorizadasPorEntidad(long pUsuarioId,long pEntidadId,
+			long pTipoUnidadId,boolean pDirecta, String pPropiedad) {
 		
 		InfoSesion infoSesion=Utilidades.obtenerInfoSesion();
 		

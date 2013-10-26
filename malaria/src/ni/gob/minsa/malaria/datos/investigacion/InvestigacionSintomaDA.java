@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.datos.investigacion;
 
+import java.util.List;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -82,6 +84,7 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
 	 * (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService#InvestigacionSintomaPorInvestigacion(long)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public InfoResultado EncontrarPorInvestigacionMalaria(
 			long pInvestigacionMalariaId) {
@@ -90,10 +93,11 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
     	try{
     		Query query = oEM.createNamedQuery("InvestigacionSintoma.encontrarPorInvestigacionMalaria");
             query.setParameter("pInvestigacionMalariaId", pInvestigacionMalariaId);
+            query.setMaxResults(1);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            InvestigacionSintoma oInvetigacionSintoma = (InvestigacionSintoma)query.getSingleResult();
+            List<InvestigacionSintoma> oInvetigacionSintoma = (List<InvestigacionSintoma>)query.getResultList();
             
-    		if (oInvetigacionSintoma==null ) {
+    		if (oInvetigacionSintoma==null || oInvetigacionSintoma.size() < 1) {
     			oResultado.setMensaje(Mensajes.ENCONTRAR_REGISTRO_NO_EXISTE);
     			oResultado.setOk(false);
     			oResultado.setFilasAfectadas(0);
@@ -102,7 +106,7 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oInvetigacionSintoma);
+    			oResultado.setObjeto((Object)oInvetigacionSintoma.get(1));
     			return oResultado;
     		}
     	}

@@ -99,9 +99,10 @@ public interface MuestreoHematicoService {
 	 * o bien con una M10 sin cerrar.
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPositivosPorUnidad(long pUnidadId,
+	public List<MuestreoHematico> ListarPositivosPorUnidad(
+			long pEntidadAdtvaId,
+			long pUnidadId,
 			int pAnioEpi,
-			int pSemanaEpi,
 			boolean pSoloActivos,
 			int pPaginaActual, 
 			int pTotalPorPagina, 
@@ -115,9 +116,10 @@ public interface MuestreoHematicoService {
 	 * o bien con una M10 sin cerrar.
 	 * @return Entero con el número de objetos {@link MuestreoHematico}.
 	 */
-	public int ContarPositivosPorUnidadActivos(long pUnidadId,
+	public int ContarPositivosPorUnidadActivos(
+			long pEntidadAdtvaId,
+			long pUnidadId,
 			int pAnioEpi,
-			int pSemanaEpi,
 			boolean pSoloActivos);
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante

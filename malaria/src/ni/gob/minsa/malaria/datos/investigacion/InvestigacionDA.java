@@ -90,6 +90,7 @@ public class InvestigacionDA implements InvestigacionService {
      * (non-Javadoc)
      * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionService#EncontrarPorMuestreoHematico(long)
      */
+ @SuppressWarnings("unchecked")
     @Override
 	public InfoResultado EncontrarPorMuestreoHematico(long pMuestreoHematicoId) {
     	InfoResultado oResultado=new InfoResultado();
@@ -98,9 +99,10 @@ public class InvestigacionDA implements InvestigacionService {
     		Query query = oEM.createNamedQuery("InvestigacionMalaria.encontrarPorMuestreoHematico");
             query.setParameter("pMuestreoHematicoId", pMuestreoHematicoId);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            InvestigacionMalaria oInvestigacionMalaria = (InvestigacionMalaria)query.getSingleResult();
+           
+			List<InvestigacionMalaria> oInvestigacionMalaria = (List<InvestigacionMalaria>)query.getResultList();
             
-    		if (oInvestigacionMalaria==null ) {
+    		if (oInvestigacionMalaria==null || oInvestigacionMalaria.size() < 1) {
     			oResultado.setMensaje(Mensajes.ENCONTRAR_REGISTRO_NO_EXISTE);
     			oResultado.setOk(false);
     			oResultado.setFilasAfectadas(0);
@@ -109,7 +111,7 @@ public class InvestigacionDA implements InvestigacionService {
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oInvestigacionMalaria);
+    			oResultado.setObjeto((Object)oInvestigacionMalaria.get(0));
     			return oResultado;
     		}
     	}

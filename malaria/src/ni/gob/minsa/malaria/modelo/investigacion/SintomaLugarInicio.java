@@ -46,7 +46,7 @@ public class SintomaLugarInicio implements Serializable {
 	private BigDecimal inicioResidencia;
 	
 	@OneToOne
-	@JoinColumn(name="INVESTIGACION_SINTOMA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	@JoinColumn(name="INVESTIGACION_SINTOMA", referencedColumnName="INVESTIGACION_SINTOMA_ID",nullable=false)
 	private InvestigacionSintoma investigacionSintoma;
 
 	@ManyToOne

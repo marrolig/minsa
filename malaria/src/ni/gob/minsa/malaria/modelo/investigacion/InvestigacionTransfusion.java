@@ -17,8 +17,8 @@ import java.util.Date;
  */
 @NamedQueries({
 	@NamedQuery(name="InvestigacionTransfusion.encontrarPorInvestigacionMalaria",
-			query="select ti from InvestigacionTransfusion " 
-					+ "ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
+			query="select ti from InvestigacionTransfusion ti " 
+					+ "where ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
 })
 @Entity
 @Table(name="INVESTIGACIONES_TRANSFUSIONES")

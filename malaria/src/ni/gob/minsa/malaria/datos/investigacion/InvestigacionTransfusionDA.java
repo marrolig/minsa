@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.datos.investigacion;
 
+import java.util.List;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -80,6 +82,7 @@ public class InvestigacionTransfusionDA implements InvestigacionTransfusionServi
 	 * (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionTransfusionService#EncontrarPorInvestigacionMalaria(long)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public InfoResultado EncontrarPorInvestigacionMalaria(
 			long pInvestigacionMalariaId) {
@@ -88,10 +91,11 @@ public class InvestigacionTransfusionDA implements InvestigacionTransfusionServi
     	try{
     		Query query = oEM.createNamedQuery("InvestigacionTransfusion.encontrarPorInvestigacionMalaria");
             query.setParameter("pInvestigacionMalariaId", pInvestigacionMalariaId);
+            query.setMaxResults(1);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            InvestigacionTransfusion oInvestigacionLugar = (InvestigacionTransfusion)query.getSingleResult();
+            List<InvestigacionTransfusion> oInvestigacionLugar = (List<InvestigacionTransfusion>)query.getResultList();
             
-    		if (oInvestigacionLugar==null ) {
+    		if (oInvestigacionLugar==null || oInvestigacionLugar.size() < 1) {
     			oResultado.setMensaje(Mensajes.ENCONTRAR_REGISTRO_NO_EXISTE);
     			oResultado.setOk(false);
     			oResultado.setFilasAfectadas(0);
@@ -100,7 +104,7 @@ public class InvestigacionTransfusionDA implements InvestigacionTransfusionServi
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oInvestigacionLugar);
+    			oResultado.setObjeto((Object)oInvestigacionLugar.get(0));
     			return oResultado;
     		}
     	}

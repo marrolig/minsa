@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+	  		Investigaciones Malaria
+		</ui:define>
+		<h:body>
+			<ui:composition template="/templates/main-template.xhtml">
+		
+				<ui:define name="content">
+		
+					<style type="text/css">
+					.ui-datatable-scrollable-body {
+						overflow-y: auto !important;
+						overflow-x: hidden !important;
+					}
+					
+					.ui-inputfield {
+						padding: 0px !important;
+					}
+			</style>
+
+			<f:view>
+				<h:form id="frmInvest">
+
+					<ni:titleBar titleText="Investigación > Investigación Malaria" />
+
+					<p:growl id="grwMensaje" showDetail="true" life="5000" />
+
+					<p:ajaxStatus
+						style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+						<f:facet name="start">
+							<h:graphicImage value="../images/loading.gif" />
+						</f:facet>
+						<f:facet name="complete">
+							<h:outputText value="" />
+						</f:facet>
+					</p:ajaxStatus>
+
+					<p:panel id="panControl" styleClass="panDefault">
+
+						<h:outputLabel for="cboEntidad" styleClass="lblDefault"
+							value="Entidad Administrativa:"
+							style="position:absolute; left:20px; top:35px;" />
+						<h:selectOneMenu id="cboEntidad"
+							disabled="#{investigacionMalariaBean.capaActiva==2}"
+							styleClass="txtDefault cboDefault"
+							style="position:absolute; left:145px;top:35px;width:170px;"
+							value="#{investigacionMalariaBean.entidadSelectedId}">
+							<f:selectItems value="#{investigacionMalariaBean.entidades}"
+								var="entidad" itemValue="#{entidad.entidadAdtvaId}"
+								itemLabel="#{entidad.nombre}" />
+							<p:ajax event="change" process="cboEntidad"
+								onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+								listener="#{investigacionMalariaBean.obtenerUnidades}"
+								update="panControl,grdMuestreos,grwMensaje" />
+						</h:selectOneMenu>
+
+						<h:outputLabel for="cboUnidad" styleClass="lblDefault"
+							value="Unidad de Salud que realizó muestreo hemático:"
+							style="position:absolute; left:325px; top:35px;" />
+						<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault"
+							disabled="#{investigacionMalariaBean.capaActiva==2}"
+							style="position:absolute; left:565px;top:35px;width:250px;"
+							value="#{investigacionMalariaBean.unidadSelectedId}">
+							<f:selectItem itemValue="0" itemLabel=" " />
+							<f:selectItems var="unidad" itemValue="#{unidad.unidadId}"
+								itemLabel="#{unidad.nombre}"
+								value="#{investigacionMalariaBean.unidades}" />
+							<p:ajax event="change" process="cboUnidad,cboAnioEpi"
+								onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+								listener="#{investigacionMalariaBean.cambiarUnidad}"
+								update="grdMuestreos,grwMensaje" />
+						</h:selectOneMenu>
+						
+						<h:outputText value="Año epidemiológico:" styleClass="lblDefault"
+								style="position:absolute; left:830px; top:35px;"  />
+							<h:selectOneMenu id="cboAnioEpi"
+								disabled="#{investigacionMalariaBean.capaActiva==2}"
+								styleClass="txtDefault cboDefault"
+								style="position:absolute; left:930px;top:35px;width:60px;"
+								value="#{investigacionMalariaBean.anioEpiSelected}">
+								<f:selectItem itemValue="0" itemLabel=" " />
+								<f:selectItems 
+									value="#{investigacionMalariaBean.aniosEpidemiologicos}" />
+								<p:ajax event="change" process=":frmInvest:cboAnioEpi"
+									onstart="statusDialog.show();"
+									oncomplete="statusDialog.hide();"
+									update="grdMuestreos,grwMensaje" />
+							</h:selectOneMenu>
+					</p:panel>
+
+					<p:panel id="capa1" styleClass="panDefault" visible="#{investigacionMalariaBean.capaActiva==1}">
+
+						<!-- Tabla de Colaboradores -->
+						<div
+							style="float: left; position: absolute; top: 60px; left: 10px; width: 980px; height: 235px;">
+
+							<p:dataTable id="grdMuestreos" var="muestreo"
+								widgetVar="tablaMuestreo"
+								rowKey="#{muestreo.muestreoHematicoId}" selectionMode="single"
+								selection="#{investigacionMalariaBean.muestreoHematicoSelected}"
+								loadingMessage="Cargando registros ..."
+								errorMessage="Se ha presentado un error al cargar los datos"
+								styleClass="panDetail" lazy="true" paginator="true" rows="12"
+								paginatorPosition="top" paginatorAlwaysVisible="true"
+								emptyMessage="No existen Muestreos Hemáticos sin Investigación o con una Investigación sin cerrar"
+								style="width:980px;"
+								value="#{investigacionMalariaBean.muestreosHematicos}">
+
+								<p:ajax event="rowSelect" process="@this"
+									listener="#{investigacionMalariaBean.onMuestreoHematicoSelected}"
+									update=":frmInvest:panControl ,:frmInvest:capa1, :frmInvest:capa2, :frmInvest:grwMensaje" />
+								
+								<p:column headerText="Nombre Completo Paciente" style="text-align:left; width:250px;">
+									<h:outputText value="#{muestreo.sisPersona.primerNombre} #{muestreo.sisPersona.segundoNombre} #{muestreo.sisPersona.primerApellido} #{muestreo.sisPersona.segundoApellido}" />
+								</p:column>
+								
+								<p:column headerText="Sexo" style="text-align:left; width:80px;">
+									<h:outputText value="#{muestreo.sisPersona.sexo.valor}" />
+								</p:column>
+								
+								<p:column headerText="Inicio Sintomas" style="text-align:left; width:80px;">
+									<h:outputText value="#{muestreo.inicioSintomas}">
+										<f:convertDateTime pattern="dd/MM/yyyy"/>
+									</h:outputText>
+								</p:column>
+								
+								<p:column headerText="Fecha Recepción" style="text-align:left; width:80px;">
+									<h:outputText value="#{muestreo.diagnostico.fechaRecepcion}">
+											<f:convertDateTime pattern="dd/MM/yyyy"/>
+									</h:outputText>
+								</p:column>
+								
+								<p:column headerText="Fecha Diagnóstico" style="text-align:left; width:80px;">
+									<h:outputText value="#{muestreo.diagnostico.fechaDiagnostico}" >
+										<f:convertDateTime pattern="dd/MM/yyyy"/>
+									</h:outputText>
+								</p:column>
+								
+								<p:column headerText="Clave" style="text-align:left; width:80px;">
+									<h:outputText value="#{muestreo.clave}" />
+								</p:column>
+							
+							</p:dataTable>
+						</div>
+
+					</p:panel>
+					<!-- fin capa 1 -->
+					
+					<p:panel id="capa2"  styleClass="panDefault" visible="#{investigacionMalariaBean.capaActiva==2}">
+						<p:panel id="panGeneral" 
+							 style="position:absolute; top:70px; left:5px; height:135px; width:985px;" 
+						 	 styleClass="panDetail">
+							
+							<h:outputLabel for="txtAnioEpi" styleClass="lblDefaultSmall" 
+							   value="Semana epidemiológica:" 
+							   style="position:absolute; left:10px; top:8px;"/>
+							<h:inputText id="txtAnioEpi" 
+							 style="position:absolute; left:10px; top:23px; width:50px;"
+							 value=""  styleClass="txtDefault" disabled="true"/>  
+							 
+							 
+							<h:inputText id="txtSemanaEpi" 
+							style="position:absolute; left:75px; top:23px; width:50px;"
+							 value=""  styleClass="txtDefault" disabled="true"/> 
+							 
+							<h:outputLabel for="txtNumCaso" styleClass="lblDefaultSmall" 
+							   value="Número Caso:" 
+							   style="position:absolute; left:140px; top:8px;"/>
+							<h:inputText id="txtNumCaso" maxlength="8" 
+							style="position:absolute; left:140px; top:23px; width:65px;"
+							 value=""  styleClass="txtDefault" /> 
+
+							<h:outputLabel for="txtNombre" styleClass="lblDefaultSmall" 
+							   value="Nombre y apellidos del Paciente:" 
+							   style="position:absolute; left:220px; top:8px;"/>
+							<h:inputText id="txtNombre"
+							 style="position:absolute; left:220px; top:23px; width:420px;"
+							 value="" styleClass="txtDefault" disabled="true" /> 
+							 
+							 <h:outputLabel for="txtSexo" styleClass="lblDefaultSmall" 
+							   value="Sexo:" 
+							   style="position:absolute; left:655px; top:8px;"/>
+							<h:inputText id="txtSexo" maxlength="8" 
+							style="position:absolute; left:655px; top:23px; width:80px;"
+							 value="" styleClass="txtDefault" disabled="true" />
+							 
+							 <h:outputLabel for="txtFechaNac" styleClass="lblDefaultSmall" 
+							   value="Fecha de Nacimiento:" 
+							   style="position:absolute; left:750px; top:8px;"/>
+							<h:inputText id="txtFechaNac" maxlength="8" 
+							style="position:absolute; left:750px; top:23px; width:95px;"
+							 value="" styleClass="txtDefault" disabled="true" />
+							 
+							 <h:outputLabel for="txtEmbarada" styleClass="lblDefaultSmall" 
+							   value="Embarazada:" 
+							   style="position:absolute; left:860px; top:8px;"/>
+							<h:selectOneMenu id="cboEmbarazda" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:860px;top:23px;width:100px;">
+									<f:selectItem itemValue="0" itemLabel="No" /> 
+									<f:selectItem itemValue="1" itemLabel="Si" />
+							</h:selectOneMenu>
+							
+							<h:outputLabel for="txtMuniResidencia" styleClass="lblDefaultSmall" 
+							   value="Municipio de Residencia:" 
+							   style="position:absolute; left:10px; top:50px;"/>
+							<h:inputText id="txtMuniResidencia" 
+							style="position:absolute; left:10px; top:65px; width:315px;"
+							 value="" styleClass="txtDefault" disabled="true" />
+							 
+							 <h:outputLabel for="txtComuResidencia" styleClass="lblDefaultSmall" 
+							   value="Comunidad o Barrio de Residencia:" 
+							   style="position:absolute; left:340px; top:50px;"/>
+							<h:inputText id="txtComuResidencia" 
+							style="position:absolute; left:340px; top:65px; width:300px;"
+							 value="" styleClass="txtDefault" disabled="true" />
+							 
+							  <h:outputLabel for="txtLongCasa" styleClass="lblDefaultSmall" 
+							   value="Longitud vivienda:" 
+							   style="position:absolute; left:655px; top:50px;"/>
+							<h:inputText id="txtLongCasa" maxlength="10" 
+							style="position:absolute; left:655px; top:65px; width:140px;"
+							 value=""  styleClass="txtDefault" />  
+							 
+							<h:outputLabel for="txtLatCasa" styleClass="lblDefaultSmall" 
+							   value="Latitud vivienda:" 
+							   style="position:absolute; left:810px; top:50px;"/>
+							<h:inputText id="txtLatCasa" maxlength="8" 
+							style="position:absolute; left:810px; top:65px; width:143px;"
+							 value=""  styleClass="txtDefault" />
+							 
+							<h:outputLabel for="txtDirResidencia" styleClass="lblDefaultSmall" 
+							   value="Dirección exacta de residencia habitual:" 
+							   style="position:absolute; left:10px; top:93px;"/>
+							<h:inputText id="txtDirResidencia" 
+							style="position:absolute; left:10px; top:108px; width:945px;"
+							 value="" styleClass="txtDefault"  disabled="true"/>
+						</p:panel> 
+						
+						<p:panel id="panDiagnostico"
+						 style="position:absolute; top:220px; left:5px; height:55px; width:985px;" 
+						 	 styleClass="panDetail">
+							
+							<h:outputLabel for="txtFechaDiagnostico" styleClass="lblDefaultSmall" 
+							   value="Fecha de Diagnostico:" 
+							   style="position:absolute; left:10px; top:8px;"/>
+							 <h:inputText id="txtFechaDiagnostico" 
+							 style="position:absolute; left:10px; top:23px; width:105px;"
+							 styleClass="txtDefault iniDiagnostico">
+								<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+							</h:inputText>
+							<script type="text/javascript">
+									jQuery('.iniDiagnostico').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+							</script> 
+							
+						   <h:outputLabel for="txtDensidadVivax" styleClass="lblDefaultSmall" 
+							   value="Densidad P. vivax:" 
+							   style="position:absolute; left:130px; top:8px;"/>
+							<h:inputText id="txtDensidadVivax" maxlength="8" 
+							style="position:absolute; left:130px; top:23px; width:115px;"
+							 value=""  styleClass="txtDefault" disabled="true"/>  
+
+						   <h:outputLabel for="txtDensidadFalcip" styleClass="lblDefaultSmall" 
+							   value="Densidad P. falciparum:" 
+							   style="position:absolute; left:260px; top:8px;"/>
+							<h:inputText id="txtDensidadFalcip" maxlength="8" 
+							style="position:absolute; left:260px; top:23px; width:115px;"
+							 value=""  styleClass="txtDefault" disabled="true"/>
+							 
+							 <h:outputLabel for="txtParasitoUl" styleClass="lblDefaultSmall" 
+							   value="Parásitos/μl:" 
+							   style="position:absolute; left:390px; top:8px;"/>
+							<h:inputText id="txtParasitoUl" 
+							style="position:absolute; left:390px; top:23px; width:115px;"
+							 value=""  styleClass="txtDefault" disabled="true"/>
+							 
+							  <h:outputLabel for="txtGamatocito" styleClass="lblDefaultSmall" 
+							   value="Gametocitos/μl:" 
+							   style="position:absolute; left:520px; top:8px;"/>
+							<h:inputText id="txtGamatocito"  
+							style="position:absolute; left:520px; top:23px; width:115px;"
+							 value=""  styleClass="txtDefault" disabled="true"/>    
+							
+							<h:outputLabel for="cboConfirmSilais" styleClass="lblDefaultSmall" 
+					   		value="Confirmación por SILAIS:" 
+					   		style="position:absolute; left:650px; top:8px;"/>
+							<h:selectOneMenu id="cboConfirmSilais" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:650px;top:23px;width:150px;" >
+							<f:selectItem itemValue="0" itemLabel=" " /> 
+							
+							</h:selectOneMenu>
+							
+							<h:outputLabel for="cboConfirmCndr" styleClass="lblDefaultSmall" 
+					   		value="Confirmación por CNDR:" 
+					   		style="position:absolute; left:810px; top:8px;"/>
+							<h:selectOneMenu id="cboConfirmCndr" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:810px;top:23px;width:150px;" >
+							<f:selectItem itemValue="0" itemLabel=" " /> 
+							
+							</h:selectOneMenu>			 
+						</p:panel>
+						
+						<p:panel id="panInvEpi"
+						 style="position:absolute; top:290px; left:5px; height:55px; width:985px;" 
+						 	 styleClass="panDetail">
+						 	 
+						</p:panel>
+					</p:panel>
+					
+					
+				</h:form>
+			</f:view>
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

@@ -14,7 +14,7 @@ import java.util.Set;
  */
 @NamedQueries({
 	@NamedQuery(name="InvestigacionSintoma.encontrarPorInvestigacionMalaria",
-		query="select ti from InvestigacionSintoma " +
+		query="select ti from InvestigacionSintoma ti " +
 				"where ti.investigacionMalaria.investigacionMalariaId=:pInvestigacionMalariaId")
 })
 @Entity
@@ -38,14 +38,17 @@ public class InvestigacionSintoma implements Serializable {
 	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal inicioResidencia;
 
-	@OneToOne
-	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	@OneToOne( optional = false,targetEntity=InvestigacionMalaria.class)
+	 @JoinColumns( {  
+           @JoinColumn(name = "INVESTIGACION_MALARIA", referencedColumnName = "INVESTIGACION_MALARIA_ID",nullable=false),  
+           @JoinColumn(name = "SINTOMATICO", referencedColumnName = "SINTOMATICO",nullable=false) 
+           }) 
 	private InvestigacionMalaria investigacionMalaria;
 
 	@Column(name="PERSONAS_SINTOMAS", nullable=false, precision=1)
 	private BigDecimal personasSintomas;
 
-	@Column(nullable=false, precision=1)
+	@Column(name="SINTOMATICO",nullable=false, precision=1,insertable=false, updatable=false )
 	private BigDecimal sintomatico;
 	
 	//bi-directional many-to-one association to SintomasLugaresAnte
