@@ -13,6 +13,8 @@ import javax.persistence.Query;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
+import org.primefaces.model.SortOrder;
+
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.encuesta.AddCatalogo;
@@ -90,7 +92,7 @@ public class CriaderoDA implements CriaderoServices {
 	 */
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
-			int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder,
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
 			Comunidad pComunidad) {
 		InfoResultado oResultado = new InfoResultado();
 		List<Criadero> resultado = null;
@@ -149,15 +151,15 @@ public class CriaderoDA implements CriaderoServices {
 	 */
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
-			int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder,
-			EntidadAdtva pSilais) {
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
+			long pCodSilais) {
 		InfoResultado oResultado = new InfoResultado();
 		List<Criadero> resultado = null;
 		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		Query query = null;
 		
-		if( pSilais == null ){
+		if( pCodSilais == 0 ){
 			oResultado.setOk(false);
 			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
 			oResultado.setMensajeDetalle("Silais no identificado");
@@ -177,10 +179,11 @@ public class CriaderoDA implements CriaderoServices {
 				"		  where und.entidadAdtva.codigo = :pCodEntidadAdtva )))  " +
 				" order by criaderoId ";
 		
+		
 		try{
 			
 			query = em.createQuery(strJPQL);
-			query.setParameter("pCodEntidadAdtva", pSilais.getCodigo());
+			query.setParameter("pCodEntidadAdtva", pCodSilais);
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
 			resultado = (List<Criadero>) query.getResultList();
@@ -218,15 +221,15 @@ public class CriaderoDA implements CriaderoServices {
 	 */
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
-			int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder,
-			DivisionPolitica pMunicipio) {
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
+			String pCodMunicipio) {
 		InfoResultado oResultado = new InfoResultado();
 		List<Criadero> resultado = null;
 		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		Query query = null;
 		
-		if( pMunicipio == null ){
+		if( pCodMunicipio == null || pCodMunicipio.isEmpty() ){
 			oResultado.setOk(false);
 			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
 			oResultado.setMensajeDetalle("Municipio no identificado");
@@ -247,7 +250,7 @@ public class CriaderoDA implements CriaderoServices {
 		try{
 			
 			query = em.createQuery(strJPQL);
-			query.setParameter("pCodMunicipio", pMunicipio.getCodigoNacional());
+			query.setParameter("pCodMunicipio", pCodMunicipio);
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
 			resultado = (List<Criadero>) query.getResultList();

@@ -35,6 +35,16 @@ public interface IntervencionServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado obtenerIntervencionesPorPesquisa(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, CriaderosPesquisa pPesquisa);
+
+	/**
+	 * Metodo que permite obtener la lista de intervenciones de tipo 
+	 * {@link CriaderosIntervencion} a partir de un objeto de tipo 
+	 * {@link CriaderosPesquisa}
+	 * 
+	 * @param pPesquisa objeto tipo {@link CriaderosPesquisa}
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado obtenerIntervencionesPorPesquisa(CriaderosPesquisa pPesquisa);	
 	
 	/**
 	 * Metodo que permite acceder a la capa de persistencia y guardar un objeto de tipo

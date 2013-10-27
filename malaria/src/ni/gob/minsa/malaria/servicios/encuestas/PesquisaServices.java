@@ -38,6 +38,16 @@ public interface PesquisaServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado obtenerPesquisasPorCriadero(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, Criadero pCriadero);
+
+	/**
+	 * Metodo que permite obtener una lista de pesquisas a partir de un 
+	 * criadero especifico, retornando el resultado del metodo en un
+	 * objeto {@link InfoResultado}
+	 * 
+	 * @param pCriadero Objeto Entity de tipo Criadero {@link Criadero}
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado obtenerPesquisasPorCriadero(Criadero pCriadero);	
 	
 	/**
 	 * Metodo que permite acceder a la capa de persistencia y guardar un objeto de tipo

@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.servicios.encuestas;
 
+import org.primefaces.model.SortOrder;
+
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
@@ -50,7 +52,7 @@ public interface CriaderoServices {
 	 * @param pComunidad Objeto de tipo {@link Comunidad}
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, Comunidad pComunidad);
+	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder, Comunidad pComunidad);
 	
 	/**
 	 * Metodo que permite obtener una lista de criaderos en dependencia del tipo de filtro 
@@ -65,7 +67,7 @@ public interface CriaderoServices {
 	 * @param pSilais Objeto de tipo {@link EntidadAdtva}
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, EntidadAdtva pSilais);	
+	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder, long pCodSilais);	
 	
 	/**
 	 * Metodo que permite obtener una lista de criaderos en dependencia del tipo de filtro 
@@ -80,7 +82,7 @@ public interface CriaderoServices {
 	 * @param pMunicipio Objeto de tipo {@link DivisionPolitica}
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
-	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, DivisionPolitica pMunicipio);	
+	public InfoResultado obtenerCriaderos(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder, String pCodMunicipio);	
 	
 	/**
 	 * Metodo que permite acceder a la capa de persistencia y guardar un objeto de tipo

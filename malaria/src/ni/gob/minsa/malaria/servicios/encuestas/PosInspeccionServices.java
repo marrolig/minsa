@@ -35,6 +35,16 @@ public interface PosInspeccionServices {
 	 * @return Objeto {@link InfoResultado} con el resultado de la operación
 	 */
 	public InfoResultado obtenerPosInspeccionesPorPorIntervencion(int pPaginaActual, int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder, CriaderosIntervencion pIntervencion);
+
+	/**
+	 * Metodo que permite obtener una lista de PosInspecciones de tipo
+	 * {@link CriaderosPosInspeccion} a partir de una intervencion de tipo
+	 * {@link CriaderosIntervencion}
+	 * 
+	 * @param pIntervencion objeto de tipo {@link CriaderosIntervencion}
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado obtenerPosInspeccionesPorPorIntervencion(CriaderosIntervencion pIntervencion);	
 	
 	/**
 	 * Metodo que permite acceder a la capa de persistencia y guardar un objeto de tipo

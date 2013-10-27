@@ -135,6 +135,59 @@ public class PesquisaDA implements PesquisaServices {
 	}
 
 	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.PesquisaServices#obtenerPesquisasPorCriadero(ni.gob.minsa.malaria.modelo.encuesta.Criadero)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public InfoResultado obtenerPesquisasPorCriadero(Criadero pCriadero) {
+		InfoResultado oResultado = new InfoResultado();
+		List<CriaderosPesquisa> resultado = null;
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pCriadero == null ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Criadero no identificado");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strJPQL = "select psq from CriaderosPesquisa psq where psq.criadero.codigo = :pCodCriadero order by criaderoPesquisaId";
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setParameter("pCodCriadero", pCriadero.getCodigo());
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			resultado = (List<CriaderosPesquisa>) query.getResultList();
+			if( resultado.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(resultado.size());
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+
+	}	
+	
+	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.PesquisaServices#guardarPesquisa(ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa)
 	 */
 	@Override

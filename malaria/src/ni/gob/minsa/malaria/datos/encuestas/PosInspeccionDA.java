@@ -138,6 +138,62 @@ public class PosInspeccionDA implements PosInspeccionServices {
 
 
 	}
+	
+	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.PosInspeccionServices#obtenerPosInspeccionesPorPorIntervencion(ni.gob.minsa.malaria.modelo.encuesta.CriaderosIntervencion)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public InfoResultado obtenerPosInspeccionesPorPorIntervencion(CriaderosIntervencion pIntervencion) {
+		InfoResultado oResultado = new InfoResultado();
+		List<CriaderosPosInspeccion> resultado = null;
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pIntervencion == null ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Pesquisa no identificada");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strJPQL = "select pins from CriaderosPosInspeccion pins " +
+				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by criaderoPosInspeccionId";
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setParameter("pPesquisaId", pIntervencion.getCriaderoIntervencionId());
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			resultado = (List<CriaderosPosInspeccion>) query.getResultList();
+			if( resultado.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(resultado.size());
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+
+
+
+	}	
 
 	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.PosInspeccionServices#guardarPosInspeccion(ni.gob.minsa.malaria.modelo.encuesta.CriaderosPosInspeccion)

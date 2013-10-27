@@ -78,6 +78,7 @@ public class IntervencionDA implements IntervencionServices {
 	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.IntervencionServices#obtenerIntervencionesPorPesquisa(int, int, java.lang.String, java.lang.Boolean, ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public InfoResultado obtenerIntervencionesPorPesquisa(int pPaginaActual,
 			int pRegistroPorPagina, String pFieldSort, Boolean pSortOrder,
@@ -137,6 +138,61 @@ public class IntervencionDA implements IntervencionServices {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.IntervencionServices#obtenerIntervencionesPorPesquisa(ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public InfoResultado obtenerIntervencionesPorPesquisa(CriaderosPesquisa pPesquisa) {
+		InfoResultado oResultado = new InfoResultado();
+		List<CriaderosIntervencion> resultado = null;
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pPesquisa == null ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Pesquisa no identificada");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strJPQL = "select int from CriaderosIntervencion int " +
+				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by criaderoIntervencionId";
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setParameter("pPesquisaId", pPesquisa.getCriaderoPesquisaId());
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			resultado = (List<CriaderosIntervencion>) query.getResultList();
+			if( resultado.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(resultado.size());
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+
+
+	}	
+	
 	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.IntervencionServices#guardarIntervencion(ni.gob.minsa.malaria.modelo.encuesta.CriaderosIntervencion)
 	 */
