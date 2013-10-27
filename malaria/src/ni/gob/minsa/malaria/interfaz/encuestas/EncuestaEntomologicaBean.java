@@ -308,9 +308,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 			@Override
 			public List<Criadero> load(int pPage, int pRows, String pSortField, SortOrder pSortOrder,
 					Map<String, String> pArgs) {
-				InfoResultado oResultado = null;
+				InfoResultado oResultado = new InfoResultado();
 				List<Criadero> resultado = null;
-				
 				
 				if( frmInp_ComunidadBusqueda != null )
 					oResultado = srvCriadero.obtenerCriaderos(pPage, pRows, pSortField, pSortOrder, frmInp_ComunidadBusqueda);
@@ -318,6 +317,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 					oResultado = srvCriadero.obtenerCriaderos(pPage, pRows, pSortField, pSortOrder, frmSom_MunicipioBusqueda);
 				else if( frmSom_SilaisBusqueda > 0 )
 					oResultado = srvCriadero.obtenerCriaderos(pPage, pRows, pSortField, pSortOrder, frmSom_SilaisBusqueda);
+				else oResultado.setOk(false);
 				
 				if( oResultado.isOk() && oResultado.getObjeto() != null ){
 					this.setRowCount(oResultado.getFilasAfectadas());
@@ -2559,6 +2559,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 
 	public void setFrmInp_AreaEnc(BigDecimal frmInp_AreaEnc) {
 		this.frmInp_AreaEnc = frmInp_AreaEnc;
+	}
+
+	public short getPanelCriadero() {
+		return panelCriadero;
+	}
+
+	public void setPanelCriadero(short panelCriadero) {
+		this.panelCriadero = panelCriadero;
 	}
 
 	
