@@ -140,46 +140,34 @@
 <div>
 	<label>Pesquisa</label>
 	<p:commandButton id="cmbAgregarPesquisa" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgPesquisa.show();"
-		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;" />
+		onclick="dlgPesquisa.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;" />
 	<p:dataTable id="dtPesquisas" value="#{encuestaEntomologicaBean.frmDt_ListaPesquisas}" var="pesq" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
+	    >
 	</p:dataTable>
 </div>
 
 <div>
 	<label>Intervencion</label>
 	<p:commandButton id="cmbAgregarIntervencion" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgIntervencion.show();"
-		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
+		onclick="dlgIntervencion.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
 	<p:dataTable id="dtIntervencion" value="#{encuestaEntomologicaBean.frmDt_ListaIntervencion}" var="intr" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
+	 	>
 	</p:dataTable>
 </div>
 
 <div>
 	<label>PosInspeccion</label>
 	<p:commandButton id="cmbAgregarPosInspeccion" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgPosInspeccion.show();"
-		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
+		onclick="dlgPosInspeccion.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
 	<p:dataTable id="dtPosInspeccion" value="#{encuestaEntomologicaBean.frmDt_ListaPosInspeccion}" var="posi"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
+	 	>
 	</p:dataTable>
 </div>
 
 </p:panel>
-
-
-<p:panel id="panelBotones" styleClass="panButton">
-	<p:commandButton id="cmbNuevo" value="Nuevo" process="@this" update="panelBusqueda, panelEncuesta, panelUbicaCriadero, panelCaractCriadero, cmbRegresar"
-		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
-	<p:commandButton id="cmbGuardar" value="Guardar" />
-	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,panelBusqueda, panelEncuesta, cmbRegresar" 
-		disabled="#{encuestaEntomologicaBean.cmbRegresar==0}"
-		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />		
-	<p:commandButton id="cmbSalir" value="Salir" />
-</p:panel>
-
 
 <p:panel id="panelCriadero" visible="#{encuestaEntomologicaBean.panelCriadero!=0}">
 <p:panel id="panelUbicaCriadero" header="Ubicacion del Criadero" style="height: 180px;" styleClass="panDetail" >
@@ -499,6 +487,19 @@
 </p:panel>
 </p:panel>
 
+<p:panel id="panelBotones" styleClass="panButton">
+	<p:commandButton id="cmbNuevo" value="Nuevo" process="@this" update="@this, cmbGuardar, panelBusqueda, panelEncuesta, panelUbicaCriadero, panelCaractCriadero, cmbRegresar"
+		disabled="#{encuestaEntomologicaBean.cmbNuevo!=0}"
+		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
+	<p:commandButton id="cmbGuardar" value="Guardar" process="@this, panelCriadero, panelPesquisa, panelIntervencion, panelPosInspeccion" update="grwMensaje"
+		disabled="#{encuestaEntomologicaBean.cmbGuardar==0}"
+		actionListener="#{encuestaEntomologicaBean.guardar}" />
+	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,panelBusqueda, panelEncuesta,panelCriadero, cmbRegresar, cmbGuardar, cmbNuevo" 
+		disabled="#{encuestaEntomologicaBean.cmbRegresar==0}"
+		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />		
+	<p:commandButton id="cmbSalir" value="Salir" />
+</p:panel>
+
 
 
 <p:dialog	id="idDlgPesquisa"
@@ -509,7 +510,8 @@
 			widgetVar="dlgPesquisa"
 			height="100"
 			width="900">
-	
+
+<p:panel id="panelPesquisa">
 <div style="float: left; width: 120px; margin-left: 10px;">
 	<h:outputLabel for="frmCal_Pesq_FechaInspeccion" value="Fecha de inspeccion:" />
 	<h:inputText id="frmCal_Pesq_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_Pesq_FechaInspeccion}" style="width: 120px">
@@ -569,7 +571,7 @@
 	<h:outputLabel for="frmInp_Pesq_Observaciones" value="Densidad pupas:" />
 	<h:inputText id="frmInp_Pesq_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Pesq_Observaciones}" style="width: 120px" />	
 </div>
-
+</p:panel>
 </p:dialog>
 
 
@@ -583,6 +585,7 @@
 			height="100"
 			width="900">
 
+<p:panel id="panelIntervencion">
 <div style="float: left; width: 120px; margin-left: 10px;">
 	<h:outputLabel for="frmCal_Intv_FechaIntervencion" value="Fecha Intervencion:" />
 	<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px" >
@@ -642,7 +645,7 @@
 	<h:outputLabel for="frmInp_Intv_Observaciones" value="Puntos muestreo:" />
 	<h:inputText id="frmInp_Intv_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Intv_Observaciones}" style="width: 120px" />	
 </div>
-
+</p:panel>
 
 
 
@@ -658,7 +661,8 @@
 			widgetVar="dlgPosInspeccion"
 			height="100"
 			width="900">
-	
+
+<p:panel id="panelPosInspeccion">	
 <div style="float: left; width: 120px; margin-left: 10px;">
 	<h:outputLabel for="frmCal_PosIns_FechaInspeccion" value="Fecha de inspeccion:" />
 	<h:inputText id="frmCal_PosIns_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_PosIns_FechaInspeccion}" style="width: 120px" >
@@ -718,6 +722,7 @@
 	<h:outputLabel for="frmInp_PosIns_Observaciones" value="Densidad pupas:" />
 	<h:inputText id="frmInp_PosIns_Observaciones" value="#{encuestaEntomologicaBean.frmInp_PosIns_Observaciones}" style="width: 120px" />	
 </div>
+</p:panel>
 
 </p:dialog>
 

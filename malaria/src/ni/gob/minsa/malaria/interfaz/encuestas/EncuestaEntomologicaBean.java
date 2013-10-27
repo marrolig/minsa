@@ -270,10 +270,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private String frmInp_UbicacionCoordendaEnc;
 	private BigDecimal frmInp_DistMaxCasaEnc;
 	private BigDecimal frmInp_AreaEnc;
-	private boolean isPanelCriadero = false;
-	
-	
-	
 	
 	
 	/*
@@ -288,6 +284,15 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private short panelEncuesta = 0;
 	private short panelCriadero = 0;
 	private short cmbRegresar = 0;
+	private short cmbGuardar = 0;
+	private short cmbNuevo = 0;
+	
+	private boolean isCriaderoActive = false;
+	private boolean isPesquisaActive = false;
+	private boolean isIntervencionActive = false;
+	private boolean isPosInspeccionActive = false;
+
+	
 	
 	public EncuestaEntomologicaBean() {
 		
@@ -419,8 +424,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_UbicacionEnc = null;
 		frmInp_UbicacionCoordendaEnc = null;
 		frmInp_DistMaxCasaEnc = null;
-		frmInp_AreaEnc = null;
-		isPanelCriadero = false;		
+		frmInp_AreaEnc = null;	
 		frmDt_ListaPesquisas = null;
 		frmDt_ListaIntervencion = null;
 		frmDt_ListaIntervencionEliminar = null;
@@ -493,7 +497,23 @@ public class EncuestaEntomologicaBean implements Serializable {
 	 * Metodos de manejo de pesquisas de criaderos
 	 * 
 	 */
-	public void agregarPesquisa(ActionEvent evt){
+	
+	public void openModalAgregarPesquisa(ActionEvent evt){
+		if( oCriaderoActual == null){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"Criadero no valido","Completar un criadero para continuar");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		
+		isCriaderoActive = false;
+		isPesquisaActive = true;
+		isIntervencionActive = false;
+		isPosInspeccionActive = false;
+		RequestContext.getCurrentInstance().execute("dlgPesquisa.show();");
+		
+	}
+	
+	private void agregarPesquisa(){
 		CriaderosPesquisa oPesquisa = new CriaderosPesquisa();
 
 		if( frmInp_SemanaEpidemiologica == null ){
@@ -652,6 +672,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Pesq_DensPupas = 
 			calcularDensidad(frmInp_Pesq_NumPupas, frmInp_Pesq_TotalCucharonadas);		
 		
+		isCriaderoActive = false;
+		isPesquisaActive = true;
+		isIntervencionActive = false;
+		isPosInspeccionActive = false;
+		
 //		frmDt_ListaPesquisas.remove(oPesquisa);
 //		oPesquisa = null;
 	}
@@ -693,11 +718,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;			
 		}
-		
+		isCriaderoActive = false;
+		isPesquisaActive = false;
+		isIntervencionActive = true;
+		isPosInspeccionActive = false;
 		RequestContext.getCurrentInstance().execute("dlgAgregarIntervencion.show();");
 	}
 	
-	public void agregarIntervencion(ActionEvent evt){
+	public void agregarIntervencion(){
 		CriaderosIntervencion oIntervencion = new CriaderosIntervencion();
 
 		
@@ -792,7 +820,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		if( frmDt_ListaIntervencion == null ) frmDt_ListaIntervencion = new ArrayList<CriaderosIntervencion>();
 		frmDt_ListaIntervencion.add(oIntervencion);
-		
 	}
 	
 	public void openModalEliminarIntervencion(ActionEvent evt){
@@ -853,6 +880,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Intv_ConsumoBti = oIntervencion.getConsumoBti();
 		frmInp_Intv_Observaciones = oIntervencion.getObservaciones();
 		
+		isCriaderoActive = false;
+		isPesquisaActive = false;
+		isIntervencionActive = true;
+		isPosInspeccionActive = false;
+		
 //		frmDt_ListaPesquisas.remove(oIntervencion);
 //		oIntervencion = null;
 	}
@@ -879,10 +911,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return;
 		}
 		
+		isCriaderoActive = false;
+		isPesquisaActive = false;
+		isIntervencionActive = false;
+		isPosInspeccionActive = true;
 		RequestContext.getCurrentInstance().execute("dlgAgregarPosInspeccion.show();");
 	}
 	
-	public void agregarPosInspeccion(ActionEvent evt){
+	public void agregarPosInspeccion(){
 		CriaderosPosInspeccion oPosInspeccion = new CriaderosPosInspeccion();
 
 		
@@ -963,7 +999,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		if( frmDt_ListaPosInspeccion == null ) frmDt_ListaPosInspeccion = new ArrayList<CriaderosPosInspeccion>();
 		frmDt_ListaPosInspeccion.add(oPosInspeccion);
-		
 	}
 	
 	public void openModalConfirmaEliminarPosInspeccion(ActionEvent evt){
@@ -1019,6 +1054,10 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_PosIns_DensPupas = 
 			calcularDensidad(frmInp_PosIns_NumPupas, frmInp_PosIns_TotalCucharonadas);
 		
+		isCriaderoActive = false;
+		isPesquisaActive = false;
+		isIntervencionActive = false;
+		isPosInspeccionActive = true;
 //		frmDt_ListaPosInspeccion.remove(oPosInspeccion);
 //		oPosInspeccion = null;
 	}
@@ -1090,8 +1129,15 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 			
 	}
+	
+	public void guardar(ActionEvent evt){
+		if( isCriaderoActive ) guardarEncuesta();
+		else if( isPesquisaActive ) agregarPesquisa();
+		else if( isIntervencionActive ) agregarIntervencion();
+		else if( isPosInspeccionActive ) agregarPosInspeccion();
+	}
 
-	public void guardarEncuesta(ActionEvent evt){
+	private void guardarEncuesta(){
 		InfoResultado oResultado = null;
 		
 		oResultado = validarFormulario();
@@ -1111,7 +1157,10 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
 		if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
-		
+		panelCriadero = 0;
+		panelEncuesta = 0;
+		cmbRegresar = 0;
+		cmbGuardar = 0;
 	}	
 	
 	private InfoResultado validarFormulario(){
@@ -1617,20 +1666,45 @@ public class EncuestaEntomologicaBean implements Serializable {
 		if( evt.getComponent().getClientId().equals("frmEncEnto:cmbNuevo")){
 			panelBusqueda = 1;
 			panelEncuesta = 1;
+			panelCriadero = 0;
 			cmbRegresar = 1;
+			cmbGuardar = 1;
+			cmbNuevo = 1;
 			limpiarFormulario();
 		}else if(evt.getComponent().getClientId().equals("frmEncEnto:cmbCriadero") ){
 			panelBusqueda = 1;
-			panelEncuesta = 1;
+			panelEncuesta = 0;
+			panelCriadero = 1;
 			cmbRegresar = 1;
-			limpiarFormulario();
-			isPanelCriadero = true;
+			cmbGuardar = 1;
+			cmbNuevo = 1;
+			limpiarDatosPanelCriadero();
+			isCriaderoActive = true;
+			isPesquisaActive = false;
+			isIntervencionActive = false;
+			isPosInspeccionActive = false;
 			if( oCriaderoActual != null ) actualizarDatosPanelCriadero();
 		}else if( evt.getComponent().getClientId().equals("frmEncEnto:cmbRegresar")){
-			panelBusqueda = 0;
-			panelEncuesta = 0;
-			cmbRegresar = 0;
-			panelCriadero = 0;
+			
+			if( panelCriadero == 1 ){
+				panelEncuesta = 1;
+				panelBusqueda = 1;
+				cmbNuevo = 1;
+				cmbGuardar = 1;
+				panelCriadero = 0;
+			}else{
+				panelEncuesta = 0;
+				panelBusqueda = 0;
+				cmbNuevo = 0;
+				cmbGuardar = 0;
+				cmbRegresar = 0;
+				panelCriadero = 0;
+			}
+			
+			
+			
+			
+			
 			limpiarDatosPanelCriadero();
 			actualizarDatosPanelEncuesta();
 		}
@@ -1646,6 +1720,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
+		
+		isCriaderoActive = true;
+		isPesquisaActive = false;
+		isIntervencionActive = false;
+		isPosInspeccionActive = false;
 		
 		frmInp_SemanaEpidemiologica = frmInp_SemaEpidemEnc;
 		frmInp_AxoEpidemiologico = frmInp_AxoEpidemEnc;
@@ -2569,11 +2648,21 @@ public class EncuestaEntomologicaBean implements Serializable {
 		this.panelCriadero = panelCriadero;
 	}
 
-	
-	
-	
+	public short getCmbGuardar() {
+		return cmbGuardar;
+	}
 
-	
+	public void setCmbGuardar(short cmbGuardar) {
+		this.cmbGuardar = cmbGuardar;
+	}
+
+	public short getCmbNuevo() {
+		return cmbNuevo;
+	}
+
+	public void setCmbNuevo(short cmbNuevo) {
+		this.cmbNuevo = cmbNuevo;
+	}
 	
 	
 }
