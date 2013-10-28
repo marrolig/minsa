@@ -50,7 +50,7 @@ public class ComunidadDA implements ComunidadService {
 		 
 		try{
 		    query = em.createQuery("select tc from Comunidad tc " +
-					" where tc.sector.municipio.codigoNacional=:pCodMunicipio and " +
+					" where tc.sector.municipio.codigoNacional=:pCodMunicipio " +
 					" and UPPER(tc.nombre) LIKE :pNombre " +
 					" order by tc.nombre");
 			query.setParameter("pCodMunicipio", pCodMunicipio);

@@ -237,6 +237,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 	 */
 	
 	private List<EntidadAdtva> itemsSilais = null;
+	private List<DivisionPolitica> itemsMunicipioBusqueda = null;
 	private List<DivisionPolitica> itemsMunicipio = null;
 	private List<AbundanciaFauna> itemsAbundanciaFauna = null;
 	private List<AbundanciaVegetacion> itemsAbundanciaVegetacion = null;
@@ -463,10 +464,29 @@ public class EncuestaEntomologicaBean implements Serializable {
 		// limpieza datos panel busqueda
 		limpiarDatosPanelBusqueda();
 	}
+
+	@SuppressWarnings("unchecked")
+	public void actualizarMunicipiosBusqueda(){
+		InfoResultado oResultado = new InfoResultado();
+		try{
+			
+			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisBusqueda);
+			if( oResultado.isOk() && oResultado.getObjeto() != null ){
+				itemsMunicipioBusqueda = (List<DivisionPolitica>) oResultado.getObjeto();
+			}else{
+				itemsMunicipioBusqueda = null;
+			}
+			
+		}catch(Exception e){
+			System.out.println("Error Obteniendo Listado Municipios Por Silais");
+			e.printStackTrace();
+		}
+		
+	}
 	
 	
 	@SuppressWarnings("unchecked")
-	public void actualizarMunicipios(ActionEvent evt){
+	public void actualizarMunicipiosUbicacion(){
 		InfoResultado oResultado = new InfoResultado();
 		try{
 			
@@ -483,6 +503,12 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 		
 	}
+
+	public List<Comunidad> completarComunidadBusqueda(String query){
+		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
+		oComunidades = srvComunidad.ComunidadesPorMunicipioNombre(frmSom_MunicipioBusqueda, query, 10);
+		return oComunidades;		
+	}	
 	
 	public List<Comunidad> completarComunidad(String query){
 		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
@@ -845,7 +871,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 			
 			oResultado = null;
 			AbundanciaVegetacion oAbunVeg = null;
-			oResultado = srvCatTurbAgua.Encontrar(frmSom_VegEmergente);
+			oResultado = srvCatAbndVgt.Encontrar(frmSom_VegEmergente);
 			if( oResultado.isOk() && oResultado.getObjeto() != null ){
 				oAbunVeg = (AbundanciaVegetacion) oResultado.getObjeto();
 				oCriaderoActual.setVegEmergente(oAbunVeg);
@@ -853,7 +879,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				return oResultado;
 			}		
 	
-			oResultado = srvCatTurbAgua.Encontrar(frmSom_VegFlotante);
+			oResultado = srvCatAbndVgt.Encontrar(frmSom_VegFlotante);
 			if( oResultado.isOk() && oResultado.getObjeto() != null ){
 				oAbunVeg = (AbundanciaVegetacion) oResultado.getObjeto();
 				oCriaderoActual.setVegFlotante(oAbunVeg);
@@ -861,7 +887,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				return oResultado;
 			}		
 	
-			oResultado = srvCatTurbAgua.Encontrar(frmSom_VegSumergida);
+			oResultado = srvCatAbndVgt.Encontrar(frmSom_VegSumergida);
 			if( oResultado.isOk() && oResultado.getObjeto() != null ){
 				oAbunVeg = (AbundanciaVegetacion) oResultado.getObjeto();
 				oCriaderoActual.setVegSumergida(oAbunVeg);
@@ -869,7 +895,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				return oResultado;
 			}			
 	
-			oResultado = srvCatTurbAgua.Encontrar(frmSom_VegVertical);
+			oResultado = srvCatAbndVgt.Encontrar(frmSom_VegVertical);
 			if( oResultado.isOk() && oResultado.getObjeto() != null ){
 				oAbunVeg = (AbundanciaVegetacion) oResultado.getObjeto();
 				oCriaderoActual.setVegVertical(oAbunVeg);
@@ -901,16 +927,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Criadero no valido","Seleccionar o agregar un criadero valido");
 			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
-		}
-				
-		oResultado = srvPesquisa.obtenerPesquisasPorCriadero(oCriaderoActual);
-		if( !oResultado.isOk() || oResultado.isExcepcion() ){
-			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
-			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
-			return;
-		}
-		
-		frmDt_ListaPesquisas = (List<CriaderosPesquisa>) oResultado.getObjeto();
+		}				
 
 		frmInp_ComunidadUbicaCriadero = oCriaderoActual.getComunidad();
 		frmInp_UbicacionEnc = oCriaderoActual.getDireccion() + ", " + oCriaderoActual.getComunidad().getNombre();
@@ -935,6 +952,16 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_UbicacionCoordendaEnc = "Latitud: " + oCriaderoActual.getLatitud()+", Longitud: " + oCriaderoActual.getLongitud();
 		frmInp_DistMaxCasaEnc = oCriaderoActual.getDistanciaCasa();
 		frmInp_AreaEnc = oCriaderoActual.getAreaActual();
+		
+		oResultado = srvPesquisa.obtenerPesquisasPorCriadero(oCriaderoActual);
+		if( !oResultado.isOk() || oResultado.isExcepcion() ){
+			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		
+		frmDt_ListaPesquisas = (List<CriaderosPesquisa>) oResultado.getObjeto();
+
 
 	}
 	
@@ -2671,6 +2698,10 @@ public class EncuestaEntomologicaBean implements Serializable {
 
 	public void setCmbNuevo(short cmbNuevo) {
 		this.cmbNuevo = cmbNuevo;
+	}
+
+	public List<DivisionPolitica> getItemsMunicipioBusqueda() {
+		return itemsMunicipioBusqueda;
 	}
 	
 	

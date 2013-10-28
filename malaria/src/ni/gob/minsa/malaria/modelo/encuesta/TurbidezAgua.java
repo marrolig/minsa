@@ -19,7 +19,7 @@ import org.eclipse.persistence.annotations.Cache;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="MHm_Dsd+")
+@DiscriminatorValue(value="ML_TURBIDEZAGUA")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class TurbidezAgua extends Catalogo {
 	private static final long serialVersionUID = 1L;
