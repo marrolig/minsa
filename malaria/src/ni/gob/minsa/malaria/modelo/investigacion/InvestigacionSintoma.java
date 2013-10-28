@@ -28,8 +28,9 @@ public class InvestigacionSintoma implements Serializable {
 	@Column(name="INVESTIGACION_SINTOMA_ID", unique=true, nullable=false, precision=10)
 	private long investigacionSintomaId;
 
-	@Column(name="ESTADO_FEBRIL", nullable=false, length=50)
-	private String estadoFebril;
+	@ManyToOne
+	@JoinColumn(name="ESTADO_FEBRIL", referencedColumnName="CODIGO",nullable=false)
+	private EstadoFebril estadoFebril;
 
     @Temporal( TemporalType.DATE)
 	@Column(name="FECHA_INICIO_SINTOMAS")
@@ -74,11 +75,11 @@ public class InvestigacionSintoma implements Serializable {
 		this.investigacionSintomaId = investigacionSintomaId;
 	}
 
-	public String getEstadoFebril() {
+	public EstadoFebril getEstadoFebril() {
 		return this.estadoFebril;
 	}
 
-	public void setEstadoFebril(String estadoFebril) {
+	public void setEstadoFebril(EstadoFebril estadoFebril) {
 		this.estadoFebril = estadoFebril;
 	}
 

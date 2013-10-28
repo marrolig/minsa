@@ -462,6 +462,25 @@ public class ComunidadDA implements ComunidadService {
             em.close();
         }
 	}
+	/*
+	 * (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.poblacion.ComunidadService#ComunidadesPorMunicipioYNombre(long, java.lang.String)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Comunidad>ComunidadesPorMunicipioYNombre(long pMunicipioId, String pNombre){
+		 EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+	        try{
+	            Query query = em.createNamedQuery("comunidadesActivasPorMunicipioYNombre");
+	            query.setParameter("pMunicipioId", pMunicipioId);
+	            query.setParameter("pTipoArea", null);
+	            query.setParameter("pNombre", "%" + pNombre.toUpperCase() + "%");
+	            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+	            return(query.getResultList());
+	        }finally{
+	            em.close();
+	        }
+	}
 
 
 	@SuppressWarnings("unchecked")

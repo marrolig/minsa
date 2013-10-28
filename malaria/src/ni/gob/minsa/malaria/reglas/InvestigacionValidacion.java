@@ -219,7 +219,7 @@ public class InvestigacionValidacion {
 			}
 		}
 
-		if(pInvestigacionSintoma.getEstadoFebril()==null || pInvestigacionSintoma.getEstadoFebril().trim().equals("")){
+		if(pInvestigacionSintoma.getEstadoFebril()==null || pInvestigacionSintoma.getEstadoFebril().getCodigo().trim().equals("")){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar el estado febril del paciente.");
 			return oResultado;

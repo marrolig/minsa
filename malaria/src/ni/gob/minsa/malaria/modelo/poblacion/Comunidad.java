@@ -63,6 +63,13 @@ import java.util.Set;
 					"      UPPER(tc.nombre) LIKE :pNombre " +
 					"order by tc.nombre"),
 	@NamedQuery(
+			name="comunidadesActivasPorMunicipioYNombre",
+			query="select tc from Comunidad tc " +
+			"where tc.sector.municipio.divisionPoliticaId=:pMunicipioId and " +
+			"      tc.pasivo='0' and (:pTipoArea is null or tc.tipoArea=:pTipoArea) and " +
+			"      UPPER(tc.nombre) LIKE :pNombre " +
+			"order by tc.nombre"),
+	@NamedQuery(
 			name="comunidadesActivasPorUnidad",
 			query="select tc from Comunidad tc " +
 					"where tc.sector.unidad.unidadId=:pUnidadId and " +

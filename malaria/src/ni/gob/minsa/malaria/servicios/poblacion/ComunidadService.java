@@ -53,6 +53,18 @@ public interface ComunidadService {
 	 * @return		Lista de objetos Comunidad
 	 */
 	public List<Comunidad> ComunidadesPorUnidadYNombre(long pUnidadId, String pNombre);
+	
+	/**
+	 * Retorna una lista de objetos {@link Comunidad} que poseen la
+	 * literal de búsqueda pNombre como parte del nombre de la comunidad,
+	 * que se encuentran activos y que están ubicados geográficamente
+	 * en un Municipio determinado. 
+	 *
+	 * pMunicipioId	Identificador del Municipio
+	 * @pNombre     Literal del nombre de la Comunidad
+	 * @return		Lista de objetos Comunidad
+	 */
+	public List<Comunidad>ComunidadesPorMunicipioYNombre(long pMunicipioId, String pNombre);
 
 	/**
 	 * Retorna la lista de objetos {@link Comunidad} activos, asociados a un
