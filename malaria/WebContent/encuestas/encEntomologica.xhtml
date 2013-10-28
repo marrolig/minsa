@@ -78,10 +78,21 @@
 		converter="comunidadConverter"     
 		itemValue="#{comunidadPuesto}">
 	</p:autoComplete>
+	
+	<p:commandButton id="cmbBuscarCriaderos" value="Buscar" process="frmInp_ComunidadBusqueda, frmSom_MunicipioBusqueda, frmSom_SilaisBusqueda" update="dtBusqueda" />
 </h:panelGrid>
 
 <p:dataTable id="dtBusqueda" value="#{encuestaEntomologicaBean.lazyCriaderos}" var="criadero" style="margin-top: 5px;"
-	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="12" errorMessage="Se ha presentado un error al cargar los datos"> 
+	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="12" errorMessage="Se ha presentado un error al cargar los datos">
+	
+	<p:column style="width:40px;text-align:center;" >
+		<p:commandButton id="cmbSeleccionarCriadero" styleClass="navLink" icon="icon-select" 
+			title="Seleccionar Criadero" process="@this" update="panelBusqueda,panelEncuesta,dtPesquisas,panelDatosCriaderoEnc,grwMensaje" 
+			actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}">
+			<f:setPropertyActionListener value="#{pesq}" target="#{encuestaEntomologicaBean.seleccionCriadero}" /> 
+		</p:commandButton>
+	</p:column>	
+	 
 </p:dataTable>
 	
 </p:panel>
@@ -131,45 +142,142 @@
 	</div>
 
 	<p:commandButton id="cmbCriadero" value="Criaderos" style="margin-top:10px;"
-		process="@this" update="panelEncuesta, panelCriadero"
-	 	actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
+		process="@this" update="panelEncuesta, panelUbicaCriadero, panelCaractCriadero" actionListener="#{encuestaEntomologicaBean.openModalPanelCriadero}" />
 
 </p:panel>
 
 	
 <div>
 	<label>Pesquisa</label>
-	<p:commandButton id="cmbAgregarPesquisa" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgPesquisa.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;" />
+	<p:commandButton id="cmbAgregarPesquisa" image="ui-icon-plusthick" title="Agregar" 
+		process="@this" update="panelPesquisa,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalAgregarPesquisa}" 
+		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;" />
 	<p:dataTable id="dtPesquisas" value="#{encuestaEntomologicaBean.frmDt_ListaPesquisas}" var="pesq" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
-	    >
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEditarPesquisa" styleClass="navLink button-delete" icon="icon-edit" 
+				title="Editar registro Pesquisa" process="@this" update="dlgPesquisa,grwMensaje" 
+				actionListener="#{encuestaEntomologicaBean.openModalAgregarPesquisa}">
+				<f:setPropertyActionListener value="#{pesq}" target="#{encuestaEntomologicaBean.seleccionPesquisa}" /> 
+			</p:commandButton>
+		</p:column>
+
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEliminarPesquisa" styleClass="navLink button-delete" icon="icon-delete" 
+				title="Eliminar registro Pesquisa"  oncomplete="dlgConfirmaEliminarPesquisa.show()">
+				<f:setPropertyActionListener value="#{pesq}" target="#{encuestaEntomologicaBean.eliminarPesquisa}" /> 
+			</p:commandButton>
+		</p:column>
 	</p:dataTable>
 </div>
 
 <div>
 	<label>Intervencion</label>
 	<p:commandButton id="cmbAgregarIntervencion" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgIntervencion.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
+		process="@this" update="panelIntervencion,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalIntervencion}"
+		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
 	<p:dataTable id="dtIntervencion" value="#{encuestaEntomologicaBean.frmDt_ListaIntervencion}" var="intr" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
-	 	>
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEditarIntervencion" styleClass="navLink button-delete" icon="icon-edit" 
+				title="Editar registro Intervencion" process="@this" update="panelIntervencion,grwMensaje" 
+				actionListener="#{encuestaEntomologicaBean.openModalIntervencion}">
+				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.seleccionIntervencion}" /> 
+			</p:commandButton>
+		</p:column>
+
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEliminarIntervencion" styleClass="navLink button-delete" icon="icon-delete" 
+				title="Eliminar registro Intervencion"  oncomplete="dlgConfirmaEliminarIntervencion.show()">
+				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.eliminarIntervencion}" /> 
+			</p:commandButton>
+		</p:column>	 	
+
 	</p:dataTable>
 </div>
 
 <div>
 	<label>PosInspeccion</label>
 	<p:commandButton id="cmbAgregarPosInspeccion" image="ui-icon-plusthick" title="Agregar"  
-		onclick="dlgPosInspeccion.show();" style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
+		 process="@this" update="panelPosInspeccion,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalPosInspeccion}"
+		 style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
 	<p:dataTable id="dtPosInspeccion" value="#{encuestaEntomologicaBean.frmDt_ListaPosInspeccion}" var="posi"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos"
-	 	>
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEditarPosInspeccion" styleClass="navLink button-delete" icon="icon-edit" 
+				title="Editar registro PosInspeccion" process="@this" update="panelPosInspeccion,grwMensaje" 
+				actionListener="#{encuestaEntomologicaBean.openModalPosInspeccion}">
+				<f:setPropertyActionListener value="#{posi}" target="#{encuestaEntomologicaBean.seleccionPosInspeccion}" /> 
+			</p:commandButton>
+		</p:column>
+		
+		<p:column style="width:40px;text-align:center;" >
+			<p:commandButton id="cmbEliminarPosInspeccion" styleClass="navLink button-delete" icon="icon-delete" 
+				title="Eliminar registro posinspeccion" oncomplete="dlgConfirmaEliminarPosInspeccion.show()">
+				<f:setPropertyActionListener value="#{posi}" target="#{encuestaEntomologicaBean.eliminarPosInspeccion}" /> 
+			</p:commandButton>
+		</p:column>
+		
 	</p:dataTable>
 </div>
 
 </p:panel>
 
-<p:panel id="panelCriadero" visible="#{encuestaEntomologicaBean.panelCriadero!=0}">
+<p:panel id="panelBotones" styleClass="panButton">
+	<p:commandButton id="cmbNuevo" value="Nuevo" process="@this" update="@this, cmbGuardar, panelBusqueda, panelEncuesta, panelUbicaCriadero, panelCaractCriadero, cmbRegresar"
+		disabled="#{encuestaEntomologicaBean.cmbNuevo!=0}"
+		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
+	<p:commandButton id="cmbGuardar" value="Guardar" process="@this" update="grwMensaje" disabled="#{encuestaEntomologicaBean.cmbGuardar==0}"
+		actionListener="#{encuestaEntomologicaBean.guardar}" />
+	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,panelBusqueda, panelEncuesta, cmbRegresar, cmbGuardar, cmbNuevo" 
+		disabled="#{encuestaEntomologicaBean.cmbRegresar==0}"
+		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />		
+	<p:commandButton id="cmbSalir" value="Salir" />
+</p:panel>
+
+
+<p:confirmDialog	message="Registro de pesquisa actual y sus dependencias seran eliminados, desea continuar?"
+					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarPesquisa">					
+	<p:commandButton id="btnSiEliminaPesquisa" value="Si" process="@this" immediate="true" styleClass="btnDefault" 
+					 style="font-size:11px;" ajax="true" update="dtPesquisas,grwMensaje" 
+					 actionListener="#{encuestaEntomologicaBean.eliminarPesquisa}" oncomplete="dlgConfirmaEliminarPesquisa.hide()">
+	</p:commandButton>
+	<p:commandButton value="No" onclick="dlgConfirmaEliminarPesquisa.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
+</p:confirmDialog>
+
+<p:confirmDialog	message="Registro de intervencion actual y sus dependencias seran eliminados, desea continuar?"
+					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarIntervencion">					
+	<p:commandButton id="btnSiEliminarIntervencion" value="Si" process="@this" immediate="true" styleClass="btnDefault" 
+					 style="font-size:11px;" ajax="true" update="dtIntervencion,grwMensaje" 
+					 actionListener="#{encuestaEntomologicaBean.eliminarIntervencion}" oncomplete="dlgConfirmaEliminarIntervencion.hide()">
+	</p:commandButton>
+	<p:commandButton value="No" onclick="dlgConfirmaEliminarIntervencion.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
+</p:confirmDialog>
+
+<p:confirmDialog	message="Desea eliminar el registro de PosInspeccion actual?"
+					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarPosInspeccion">					
+	<p:commandButton id="btnSiEliminarPosInspeccion" value="Si"  process="@this" immediate="true" styleClass="btnDefault" 
+					 style="font-size:11px;" ajax="true" update="dtPosInspeccion,grwMensaje" 
+					 actionListener="#{encuestaEntomologicaBean.eliminarPosInspeccion}" oncomplete="dlgConfirmaEliminarPosInspeccion.hide()">
+	</p:commandButton>
+	<p:commandButton value="No" onclick="dlgConfirmaEliminarPosInspeccion.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
+</p:confirmDialog>
+
+
+
+<p:dialog	id="idDlgCriadero"
+			draggable="false"
+			closable="false"
+			resizable="false"
+			modal="true"
+			header="Datos Generales del Criade"
+			widgetVar="dlgCriadero"
+			height="452"
+			width="1003">
+			
 <p:panel id="panelUbicaCriadero" header="Ubicacion del Criadero" style="height: 180px;" styleClass="panDetail" >
 
 
@@ -483,22 +591,19 @@
 		styleClass="txtAreaDefault" />
 </div>
 
-
-</p:panel>
 </p:panel>
 
-<p:panel id="panelBotones" styleClass="panButton">
-	<p:commandButton id="cmbNuevo" value="Nuevo" process="@this" update="@this, cmbGuardar, panelBusqueda, panelEncuesta, panelUbicaCriadero, panelCaractCriadero, cmbRegresar"
-		disabled="#{encuestaEntomologicaBean.cmbNuevo!=0}"
-		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
-	<p:commandButton id="cmbGuardar" value="Guardar" process="@this, panelCriadero, panelPesquisa, panelIntervencion, panelPosInspeccion" update="grwMensaje"
-		disabled="#{encuestaEntomologicaBean.cmbGuardar==0}"
-		actionListener="#{encuestaEntomologicaBean.guardar}" />
-	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,panelBusqueda, panelEncuesta,panelCriadero, cmbRegresar, cmbGuardar, cmbNuevo" 
-		disabled="#{encuestaEntomologicaBean.cmbRegresar==0}"
-		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />		
-	<p:commandButton id="cmbSalir" value="Salir" />
+<p:panel>
+	<p:commandButton id="cmbAgregarCriadero" value="Agregar" process="@this, panelUbicaCriadero, panelCaractCriadero" update="panelDatosCriaderoEnc,dtPesquisas,grwMensaje"
+		actionListener="#{encuestaEntomologicaBean.agregarCriadero}" />
+	<p:commandButton value="Cerrar" onclick="dlgCriadero.hide();" />
 </p:panel>
+
+
+</p:dialog>
+
+
+
 
 
 
@@ -572,6 +677,13 @@
 	<h:inputText id="frmInp_Pesq_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Pesq_Observaciones}" style="width: 120px" />	
 </div>
 </p:panel>
+
+<p:panel>
+	<p:commandButton id="cmbAgregarPesquisa" value="Agregar"  process="@this, panelPesquisa" update="dtPesquisas,grwMensaje"
+		actionListener="#{encuestaEntomologicaBean.agregarPesquisa}" />
+	<p:commandButton value="Cerrar" onclick="dlgPesquisa.hide();" />
+</p:panel>
+
 </p:dialog>
 
 
@@ -647,7 +759,11 @@
 </div>
 </p:panel>
 
-
+<p:panel>
+	<p:commandButton id="cmbAgregarIntervencion" value="Agregar"  process="@this, panelIntervencion" update="dtIntervencion,grwMensaje"
+		actionListener="#{encuestaEntomologicaBean.agregarIntervencion}" />
+	<p:commandButton value="Cerrar" onclick="dlgIntervencion.hide();" />
+</p:panel>
 
 </p:dialog>
 
@@ -657,6 +773,7 @@
 			draggable="false"
 			closable="false"
 			modal="true"
+			visible="true"
 			header="Detalle Pos Inspeccion"
 			widgetVar="dlgPosInspeccion"
 			height="100"
@@ -722,6 +839,13 @@
 	<h:outputLabel for="frmInp_PosIns_Observaciones" value="Densidad pupas:" />
 	<h:inputText id="frmInp_PosIns_Observaciones" value="#{encuestaEntomologicaBean.frmInp_PosIns_Observaciones}" style="width: 120px" />	
 </div>
+</p:panel>
+
+
+<p:panel>
+	<p:commandButton id="cmbAgregarPosInspeccion" value="Agregar"  process="@this, panelPosInspeccion" update="dtPosInspeccion,grwMensaje"
+		actionListener="#{encuestaEntomologicaBean.agregarPosInspeccion}" />
+	<p:commandButton value="Cerrar" onclick="dlgPosInspeccion.hide();" />
 </p:panel>
 
 </p:dialog>
