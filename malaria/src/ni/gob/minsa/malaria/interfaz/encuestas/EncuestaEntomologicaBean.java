@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -166,8 +165,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 	 * Variables de manejo de registro de Pesquisas
 	 */
 	
+	private Integer indexListaPesquisa = -1;
 	
+	private BigDecimal frmInp_Pesq_SemanaEpidemiologica;
+	private BigDecimal frmInp_Pesq_AxoEpidemiologico;	
 	private Date frmCal_Pesq_FechaInspeccion;
+	private Date frmCal_Pesq_FechaNotificacion;
+	private String frmInp_Pesq_Inspector;
 	private BigDecimal frmInp_Pesq_PuntosMuestreados;
 	private BigDecimal frmInp_Pesq_TotalCucharonadas;
 	private BigDecimal frmInp_Pesq_CucharonadasPositivas;
@@ -186,6 +190,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 	/*
 	 * Variables de manejo de registro de intervenciones
 	 */
+	
+	private Integer indexListaIntervencion = -1;
+	
 	private Date frmCal_Intv_FechaIntervencion;
 	private BigDecimal frmInp_Intv_Limpieza;
 	private BigDecimal frmInp_Intv_Eva;
@@ -206,6 +213,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 	/*
 	 * Variables de manejo de registro de PosInspeccion
 	 */
+	
+	private Integer indexListaPosInspeccion = -1;
+	
 	private Date frmCal_PosIns_FechaInspeccion;
 	private BigDecimal frmInp_PosIns_PuntosMuestreados;
 	private BigDecimal frmInp_PosIns_TotalCucharonadas;
@@ -372,7 +382,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Observaciones = null;
 	}
 		
-	private void limpiarDatosModalPesquisa(){	
+	private void limpiarDatosModalPesquisa(){
+		frmInp_Pesq_SemanaEpidemiologica = null;
+		frmInp_Pesq_AxoEpidemiologico = null;
 		frmCal_Pesq_FechaInspeccion = null;
 		frmInp_Pesq_PuntosMuestreados = null;
 		frmInp_Pesq_TotalCucharonadas = null;
@@ -384,6 +396,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Pesq_DensLarvAduEstaIIIyIV = null;
 		frmInp_Pesq_DensPupas = null;
 		frmInp_Pesq_Observaciones = null;	
+		frmCal_Pesq_FechaNotificacion = null;
+		frmInp_Pesq_Inspector = null;
+		indexListaPesquisa = -1;
 	}
 	
 	private void limpiarDatosModalIntervencion(){
@@ -398,6 +413,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Intv_ConsumoBsphaericus = null;
 		frmInp_Intv_ConsumoBti = null;
 		frmInp_Intv_Observaciones = null;
+		indexListaIntervencion = -1;
 	}		
 	
 	private void limpiarDatosModalPosInspeccion(){
@@ -412,6 +428,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_PosIns_DensLarvAduEstaIIIyIV = null;
 		frmInp_PosIns_DensPupas = null;
 		frmInp_PosIns_Observaciones = null;
+		indexListaPosInspeccion = -1;
 	}
 	
 	private void limpiarDatosPanelEncuesta(){
@@ -443,8 +460,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oSelPesquisa = null;
 		oSelIntervencion = null;
 		oSelPosInspeccion = null;
-		
-		
 		
 		// limpieza de panel formulario criaderos
 		limpiarDatosPanelCriadero();
@@ -946,22 +961,24 @@ public class EncuestaEntomologicaBean implements Serializable {
 			
 		}
 		
-		frmInp_SemaEpidemEnc = null;
-		frmInp_AxoEpidemEnc = null;
+		frmInp_CodCriaderoEnc = oCriaderoActual.getCodigo();
+		frmInp_SemaEpidemEnc = frmInp_SemanaEpidemiologica;
+		frmInp_AxoEpidemEnc = frmInp_AxoEpidemiologico;
 		frmInp_DatosCriaderoEnc = oCriaderoActual.getNombre();
 		frmInp_UbicacionCoordendaEnc = "Latitud: " + oCriaderoActual.getLatitud()+", Longitud: " + oCriaderoActual.getLongitud();
 		frmInp_DistMaxCasaEnc = oCriaderoActual.getDistanciaCasa();
 		frmInp_AreaEnc = oCriaderoActual.getAreaActual();
 		
-		oResultado = srvPesquisa.obtenerPesquisasPorCriadero(oCriaderoActual);
-		if( !oResultado.isOk() || oResultado.isExcepcion() ){
-			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
-			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
-			return;
+		if( oCriaderoActual.getCriaderoId() > 0 ){
+			oResultado = srvPesquisa.obtenerPesquisasPorCriadero(oCriaderoActual);
+			if( !oResultado.isOk() || oResultado.isExcepcion() ){
+				FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+				if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+				return;
+			}
+			
+			frmDt_ListaPesquisas = (List<CriaderosPesquisa>) oResultado.getObjeto();
 		}
-		
-		frmDt_ListaPesquisas = (List<CriaderosPesquisa>) oResultado.getObjeto();
-
 
 	}
 	
@@ -1073,14 +1090,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		oResultado.setOk(true);
 		
-		if( frmInp_SemanaEpidemiologica == null ){
+		if( frmInp_Pesq_SemanaEpidemiologica == null ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Semana epidemiologica no identificada");
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
 			return oResultado;
 		}		
 		
-		if( frmInp_AxoEpidemiologico == null ){
+		if( frmInp_Pesq_AxoEpidemiologico == null ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Año epidemiologico no identificado");
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
@@ -1135,6 +1152,21 @@ public class EncuestaEntomologicaBean implements Serializable {
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
 			return oResultado;				
 		}
+		
+		if( frmCal_Pesq_FechaNotificacion == null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Completar Fecha de Notificacion");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			return oResultado;			
+		}
+		
+		if( frmInp_Pesq_Inspector == null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Completar Nombre del Inspector");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			return oResultado;			
+		}		
+		
 		return oResultado;
 	}
 	
@@ -1142,8 +1174,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private void agregarPesquisa(){
 		CriaderosPesquisa oPesquisa = new CriaderosPesquisa();
 		
-		oPesquisa.setAñoEpidemiologico(frmInp_AxoEpidemiologico);
-		oPesquisa.setSemanaEpidemiologica(frmInp_SemanaEpidemiologica);
+		oPesquisa.setAñoEpidemiologico(frmInp_Pesq_AxoEpidemiologico);
+		oPesquisa.setSemanaEpidemiologica(frmInp_Pesq_SemanaEpidemiologica);
 		oPesquisa.setFechaInspeccion(frmCal_Pesq_FechaInspeccion);
 		oPesquisa.setPuntosMuestreados(frmInp_Pesq_PuntosMuestreados);
 		oPesquisa.setCuchColectadas(frmInp_Pesq_TotalCucharonadas);
@@ -1152,14 +1184,21 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oPesquisa.setLarvasAdultas(frmInp_Pesq_NumLarvAduEstaIIIyIV);
 		oPesquisa.setPupas(frmInp_Pesq_NumPupas);
 		oPesquisa.setObservacion(frmInp_Pesq_Observaciones);
+		oPesquisa.setFechaNotificacion(frmCal_Pesq_FechaNotificacion);
+		oPesquisa.setInspector(frmInp_Pesq_Inspector);
 		
 		if( frmDt_ListaPesquisas == null ) frmDt_ListaPesquisas = new ArrayList<CriaderosPesquisa>();
+		if( indexListaPesquisa >= 0 && frmDt_ListaPesquisas != null ) frmDt_ListaPesquisas.remove(indexListaPesquisa);
 		frmDt_ListaPesquisas.add(oPesquisa);
-		
+		indexListaPesquisa = 0;
 	}
 	
 	public void setEliminarPesquisa(CriaderosPesquisa pPesquisa){
 		oSelPesquisa = pPesquisa;
+		frmInp_Inspector = null;
+		frmCal_FechaNotificacion = null;
+		frmInp_SemaEpidemEnc = null;
+		frmInp_AxoEpidemEnc = null;
 	}
 	
 	public void eliminarPesquisa(ActionEvent evt){
@@ -1214,9 +1253,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 	}
 	
-	public void editarPesquisa(CriaderosPesquisa oPesquisa){
+	public void setEditarPesquisa(CriaderosPesquisa oPesquisa){
+		
+		indexListaPesquisa = frmDt_ListaPesquisas.indexOf(oPesquisa);
 		
 		frmCal_Pesq_FechaInspeccion = oPesquisa.getFechaInspeccion();
+		frmInp_Pesq_SemanaEpidemiologica = oPesquisa.getSemanaEpidemiologica();
+		frmInp_Pesq_AxoEpidemiologico = oPesquisa.getAñoEpidemiologico();
 		frmInp_Pesq_PuntosMuestreados = oPesquisa.getPuntosMuestreados();
 		frmInp_Pesq_TotalCucharonadas = oPesquisa.getCuchColectadas();
 		frmInp_Pesq_CucharonadasPositivas = oPesquisa.getCuchPositivas();
@@ -1224,6 +1267,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Pesq_NumLarvAduEstaIIIyIV = oPesquisa.getLarvasAdultas();
 		frmInp_Pesq_NumPupas = oPesquisa.getPupas();	
 		frmInp_Pesq_Observaciones = oPesquisa.getObservacion();
+		frmCal_Pesq_FechaNotificacion = oPesquisa.getFechaNotificacion();
+		frmInp_Pesq_Inspector = oPesquisa.getInspector();
 		
 		frmInp_Pesq_DensLarvJovEstaIyII = 
 			calcularDensidad( frmInp_Pesq_NumLarvJovEstaIyII, frmInp_Pesq_TotalCucharonadas);
@@ -1234,31 +1279,31 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Pesq_DensPupas = 
 			calcularDensidad(frmInp_Pesq_NumPupas, frmInp_Pesq_TotalCucharonadas);		
 		
-//		frmDt_ListaPesquisas.remove(oPesquisa);
-//		oPesquisa = null;
 	}
 	
-	public void calcularPesqDensLarvJovenes(ActionEvent evt){
+	public void calcularPesqDensLarvJovenes(){
 		frmInp_Pesq_DensLarvJovEstaIyII = 
 			calcularDensidad( frmInp_Pesq_NumLarvJovEstaIyII, frmInp_Pesq_TotalCucharonadas);
 	}
 
-	public void calcularPesqDensLarvAdultas(ActionEvent evt){
+	public void calcularPesqDensLarvAdultas(){
 		frmInp_Pesq_DensLarvAduEstaIIIyIV = 
 			calcularDensidad( frmInp_Pesq_NumLarvAduEstaIIIyIV, frmInp_Pesq_TotalCucharonadas);
 	}	
 
-	public void calcularPesqDensPupas(ActionEvent evt){
+	public void calcularPesqDensPupas(){
 		frmInp_Pesq_DensPupas = 
 			calcularDensidad( frmInp_Pesq_NumPupas, frmInp_Pesq_TotalCucharonadas);
 	}		
 	
 	public void setSeleccionPesquisa(CriaderosPesquisa pPesquisa){
 		oSelPesquisa = pPesquisa;
-		if( frmDt_ListaPesquisas != null ) frmDt_ListaIntervencion.remove(pPesquisa);
+		//if( frmDt_ListaPesquisas != null ) frmDt_ListaPesquisas.remove(pPesquisa);
 		
 		frmInp_SemaEpidemEnc = oSelPesquisa.getSemanaEpidemiologica();
 		frmInp_AxoEpidemEnc = oSelPesquisa.getAñoEpidemiologico();
+		frmInp_Inspector = oSelPesquisa.getInspector();
+		frmCal_FechaNotificacion = oSelPesquisa.getFechaNotificacion();		
 	}
 	
 	/**
@@ -1360,7 +1405,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 		InfoResultado oResultado = null;
 		FacesMessage msg = null;
 		try{
-			
 			oResultado = srvIntervencion.guardarIntervencion(oIntervencion);
 			if( !oResultado.isOk() || oResultado.isExcepcion() ){
 				msg = Mensajes.enviarMensaje(oResultado);
@@ -1375,6 +1419,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 		
 		if( frmDt_ListaIntervencion == null ) frmDt_ListaIntervencion = new ArrayList<CriaderosIntervencion>();
+		if( indexListaIntervencion >= 0 && frmDt_ListaIntervencion != null ) frmDt_ListaIntervencion.remove(indexListaIntervencion);
 		frmDt_ListaIntervencion.add(oIntervencion);
 		
 		RequestContext.getCurrentInstance().execute("dlgIntervencion.hide();");
@@ -1421,7 +1466,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 	}
 	
-	public void editarIntervencion(CriaderosIntervencion oIntervencion){
+	public void setEditarIntervencion(CriaderosIntervencion oIntervencion){
+		
+		indexListaIntervencion = frmDt_ListaIntervencion.indexOf(oIntervencion);
 		
 		frmCal_Intv_FechaIntervencion = oIntervencion.getFechaIntervencion();
 		frmInp_Intv_Limpieza = oIntervencion.getLimpieza();
@@ -1434,14 +1481,10 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Intv_ConsumoBti = oIntervencion.getConsumoBti();
 		frmInp_Intv_Observaciones = oIntervencion.getObservaciones();
 		
-		
-//		frmDt_ListaPesquisas.remove(oIntervencion);
-//		oIntervencion = null;
 	}
 	
 	public void setSeleccionIntervencion(CriaderosIntervencion pIntervencion){
 		oSelIntervencion = pIntervencion;
-		if( frmDt_ListaIntervencion != null ) frmDt_ListaIntervencion.remove(pIntervencion);
 	}
 	
 	
@@ -1545,6 +1588,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 		
 		if( frmDt_ListaPosInspeccion == null ) frmDt_ListaPosInspeccion = new ArrayList<CriaderosPosInspeccion>();
+		if( indexListaPosInspeccion >= 0 && frmDt_ListaPosInspeccion != null ) frmDt_ListaPosInspeccion.remove(indexListaPosInspeccion);
 		frmDt_ListaPosInspeccion.add(oPosInspeccion);
 		
 		RequestContext.getCurrentInstance().execute("dlgPosInspeccion.hide()");
@@ -1579,7 +1623,9 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 	}
 	
-	public void editarPosInspeccion(CriaderosPosInspeccion oPosInspeccion){
+	public void setEditarPosInspeccion(CriaderosPosInspeccion oPosInspeccion){
+		
+		indexListaPosInspeccion = frmDt_ListaPosInspeccion.indexOf(oPosInspeccion);
 		
 		frmCal_PosIns_FechaInspeccion = oPosInspeccion.getFechaInspeccion();
 		frmInp_PosIns_PuntosMuestreados = oPosInspeccion.getPuntosMuestreados();
@@ -1603,24 +1649,24 @@ public class EncuestaEntomologicaBean implements Serializable {
 //		oPosInspeccion = null;
 	}
 	
-	public void calcularPosInsDensLarvJovenes(ActionEvent evt){
+	public void calcularPosInsDensLarvJovenes(){
 		frmInp_PosIns_DensLarvJovEstaIyII = 
 			calcularDensidad( frmInp_PosIns_NumLarvJovEstaIyII, frmInp_Pesq_TotalCucharonadas);
 	}
 
-	public void calcularPosInsDensLarvAdultas(ActionEvent evt){
+	public void calcularPosInsDensLarvAdultas(){
 		frmInp_PosIns_DensLarvAduEstaIIIyIV = 
 			calcularDensidad( frmInp_PosIns_NumLarvAduEstaIIIyIV, frmInp_Pesq_TotalCucharonadas);
 	}	
 
-	public void calcularPosInsDensPupas(ActionEvent evt){
+	public void calcularPosInsDensPupas(){
 		frmInp_PosIns_DensPupas = 
 			calcularDensidad( frmInp_PosIns_NumPupas, frmInp_Pesq_TotalCucharonadas);
 	}	
 	
 	public void setSeleccionPosInspeccion(CriaderosPosInspeccion pPosInspeccion){
 		oSelPosInspeccion = pPosInspeccion;
-		if( frmDt_ListaPosInspeccion != null ) frmDt_ListaPosInspeccion.remove(pPosInspeccion);
+		//if( frmDt_ListaPosInspeccion != null ) frmDt_ListaPosInspeccion.remove(pPosInspeccion);
 	}	
 	
 	
@@ -2702,6 +2748,40 @@ public class EncuestaEntomologicaBean implements Serializable {
 
 	public List<DivisionPolitica> getItemsMunicipioBusqueda() {
 		return itemsMunicipioBusqueda;
+	}
+
+	public BigDecimal getFrmInp_Pesq_SemanaEpidemiologica() {
+		return frmInp_Pesq_SemanaEpidemiologica;
+	}
+
+	public void setFrmInp_Pesq_SemanaEpidemiologica(
+			BigDecimal frmInp_Pesq_SemanaEpidemiologica) {
+		this.frmInp_Pesq_SemanaEpidemiologica = frmInp_Pesq_SemanaEpidemiologica;
+	}
+
+	public BigDecimal getFrmInp_Pesq_AxoEpidemiologico() {
+		return frmInp_Pesq_AxoEpidemiologico;
+	}
+
+	public void setFrmInp_Pesq_AxoEpidemiologico(
+			BigDecimal frmInp_Pesq_AxoEpidemiologico) {
+		this.frmInp_Pesq_AxoEpidemiologico = frmInp_Pesq_AxoEpidemiologico;
+	}
+
+	public Date getFrmCal_Pesq_FechaNotificacion() {
+		return frmCal_Pesq_FechaNotificacion;
+	}
+
+	public void setFrmCal_Pesq_FechaNotificacion(Date frmCal_Pesq_FechaNotificacion) {
+		this.frmCal_Pesq_FechaNotificacion = frmCal_Pesq_FechaNotificacion;
+	}
+
+	public String getFrmInp_Pesq_Inspector() {
+		return frmInp_Pesq_Inspector;
+	}
+
+	public void setFrmInp_Pesq_Inspector(String frmInp_Pesq_Inspector) {
+		this.frmInp_Pesq_Inspector = frmInp_Pesq_Inspector;
 	}
 	
 	
