@@ -201,8 +201,8 @@ public class IntervencionDA implements IntervencionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
 		
     	
@@ -275,12 +275,12 @@ public class IntervencionDA implements IntervencionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
-    		CriaderosPesquisa oPesquisa = (CriaderosPesquisa)oEM.find(CriaderosPesquisa.class, pPesquisaId);
-    		if (oPesquisa!=null) {
-    			oEM.remove(oPesquisa);
+    		CriaderosIntervencion oIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pIntervencionId);
+    		if (oIntervencion!=null) {
+    			oEM.remove(oIntervencion);
     			oEM.getTransaction().commit();
     			
     			oResultado.setFilasAfectadas(1);
@@ -328,8 +328,8 @@ public class IntervencionDA implements IntervencionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	Query query = null;
     	int n = 0;
     	

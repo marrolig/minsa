@@ -218,8 +218,8 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
 		
     	
@@ -289,8 +289,8 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
     		CriaderosEspecie oCriaderoEspecie = (CriaderosEspecie)oEM.find(CriaderosEspecie.class, pEspecieId);
     		if (oCriaderoEspecie!=null) {

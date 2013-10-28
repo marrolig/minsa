@@ -204,8 +204,8 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
 		
     	
@@ -278,8 +278,8 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
     		CriaderosPosInspeccion oPosInspeccion = (CriaderosPosInspeccion)oEM.find(CriaderosPosInspeccion.class, pPosInspeccionId);
     		if (oPosInspeccion!=null) {
@@ -331,8 +331,8 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	Query query = null;
     	int n = 0;
     	

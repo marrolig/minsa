@@ -290,7 +290,8 @@ public class CriaderoDA implements CriaderoServices {
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
     	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
+		//java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+    	
     	String strUpdate = "";
 		
     	
@@ -361,8 +362,8 @@ public class CriaderoDA implements CriaderoServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+    	//@SuppressWarnings("unused")
+		//java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
     		Criadero oCriadero = (Criadero)oEM.find(Criadero.class, pCriaderoId);
     		if (oCriadero!=null) {
@@ -469,8 +470,8 @@ public class CriaderoDA implements CriaderoServices {
 		InfoResultado oResultado = new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);				
+    	//@SuppressWarnings("unused")
+		//java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);				
 		
     	
     	if( pValor == null || pValor.isEmpty() ){

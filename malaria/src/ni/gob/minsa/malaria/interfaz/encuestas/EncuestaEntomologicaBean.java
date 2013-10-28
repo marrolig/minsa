@@ -833,7 +833,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				return oResultado;
 			}			
 			
-			oCriaderoActual.setFechaDatos(frmCal_FechaNotificacion);
+			oCriaderoActual.setFechaDatos(frmCal_FechaTomaDatos);
 			oCriaderoActual.setLatitud(frmInp_Latitud);
 			oCriaderoActual.setLongitud(frmInp_Longitud);
 			

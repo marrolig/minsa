@@ -195,8 +195,8 @@ public class PesquisaDA implements PesquisaServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
 		
     	
@@ -269,8 +269,8 @@ public class PesquisaDA implements PesquisaServices {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
-    	@SuppressWarnings("unused")
-		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+//    	@SuppressWarnings("unused")
+//		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
     		CriaderosPesquisa oPesquisa = (CriaderosPesquisa)oEM.find(CriaderosPesquisa.class, pPesquisaId);
     		if (oPesquisa!=null) {

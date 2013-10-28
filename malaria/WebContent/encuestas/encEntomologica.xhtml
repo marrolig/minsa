@@ -563,9 +563,9 @@
 		
 	<div style="float: left; width: 90px; ">
 		<h:outputLabel for="frmCal_FechaTomaDatos" value="Toma datos:"/>
-		<h:inputText id="frmCal_FechaTomaDatos" 
-				 value="#{encuestaEntomologicaBean.frmCal_FechaTomaDatos}"  
-				  style="width: 90px;">
+		<h:inputText id="frmCal_FechaTomaDatos" value="#{encuestaEntomologicaBean.frmCal_FechaTomaDatos}" style="width: 90px;"
+					requiredMessage="Fecha de Inspeccion Requerida"  
+					styleClass="txtDefault frmCal_FechaTomaDatos">
 			<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -628,11 +628,13 @@
 
 	<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_Pesq_FechaInspeccion" value="Fecha de inspeccion:" />
-		<h:inputText id="frmCal_Pesq_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_Pesq_FechaInspeccion}" style="width: 120px">
+		<h:inputText id="frmCal_Pesq_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_Pesq_FechaInspeccion}" style="width: 120px"
+					requiredMessage="Fecha de Inspeccion Requerida"  
+					styleClass="txtDefault frmCal_Pesq_FechaInspeccion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
-				jQuery('.frmCal_FechaTomaDatos').dateEntry({dateFormat: 'dmy/'}); 
+				jQuery('.frmCal_Pesq_FechaInspeccion').dateEntry({dateFormat: 'dmy/'}); 
 		</script>
 	</div>
 	
@@ -720,7 +722,9 @@
 <div style="float: left; width: 400px;">
 	<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_Intv_FechaIntervencion" value="Fecha Intervencion:" />
-		<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px" >
+		<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px"
+					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
+					styleClass="txtDefault frmCal_Intv_FechaIntervencion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -812,11 +816,13 @@
 <div style="float: left; width: 400px;">
 	<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_PosIns_FechaInspeccion" value="Fecha de inspeccion:" />
-		<h:inputText id="frmCal_PosIns_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_PosIns_FechaInspeccion}" style="width: 120px" >
+		<h:inputText id="frmCal_PosIns_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_PosIns_FechaInspeccion}" style="width: 120px"
+					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
+					styleClass="txtDefault frmCal_PosIns_FechaInspeccion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
-				jQuery('.frmCal_FechaTomaDatos').dateEntry({dateFormat: 'dmy/'}); 
+				jQuery('.frmCal_PosIns_FechaInspeccion').dateEntry({dateFormat: 'dmy/'}); 
 		</script>
 	</div>
 
