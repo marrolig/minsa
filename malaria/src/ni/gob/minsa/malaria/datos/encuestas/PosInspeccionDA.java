@@ -200,28 +200,43 @@ public class PosInspeccionDA implements PosInspeccionServices {
 	 */
 	@Override
 	public InfoResultado guardarPosInspeccion(
-			CriaderosPosInspeccion pPosInspeccion) {
+			CriaderosPosInspeccion pPosIns) {
 		InfoResultado oResultado=new InfoResultado();
     	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
 //    	@SuppressWarnings("unused")
 //		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
-		
+    	CriaderosPosInspeccion oPosIns = null;
     	
     	try{
-    		if( pPosInspeccion.getCriaderoPosInspeccionId() > 0 ){
-    			CriaderosPosInspeccion oDetachedPosInspeccion = (CriaderosPosInspeccion)oEM.find(CriaderosPosInspeccion.class, pPosInspeccion.getCriaderoPosInspeccionId());
-    			CriaderosPosInspeccion oPosInspeccion=oEM.merge(oDetachedPosInspeccion);
+    		if( pPosIns.getCriaderoPosInspeccionId() > 0 ){
+    			CriaderosPosInspeccion oDetachedPosInspeccion = (CriaderosPosInspeccion)oEM.find(CriaderosPosInspeccion.class, pPosIns.getCriaderoPosInspeccionId());
+    			oPosIns=oEM.merge(oDetachedPosInspeccion);
+    			
+    			oPosIns.setUsuarioRegistro(pPosIns.getUsuarioRegistro());
+    			oPosIns.setCuchColectadas(pPosIns.getCuchColectadas());
+    			oPosIns.setCuchPositivas(pPosIns.getCuchPositivas());
+    			oPosIns.setFechaInspeccion(pPosIns.getFechaInspeccion());
+    			oPosIns.setFechaRegistro(pPosIns.getFechaRegistro());
+    			oPosIns.setLarvasAdultas(pPosIns.getLarvasAdultas());
+    			oPosIns.setLarvasJovenes(pPosIns.getLarvasJovenes());
+    			oPosIns.setPuntosMuestreados(pPosIns.getPuntosMuestreados());
+    			oPosIns.setPupas(pPosIns.getPupas());
+    			oPosIns.setObservacion(pPosIns.getObservacion());
+    			    			
             	strUpdate = "Guardar";
     		}else{
-    			oEM.persist(pPosInspeccion);
+    			oEM.persist(pPosIns);
     			strUpdate = "Agregar";
     		}
     		        	
             oEM.getTransaction().commit();
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
+    		
+    		if( strUpdate.equals("Guardar")) oResultado.setObjeto(oPosIns);
+    		else oResultado.setObjeto(pPosIns);
    			
    			
     	} catch (EntityExistsException iExPersistencia) {

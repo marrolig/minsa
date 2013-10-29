@@ -4,7 +4,6 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -17,15 +16,15 @@ import java.util.Date;
 public class CriaderosPosInspeccion implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoPosInspeccionId;
-	private BigDecimal cuchColectadas;
-	private BigDecimal cuchPositivas;
+	private Short cuchColectadas;
+	private Short cuchPositivas;
 	private Date fechaInspeccion;
 	private Date fechaRegistro;
-	private BigDecimal larvasAdultas;
-	private BigDecimal larvasJovenes;
+	private Short larvasAdultas;
+	private Short larvasJovenes;
 	private String observacion;
-	private BigDecimal puntosMuestreados;
-	private BigDecimal pupas;
+	private Short puntosMuestreados;
+	private Short pupas;
 	private String usuarioRegistro;
 	private CriaderosIntervencion criaderosIntervencione;
 
@@ -47,21 +46,21 @@ public class CriaderosPosInspeccion implements Serializable {
 
 
 	@Column(name="CUCH_COLECTADAS")
-	public BigDecimal getCuchColectadas() {
+	public Short getCuchColectadas() {
 		return this.cuchColectadas;
 	}
 
-	public void setCuchColectadas(BigDecimal cuchColectadas) {
+	public void setCuchColectadas(Short cuchColectadas) {
 		this.cuchColectadas = cuchColectadas;
 	}
 
 
 	@Column(name="CUCH_POSITIVAS")
-	public BigDecimal getCuchPositivas() {
+	public Short getCuchPositivas() {
 		return this.cuchPositivas;
 	}
 
-	public void setCuchPositivas(BigDecimal cuchPositivas) {
+	public void setCuchPositivas(Short cuchPositivas) {
 		this.cuchPositivas = cuchPositivas;
 	}
 
@@ -88,21 +87,21 @@ public class CriaderosPosInspeccion implements Serializable {
 
 
 	@Column(name="LARVAS_ADULTAS")
-	public BigDecimal getLarvasAdultas() {
+	public Short getLarvasAdultas() {
 		return this.larvasAdultas;
 	}
 
-	public void setLarvasAdultas(BigDecimal larvasAdultas) {
+	public void setLarvasAdultas(Short larvasAdultas) {
 		this.larvasAdultas = larvasAdultas;
 	}
 
 
 	@Column(name="LARVAS_JOVENES")
-	public BigDecimal getLarvasJovenes() {
+	public Short getLarvasJovenes() {
 		return this.larvasJovenes;
 	}
 
-	public void setLarvasJovenes(BigDecimal larvasJovenes) {
+	public void setLarvasJovenes(Short larvasJovenes) {
 		this.larvasJovenes = larvasJovenes;
 	}
 
@@ -117,20 +116,20 @@ public class CriaderosPosInspeccion implements Serializable {
 
 
 	@Column(name="PUNTOS_MUESTREADOS")
-	public BigDecimal getPuntosMuestreados() {
+	public Short getPuntosMuestreados() {
 		return this.puntosMuestreados;
 	}
 
-	public void setPuntosMuestreados(BigDecimal puntosMuestreados) {
+	public void setPuntosMuestreados(Short puntosMuestreados) {
 		this.puntosMuestreados = puntosMuestreados;
 	}
 
 
-	public BigDecimal getPupas() {
+	public Short getPupas() {
 		return this.pupas;
 	}
 
-	public void setPupas(BigDecimal pupas) {
+	public void setPupas(Short pupas) {
 		this.pupas = pupas;
 	}
 

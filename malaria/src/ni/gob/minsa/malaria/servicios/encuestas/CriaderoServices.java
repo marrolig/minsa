@@ -125,4 +125,13 @@ public interface CriaderoServices {
 	 */
 	public InfoResultado agregarCatOtros(String pValor, String pCodigo, String pDependencia);
 	
+	/**
+	 * Metodo que Permite agregar el permiso de un catalogo al sistema Malaria, para
+	 * ser visualizado desde los combos donde son utilizados
+	 * 
+	 * @param pCodigo Objeto de Tipo {@link String} contiene el valor del catalogo
+	 * @return Objeto {@link InfoResultado} con el resultado de la operacion
+	 */
+	public InfoResultado agregarSistemaCatalogo(String pCodigo);
+	
 }

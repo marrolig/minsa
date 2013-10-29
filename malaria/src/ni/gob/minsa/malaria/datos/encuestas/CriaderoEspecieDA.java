@@ -221,12 +221,12 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
 //    	@SuppressWarnings("unused")
 //		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
-		
+    	CriaderosEspecie oCriaderoEspecie = null;
     	
     	try{
     		if( pEspecie.getCriaderoEspecieId() > 0 ){
     			CriaderosEspecie oDetachedCriaderoEspecie = (CriaderosEspecie)oEM.find(CriaderosEspecie.class, pEspecie.getCriaderoEspecieId());
-    			CriaderosEspecie oCriaderoEspecie=oEM.merge(oDetachedCriaderoEspecie);
+    			oCriaderoEspecie=oEM.merge(oDetachedCriaderoEspecie);
             	strUpdate = "Guardar";
     		}else{
     			oEM.persist(pEspecie);
@@ -237,6 +237,9 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
    			
+    		if( strUpdate.equals("Guardar")) oResultado.setObjeto(oCriaderoEspecie);
+    		else oResultado.setObjeto(pEspecie);
+    		
    			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);

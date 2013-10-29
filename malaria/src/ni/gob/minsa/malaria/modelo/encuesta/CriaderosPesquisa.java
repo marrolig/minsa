@@ -4,7 +4,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import java.math.BigDecimal;
+
 import java.util.Date;
 
 
@@ -17,22 +17,22 @@ import java.util.Date;
 public class CriaderosPesquisa implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoPesquisaId;
-	private BigDecimal añoEpidemiologico;
+	private Short añoEpidemiologico;
 	private Criadero criadero;
-	private BigDecimal cuchColectadas;
-	private BigDecimal cuchPositivas;
+	private Short cuchColectadas;
+	private Short cuchPositivas;
 	private Date fechaInspeccion;
 	private Date fechaNotificacion;
 	private Date fechaRegistro;
 	private Date fechaRevision;
 	private String inspector;
-	private BigDecimal larvasAdultas;
-	private BigDecimal larvasJovenes;
+	private Short larvasAdultas;
+	private Short larvasJovenes;
 	private String observacion;
-	private BigDecimal puntosMuestreados;
-	private BigDecimal pupas;
-	private BigDecimal revisado;
-	private BigDecimal semanaEpidemiologica;
+	private Short puntosMuestreados;
+	private Short pupas;
+	private Boolean revisado;
+	private Short semanaEpidemiologica;
 	private String usuarioRegistro;
 	private String usuarioRevision;
 
@@ -54,11 +54,11 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="AÑO_EPIDEMIOLOGICO")
-	public BigDecimal getAñoEpidemiologico() {
+	public Short getAñoEpidemiologico() {
 		return this.añoEpidemiologico;
 	}
 
-	public void setAñoEpidemiologico(BigDecimal añoEpidemiologico) {
+	public void setAñoEpidemiologico(Short añoEpidemiologico) {
 		this.añoEpidemiologico = añoEpidemiologico;
 	}
 
@@ -76,21 +76,21 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="CUCH_COLECTADAS")
-	public BigDecimal getCuchColectadas() {
+	public Short getCuchColectadas() {
 		return this.cuchColectadas;
 	}
 
-	public void setCuchColectadas(BigDecimal cuchColectadas) {
+	public void setCuchColectadas(Short cuchColectadas) {
 		this.cuchColectadas = cuchColectadas;
 	}
 
 
 	@Column(name="CUCH_POSITIVAS")
-	public BigDecimal getCuchPositivas() {
+	public Short getCuchPositivas() {
 		return this.cuchPositivas;
 	}
 
-	public void setCuchPositivas(BigDecimal cuchPositivas) {
+	public void setCuchPositivas(Short cuchPositivas) {
 		this.cuchPositivas = cuchPositivas;
 	}
 
@@ -147,21 +147,21 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="LARVAS_ADULTAS")
-	public BigDecimal getLarvasAdultas() {
+	public Short getLarvasAdultas() {
 		return this.larvasAdultas;
 	}
 
-	public void setLarvasAdultas(BigDecimal larvasAdultas) {
+	public void setLarvasAdultas(Short larvasAdultas) {
 		this.larvasAdultas = larvasAdultas;
 	}
 
 
 	@Column(name="LARVAS_JOVENES")
-	public BigDecimal getLarvasJovenes() {
+	public Short getLarvasJovenes() {
 		return this.larvasJovenes;
 	}
 
-	public void setLarvasJovenes(BigDecimal larvasJovenes) {
+	public void setLarvasJovenes(Short larvasJovenes) {
 		this.larvasJovenes = larvasJovenes;
 	}
 
@@ -176,39 +176,39 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="PUNTOS_MUESTREADOS")
-	public BigDecimal getPuntosMuestreados() {
+	public Short getPuntosMuestreados() {
 		return this.puntosMuestreados;
 	}
 
-	public void setPuntosMuestreados(BigDecimal puntosMuestreados) {
+	public void setPuntosMuestreados(Short puntosMuestreados) {
 		this.puntosMuestreados = puntosMuestreados;
 	}
 
 
-	public BigDecimal getPupas() {
+	public Short getPupas() {
 		return this.pupas;
 	}
 
-	public void setPupas(BigDecimal pupas) {
+	public void setPupas(Short pupas) {
 		this.pupas = pupas;
 	}
 
 
-	public BigDecimal getRevisado() {
+	public Boolean isRevisado() {
 		return this.revisado;
 	}
 
-	public void setRevisado(BigDecimal revisado) {
+	public void setRevisado(Boolean revisado) {
 		this.revisado = revisado;
 	}
 
 
 	@Column(name="SEMANA_EPIDEMIOLOGICA")
-	public BigDecimal getSemanaEpidemiologica() {
+	public Short getSemanaEpidemiologica() {
 		return this.semanaEpidemiologica;
 	}
 
-	public void setSemanaEpidemiologica(BigDecimal semanaEpidemiologica) {
+	public void setSemanaEpidemiologica(Short semanaEpidemiologica) {
 		this.semanaEpidemiologica = semanaEpidemiologica;
 	}
 

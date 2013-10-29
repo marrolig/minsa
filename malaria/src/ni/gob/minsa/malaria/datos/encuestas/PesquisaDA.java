@@ -3,6 +3,7 @@
  */
 package ni.gob.minsa.malaria.datos.encuestas;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityExistsException;
@@ -18,6 +19,7 @@ import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa;
 import ni.gob.minsa.malaria.servicios.encuestas.PesquisaServices;
 import ni.gob.minsa.malaria.soporte.Mensajes;
+import ni.gob.minsa.malaria.soporte.Utilidades;
 
 /**
  * @author dev
@@ -198,12 +200,28 @@ public class PesquisaDA implements PesquisaServices {
 //    	@SuppressWarnings("unused")
 //		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
-		
+    	CriaderosPesquisa oPesquisa = null;
     	
     	try{
     		if( pPesquisa.getCriaderoPesquisaId() > 0 ){
     			CriaderosPesquisa oDetachedPesquisa = (CriaderosPesquisa)oEM.find(CriaderosPesquisa.class, pPesquisa.getCriaderoPesquisaId());
-    			CriaderosPesquisa oPesquisa=oEM.merge(oDetachedPesquisa);
+    			oPesquisa=oEM.merge(oDetachedPesquisa);
+    			
+    			oPesquisa.setAñoEpidemiologico(pPesquisa.getAñoEpidemiologico());
+    			oPesquisa.setSemanaEpidemiologica(pPesquisa.getSemanaEpidemiologica());
+//    			oPesquisa.setCriadero(pPesquisa.getCriadero());
+    			oPesquisa.setCuchColectadas(pPesquisa.getCuchColectadas());
+    			oPesquisa.setCuchPositivas(pPesquisa.getCuchPositivas());
+    			oPesquisa.setFechaInspeccion(pPesquisa.getFechaInspeccion());
+    			oPesquisa.setFechaNotificacion(pPesquisa.getFechaNotificacion());
+    			oPesquisa.setInspector(pPesquisa.getInspector());
+    			oPesquisa.setLarvasJovenes(pPesquisa.getLarvasJovenes());
+    			oPesquisa.setLarvasAdultas(pPesquisa.getLarvasAdultas());
+    			oPesquisa.setPupas(pPesquisa.getPupas());
+    			oPesquisa.setPuntosMuestreados(pPesquisa.getPuntosMuestreados());
+    			oPesquisa.setFechaRegistro(new Date());
+    			oPesquisa.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+    			
             	strUpdate = "Guardar";
     		}else{
     			oEM.persist(pPesquisa);
@@ -214,6 +232,8 @@ public class PesquisaDA implements PesquisaServices {
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
    			
+    		if( strUpdate.equals("Guardar")) oResultado.setObjeto(oPesquisa);
+    		else oResultado.setObjeto(pPesquisa);
    			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);

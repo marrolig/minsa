@@ -109,7 +109,7 @@ public class CriaderoDA implements CriaderoServices {
 			return oResultado;
 		}
 		
-		String strJPQL = "select cr from Criadero cr where cr.comunidad.codigo = :pCodComunidad order by criaderoId";
+		String strJPQL = "select cr from Criadero cr where cr.comunidad.codigo = :pCodComunidad order by cr.criaderoId";
 		
 		try{
 			
@@ -177,7 +177,7 @@ public class CriaderoDA implements CriaderoServices {
 				"	  where sec.unidad.codigo in" +
 				"		( select und.codigo from Unidad und " +
 				"		  where und.entidadAdtva.codigo = :pCodEntidadAdtva )))  " +
-				" order by criaderoId ";
+				" order by cr.criaderoId ";
 		
 		
 		try{
@@ -245,7 +245,7 @@ public class CriaderoDA implements CriaderoServices {
 				"	where com.sector.codigo in" +
 				"	( select sec.codigo from Sector sec " +
 				"	  where sec.municipio.codigoNacional = :pCodMunicipio))  " +
-				" order by criaderoId ";
+				" order by cr.criaderoId ";
 		
 		try{
 			
@@ -294,11 +294,40 @@ public class CriaderoDA implements CriaderoServices {
     	
     	String strUpdate = "";
 		
-    	
+    	Criadero oCriadero = null;
     	try{
     		if( pCriadero.getCriaderoId() > 0 ){
         		Criadero oDetachedCriadero = (Criadero)oEM.find(Criadero.class, pCriadero.getCriaderoId());
-            	Criadero oCriadero=oEM.merge(oDetachedCriadero);
+            	oCriadero=oEM.merge(oDetachedCriadero);
+            	
+            	oCriadero.setAreaActual(pCriadero.getAreaActual());
+            	oCriadero.setAreaMax(pCriadero.getAreaMax());
+            	oCriadero.setAreaMin(pCriadero.getAreaMin());
+            	oCriadero.setClaseCriadero(pCriadero.getClaseCriadero());
+            	oCriadero.setCloro(pCriadero.getCloro());
+            	oCriadero.setCodigo(pCriadero.getCodigo());
+            	oCriadero.setComunidad(pCriadero.getComunidad());
+            	oCriadero.setDireccion(pCriadero.getDireccion());
+            	oCriadero.setDistanciaCasa(pCriadero.getDistanciaCasa());
+            	oCriadero.setExposicionSol(pCriadero.getExposicionSol());
+            	oCriadero.setFaunaAnfibios(pCriadero.getFaunaAnfibios());
+            	oCriadero.setFaunaInsecto(pCriadero.getFaunaInsecto());
+            	oCriadero.setFaunaPeces(pCriadero.getFaunaPeces());
+            	oCriadero.setLatitud(pCriadero.getLatitud());
+            	oCriadero.setLongitud(pCriadero.getLongitud());
+            	oCriadero.setMovimientoAgua(pCriadero.getMovimientoAgua());
+            	oCriadero.setObservaciones(pCriadero.getObservaciones());
+            	oCriadero.setPh(pCriadero.getPh());
+            	oCriadero.setTemperatura(pCriadero.getTemperatura());
+            	oCriadero.setTipoCriadero(pCriadero.getTipoCriadero());
+            	oCriadero.setTurbidezAgua(pCriadero.getTurbidezAgua());
+            	oCriadero.setUsuarioRegistro(pCriadero.getUsuarioRegistro());
+            	oCriadero.setVegEmergente(pCriadero.getVegEmergente());
+            	oCriadero.setVegFlotante(pCriadero.getVegFlotante());
+            	oCriadero.setVegSumergida(pCriadero.getVegSumergida());
+            	oCriadero.setVegVertical(pCriadero.getVegVertical());
+            	oCriadero.setUsuarioRegistro(pCriadero.getUsuarioRegistro());
+            	
             	strUpdate = "Guardar";
     		}else{
     			oEM.persist(pCriadero);
@@ -308,6 +337,9 @@ public class CriaderoDA implements CriaderoServices {
             oEM.getTransaction().commit();
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
+    		
+    		if( strUpdate.equals("Guardar")) oResultado.setObjeto(oCriadero);
+    		else oResultado.setObjeto(pCriadero);
    			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);
@@ -501,21 +533,16 @@ public class CriaderoDA implements CriaderoServices {
 		oCatalogo.setDependencia(pDependencia);
 		oCatalogo.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
 		oCatalogo.setFechaRegistro(new Date());
-		
-		AddSistemaCatalogo oSisCat = new AddSistemaCatalogo();
-		oSisCat.setCatalogo(pCodigo);
-		oSisCat.setSistema(Utilidades.obtenerInfoSesion().getSistemaSesion());
-		oSisCat.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
-		oSisCat.setFechaRegistro(new Date());
+		oCatalogo.setOrden(999);
 		
 		try{
 			
 			oEM.persist(oCatalogo);
-			oEM.persist(oSisCat);
 			
             oEM.getTransaction().commit();
     		oResultado.setFilasAfectadas(1);
-    		oResultado.setOk(true);		
+    		oResultado.setOk(true);
+    		oResultado.setObjeto(oCatalogo);
 			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);
@@ -561,4 +588,83 @@ public class CriaderoDA implements CriaderoServices {
 		return oResultado;
 	}
 
+	/* (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#agregarSistemaCatalogo(java.lang.String)
+	 */
+	@Override
+	public InfoResultado agregarSistemaCatalogo(String pCodigo) {
+		InfoResultado oResultado = new InfoResultado();
+    	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+    	oEM.getTransaction().begin();
+    	//@SuppressWarnings("unused")
+		//java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);				
+		
+    	if( pCodigo == null || pCodigo.isEmpty() ){
+    		oResultado.setOk(false);
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setMensajeDetalle("Codigo del catalogo no identificado");
+    		return oResultado;    		
+    	}
+    	
+    	AddSistemaCatalogo oSisCat = new AddSistemaCatalogo();
+		oSisCat.setCatalogo(pCodigo);
+		oSisCat.setSistema(Utilidades.obtenerInfoSesion().getSistemaSesion());
+		oSisCat.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+		oSisCat.setFechaRegistro(new Date());
+		
+		try{
+			
+			oEM.persist(oSisCat);
+			
+            oEM.getTransaction().commit();
+    		oResultado.setFilasAfectadas(1);
+    		oResultado.setOk(true);	
+    		oResultado.setObjeto(oSisCat);
+			
+    	} catch (EntityExistsException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar Cat");
+    		oResultado.setMensaje(Mensajes.EXCEPCION_REGISTRO_EXISTE);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+    		oResultado.setOk(false);
+    		return oResultado;
+    	} catch (ConstraintViolationException iExcepcion) {
+    		oResultado.setExcepcion(true);
+    		ConstraintViolation<?> oConstraintViolation = iExcepcion.getConstraintViolations().iterator().next();
+    		oResultado.setMensaje(oConstraintViolation.getMessage());
+    		oResultado.setFuenteError(oConstraintViolation.getPropertyPath().toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    	} 
+    	catch (PersistenceException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Agregar Cat");
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    		
+    	} finally{
+    		oEM.close();
+    	}    	
+
+		
+		return oResultado;
+	}
+	
+	
+	
 }

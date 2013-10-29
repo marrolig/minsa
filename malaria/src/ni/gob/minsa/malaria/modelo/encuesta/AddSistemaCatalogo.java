@@ -4,20 +4,24 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
+@Entity
+@Table(name="SISTEMASCATALOGOS",schema="GENERAL")
 public class AddSistemaCatalogo implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="SISTCATS_ID_GENERATOR", sequenceName="GENERAL.SISTCAT_SEQ",allocationSize=1)
+	@SequenceGenerator(name="SISTCATS_ID_GENERATOR_1", sequenceName="GENERAL.SISTCAT_SEQ",allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SISTCATS_ID_GENERATOR")
 	@Column(name="SISTEMACATALOGO_ID",updatable=false)
 	private long sistemaCatalogoId;

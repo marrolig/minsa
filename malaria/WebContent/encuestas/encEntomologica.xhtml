@@ -47,7 +47,9 @@
 
 
 <p:panel id="panelBusqueda" visible="#{encuestaEntomologicaBean.panelBusqueda==0}" style="height: 375px;margin-bottom: 5px;">
+
 <h:panelGrid columns="7">
+
 	<h:outputLabel for="frmSom_SilaisBusqueda" value="Silais:" styleClass="lblDefaultSmall" />
 	<h:selectOneMenu id="frmSom_SilaisBusqueda"
 		style="width: 200px;"
@@ -82,22 +84,58 @@
 		itemValue="#{comunidad}">
 	</p:autoComplete>
 	
-	<p:commandButton id="cmbBuscarCriaderos" value="Buscar" process="frmInp_ComunidadBusqueda, frmSom_MunicipioBusqueda, frmSom_SilaisBusqueda" update="dtBusqueda" />
+	<p:commandButton id="cmbBuscarCriaderos" value="Buscar" 
+		process=":frmEncEnto:frmInp_ComunidadBusqueda, :frmEncEnto:frmSom_MunicipioBusqueda, :frmEncEnto:frmSom_SilaisBusqueda" 
+		update=":frmEncEnto:dtBusqueda" />
+
 </h:panelGrid>
+
 
 <p:dataTable id="dtBusqueda" value="#{encuestaEntomologicaBean.lazyCriaderos}" var="criadero" style="margin-top: 5px;"
 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="12" errorMessage="Se ha presentado un error al cargar los datos">
 	
-	<p:column style="width:40px;text-align:center;" >
-		<p:commandButton id="cmbSeleccionarCriadero" styleClass="navLink" icon="icon-select" 
-			title="Seleccionar Criadero" process="@this" update="panelBusqueda,panelEncuesta,dtPesquisas,panelDatosCriaderoEnc,grwMensaje" 
+	<p:column  headerText="Codigo" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.codigo}" />
+	</p:column>
+
+	<p:column  headerText="Nombre" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.nombre}" />
+	</p:column>
+
+	<p:column  headerText="Comunidad" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.comunidad.nombre}" />
+	</p:column>
+
+	<p:column  headerText="Latitud" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.latitud}" />
+	</p:column>
+	
+	<p:column  headerText="Longitud" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.longitud}" />
+	</p:column>
+	
+	<p:column  headerText="Tipo" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.tipoCriadero.valor}" />
+	</p:column>
+	
+	<p:column  headerText="Dimension" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.areaActual}" />
+	</p:column>		
+	
+	<p:column  headerText="Dist.Casa" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.distanciaCasa}" />
+	</p:column>		
+	
+	<p:column style="width:10px;text-align:center;" >
+		<p:commandButton id="cmbSeleccionarCriadero" styleClass="navLink button-edit" icon="icon-edit"
+			title="Seleccionar Criadero" process="@this" 
+			update="panelBusqueda,panelEncuesta,panelDatosCriaderoEnc,:frmEncEnto:dtPesquisas,:frmEncEnto:grwMensaje" 
 			actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}">
-			<f:setPropertyActionListener value="#{pesq}" target="#{encuestaEntomologicaBean.seleccionCriadero}" /> 
+			<f:setPropertyActionListener value="#{criadero}" target="#{encuestaEntomologicaBean.seleccionCriadero}" /> 
 		</p:commandButton>
 	</p:column>	
-	 
 </p:dataTable>
-	
+
 </p:panel>
 
 
@@ -149,14 +187,29 @@
 
 </p:panel>
 
-	
+<div style="height: 350px; overflow: auto;">	
+
 <div>
 	<label>Pesquisa</label>
 	<p:commandButton id="cmbAgregarPesquisa" image="ui-icon-plusthick" title="Agregar" 
 		process="@this" update="panelPesquisa,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalAgregarPesquisa}" 
 		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;" />
-	<p:dataTable id="dtPesquisas" value="#{encuestaEntomologicaBean.frmDt_ListaPesquisas}" var="pesq" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+
+	<p:dataTable id="dtPesquisas" value="#{encuestaEntomologicaBean.frmDt_ListaPesquisas}" 
+		var="pesq" style="margin-bottom:10px;"
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." 
+	 	rows="4" errorMessage="Se ha presentado un error al cargar los datos"
+	 	rowKey="#{pesq}"
+	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelPesquisa}">
+	 	
+		<p:ajax event="rowSelect" process="@this" listener="#{encuestaEntomologicaBean.actualizarTrasSeleccionPesquisa}"   
+   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:frmInp_AxoEpidemEnc, :frmEncEnto:frmInp_SemaEpidemEnc" />
+
+		<p:column headerText="Fecha Insp." style="width:30px; text-aling:center;">
+			<h:outputText value="#{pesq.fechaInspeccion}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+		</p:column>
 
 		<p:column headerText="Semana" style="width:10px;text-align:center;" >
 			<h:outputText value="#{pesq.semanaEpidemiologica}" />
@@ -164,6 +217,10 @@
 
 		<p:column headerText="Año" style="width:10px;text-align:center;" >
 			<h:outputText value="#{pesq.añoEpidemiologico}" />
+		</p:column>
+
+		<p:column headerText="Pts. Muestrea" style="width:10px;text-align:center;" >
+			<h:outputText value="#{pesq.puntosMuestreados}" />
 		</p:column>
 
 		<p:column headerText="Cuch. colectadas" style="width:30px;text-align:center;" >
@@ -174,16 +231,21 @@
 			<h:outputText value="#{pesq.cuchPositivas}" />
 		</p:column>
 
-		<p:column headerText="Fecha Insp." style="width:30px; text-aling:center;">
-			<h:outputText value="#{pesq.fechaInspeccion}">
-				<f:convertDateTime pattern="dd/MM/yyyy" />
-			</h:outputText>
+		<p:column headerText="Larvas IyII" style="width:30px;text-align:center;" >
+			<h:outputText value="#{pesq.larvasJovenes}" />
 		</p:column>
 		
+		<p:column headerText="Larvas IIIyIV" style="width:30px;text-align:center;" >
+			<h:outputText value="#{pesq.larvasAdultas}" />
+		</p:column>
+		
+		<p:column headerText="Pupas" style="width:30px;text-align:center;" >
+			<h:outputText value="#{pesq.pupas}" />
+		</p:column>
+				
 		<p:column style="width:40px;text-align:center;" >
 			<p:commandButton id="cmbEditarPesquisa" styleClass="navLink button-edit" icon="icon-edit" title="Editar" 
-				process="@this" update=":frmEncEnto:panelPesquisa, :frmEncEnto:grwMensaje"
-				actionListener="#{encuestaEntomologicaBean.openModalAgregarPesquisa}">
+				process="@this" update=":frmEncEnto:panelPesquisa" oncomplete="dlgPesquisa.show()">
 				<f:setPropertyActionListener target="#{encuestaEntomologicaBean.editarPesquisa}" value="#{pesq}" />
 			</p:commandButton> 
 		</p:column>
@@ -194,6 +256,7 @@
 				<f:setPropertyActionListener value="#{pesq}" target="#{encuestaEntomologicaBean.eliminarPesquisa}" /> 
 			</p:commandButton>
 		</p:column>
+
 	</p:dataTable>
 </div>
 
@@ -202,25 +265,66 @@
 	<p:commandButton id="cmbAgregarIntervencion" image="ui-icon-plusthick" title="Agregar"  
 		process="@this" update="panelIntervencion,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalIntervencion}"
 		style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
-	<p:dataTable id="dtIntervencion" value="#{encuestaEntomologicaBean.frmDt_ListaIntervencion}" var="intr" style="margin-bottom:10px;"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
 
+	<p:dataTable id="dtIntervencion" value="#{encuestaEntomologicaBean.frmDt_ListaIntervencion}" var="intr" style="margin-bottom:10px;"
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" 
+	 	errorMessage="Se ha presentado un error al cargar los datos"
+	 	rowKey="#{intr}"
+	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelIntervencion}">
+
+		<p:column headerText="Fecha Intrv." style="width:30px; text-aling:center;">
+			<h:outputText value="#{intr.fechaIntervencion}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+		</p:column>
+
+		<p:column headerText="Limpieza" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.limpieza}" />
+		</p:column>
+
+		<p:column headerText="Eva" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.eva}" />
+		</p:column>
+
+		<p:column headerText="Drenaje" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.drenaje}" />
+		</p:column>
+
+		<p:column headerText="Relleno" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.relleno}" />
+		</p:column>
+		
+		<p:column headerText="Relleno" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.relleno}" />
+		</p:column>
+				
+		<p:column headerText="Peces" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.peces}" />
+		</p:column>
+
+		<p:column headerText="Cons. Bsphaericus" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.consumoBsphaericus}" />
+		</p:column>		
+
+		<p:column headerText="Cons. Bti" style="width:10px;text-align:center;" >
+			<h:outputText value="#{intr.consumoBti}" />
+		</p:column>		
+		
 		<p:column style="width:40px;text-align:center;" >
 			<p:commandButton id="cmbEditarIntervencion" value="Editar" 
-				title="Editar" process="@this" update="panelIntervencion,grwMensaje" 
-				actionListener="#{encuestaEntomologicaBean.openModalIntervencion}">
+				title="Editar" process="@this" update=":frmEncEnto:panelIntervencion" oncomplete="dlgAgregarIntervencion.show()">
 				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.seleccionIntervencion}" /> 
 			</p:commandButton>
 		</p:column>
 
 		<p:column style="width:40px;text-align:center;" >
 			<p:commandButton id="cmbEliminarIntervencion"  styleClass="navLink button-delete" icon="icon-delete"
-				title="Eliminar"  oncomplete="dlgConfirmaEliminarIntervencion.show()">
+				title="Eliminar"  oncomplete="dlgConfirmaEliminarIntervencion.show()" process="@this">
 				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.eliminarIntervencion}" /> 
 			</p:commandButton>
 		</p:column>	 	
-
 	</p:dataTable>
+
 </div>
 
 <div>
@@ -229,12 +333,44 @@
 		 process="@this" update="panelPosInspeccion,grwMensaje" actionListener="#{encuestaEntomologicaBean.openModalPosInspeccion}"
 		 style="margin-left:5px;width: 0px; height: 0px;vertical-align: middle; margin-bottom:5px;"/>
 	<p:dataTable id="dtPosInspeccion" value="#{encuestaEntomologicaBean.frmDt_ListaPosInspeccion}" var="posi"
-	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="4" errorMessage="Se ha presentado un error al cargar los datos">
+	 	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." 
+	 	rows="4" errorMessage="Se ha presentado un error al cargar los datos"	 	
+	 	rowKey="#{posi}"
+	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelPosInspeccion}">
 
+		<p:column headerText="Fecha Insp." style="width:30px; text-aling:center;">
+			<h:outputText value="#{posi.fechaInspeccion}">
+				<f:convertDateTime pattern="dd/MM/yyyy" />
+			</h:outputText>
+		</p:column>
+
+		<p:column headerText="Pts. Muestra" style="width:10px;text-align:center;" >
+			<h:outputText value="#{posi.puntosMuestreados}" />
+		</p:column>		
+		
+		<p:column headerText="Cuch. colectadas" style="width:30px;text-align:center;" >
+			<h:outputText value="#{posi.cuchColectadas}" />
+		</p:column>
+
+		<p:column headerText="Cuch. positivas" style="width:30px;text-align:center;" >
+			<h:outputText value="#{posi.cuchPositivas}" />
+		</p:column>
+		
+		<p:column headerText="Larvas IyII" style="width:30px;text-align:center;" >
+			<h:outputText value="#{posi.larvasJovenes}" />
+		</p:column>
+		
+		<p:column headerText="Larvas IIIyIV" style="width:30px;text-align:center;" >
+			<h:outputText value="#{posi.larvasAdultas}" />
+		</p:column>
+		
+		<p:column headerText="Pupas" style="width:30px;text-align:center;" >
+			<h:outputText value="#{posi.pupas}" />
+		</p:column>
+		
 		<p:column style="width:40px;text-align:center;" >
 			<p:commandButton id="cmbEditarPosInspeccion" value="Editar"
-				title="Editar registro PosInspeccion" process="@this" update="panelPosInspeccion,grwMensaje" 
-				actionListener="#{encuestaEntomologicaBean.openModalPosInspeccion}">
+				title="Editar" process="@this" update=":frmEncEnto:panelPosInspeccion" oncomplete="dlgAgregarPosInspeccion.show()">
 				<f:setPropertyActionListener value="#{posi}" target="#{encuestaEntomologicaBean.seleccionPosInspeccion}" /> 
 			</p:commandButton>
 		</p:column>
@@ -248,6 +384,9 @@
 		
 	</p:dataTable>
 </div>
+
+</div>
+
 
 </p:panel>
 
@@ -266,8 +405,8 @@
 
 <p:confirmDialog	message="Registro de pesquisa actual y sus dependencias seran eliminados, desea continuar?"
 					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarPesquisa">					
-	<p:commandButton id="btnSiEliminaPesquisa" value="Si" process="@this" immediate="true" styleClass="btnDefault" 
-					 style="font-size:11px;" ajax="true" update="dtPesquisas,grwMensaje" 
+	<p:commandButton id="btnSiEliminaPesquisa" value="Si" immediate="true" styleClass="btnDefault" 
+					 style="font-size:11px;" ajax="true" process="@this" update=":frmEncEnto:dtPesquisas,:frmEncEnto:grwMensaje" 
 					 actionListener="#{encuestaEntomologicaBean.eliminarPesquisa}" oncomplete="dlgConfirmaEliminarPesquisa.hide()">
 	</p:commandButton>
 	<p:commandButton value="No" onclick="dlgConfirmaEliminarPesquisa.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
@@ -276,7 +415,7 @@
 <p:confirmDialog	message="Registro de intervencion actual y sus dependencias seran eliminados, desea continuar?"
 					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarIntervencion">					
 	<p:commandButton id="btnSiEliminarIntervencion" value="Si" process="@this" immediate="true" styleClass="btnDefault" 
-					 style="font-size:11px;" ajax="true" update="dtIntervencion,grwMensaje" 
+					 style="font-size:11px;" ajax="true" update=":frmEncEnto:dtIntervencion,:frmEncEnto:grwMensaje" 
 					 actionListener="#{encuestaEntomologicaBean.eliminarIntervencion}" oncomplete="dlgConfirmaEliminarIntervencion.hide()">
 	</p:commandButton>
 	<p:commandButton value="No" onclick="dlgConfirmaEliminarIntervencion.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
@@ -285,7 +424,7 @@
 <p:confirmDialog	message="Desea eliminar el registro de PosInspeccion actual?"
 					modal="true" header="Aviso" severity="alert" widgetVar="dlgConfirmaEliminarPosInspeccion">					
 	<p:commandButton id="btnSiEliminarPosInspeccion" value="Si"  process="@this" immediate="true" styleClass="btnDefault" 
-					 style="font-size:11px;" ajax="true" update="dtPosInspeccion,grwMensaje" 
+					 style="font-size:11px;" ajax="true" update=":frmEncEnto:dtPosInspeccion,:frmEncEnto:grwMensaje" 
 					 actionListener="#{encuestaEntomologicaBean.eliminarPosInspeccion}" oncomplete="dlgConfirmaEliminarPosInspeccion.hide()">
 	</p:commandButton>
 	<p:commandButton value="No" onclick="dlgConfirmaEliminarPosInspeccion.hide()" style="font-size:11px;" styleClass="btnDefault" type="button" /> 										
@@ -298,7 +437,7 @@
 			closable="false"
 			resizable="false"
 			modal="true"
-			header="Datos Generales del Criade"
+			header="Datos Generales del Criadero"
 			widgetVar="dlgCriadero"
 			height="492"
 			width="1003">
@@ -432,8 +571,10 @@
 		<f:selectItem itemLabel="Seleccionar" itemValue="0" />
 		<f:selectItems value="#{encuestaEntomologicaBean.itemsClasesCriaderos}" var="clase" 
 			itemValue="#{clase.catalogoId}" itemLabel="#{clase.valor}" />
+		<f:selectItem itemValue="999999" itemLabel="Otro" />
+			<p:ajax event="change"  process=":frmEncEnto:frmSom_ClasificacionCriadero" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+				listener="#{encuestaEntomologicaBean.openModalAgregarCatOtros}" />
 	</h:selectOneMenu>
-
 </div>
 </p:panel>
 
@@ -587,7 +728,7 @@
 		<h:outputLabel for="frmCal_FechaTomaDatos" value="Toma datos:"/>
 		<h:inputText id="frmCal_FechaTomaDatos" value="#{encuestaEntomologicaBean.frmCal_FechaTomaDatos}" style="width: 90px;"
 					requiredMessage="Fecha de Inspeccion Requerida"  
-					styleClass="txtDefault frmCal_FechaTomaDatos">
+					styleClass="frmCal_FechaTomaDatos">
 			<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -599,12 +740,15 @@
 
 <div style="float: left; width: 210px;">
 	<h:outputLabel for="frmSom_EspecieAnopheles" value="Especies anopheles:" styleClass="lblDefaultSmall" />	
-	<h:selectManyMenu id="frmSom_EspecieAnopheles" value="#{encuestaEntomologicaBean.frmSom_EspecieAnopheles}"
+	<h:selectManyMenu id="frmSom_EspecieAnopheles" value="#{encuestaEntomologicaBean.frmSom_EspecieAnopheles}" 
 		style="width: 200px; height: 100px;"
 		styleClass="txtDefault cboDefault" >
 		<f:selectItems value="#{encuestaEntomologicaBean.itemsEspeciesAnopheles}" var="espanop" 
 			itemValue="#{espanop.catalogoId}" itemLabel="#{espanop.valor}" />
-	</h:selectManyMenu>
+		<f:selectItem itemValue="999999" itemLabel="Otro" />
+			<p:ajax event="change"  process=":frmEncEnto:frmSom_EspecieAnopheles" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+				listener="#{encuestaEntomologicaBean.openModalAgregarCatOtros}" />
+ 	</h:selectManyMenu>
 </div>
 
 </div>
@@ -653,7 +797,7 @@
 		<h:outputLabel for="frmCal_Pesq_FechaInspeccion" value="Fecha de inspeccion:" />
 		<h:inputText id="frmCal_Pesq_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_Pesq_FechaInspeccion}" style="width: 120px"
 					requiredMessage="Fecha de Inspeccion Requerida"  
-					styleClass="txtDefault frmCal_Pesq_FechaInspeccion">
+					styleClass="frmCal_Pesq_FechaInspeccion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -693,21 +837,21 @@
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_NumLarvJovEstaIyII" value="Larvas Est. IyII:" />
 		<h:inputText id="frmInp_Pesq_NumLarvJovEstaIyII" value="#{encuestaEntomologicaBean.frmInp_Pesq_NumLarvJovEstaIyII}" style="width: 120px">
-				<f:ajax event="change" render="frmInp_Pesq_DensLarvJovEstaIyII" listener="#{encuestaEntomologicaBean.calcularPesqDensLarvJovenes}" />
+				<f:ajax event="change" execute="frmInp_Pesq_TotalCucharonadas" render="frmInp_Pesq_DensLarvJovEstaIyII" listener="#{encuestaEntomologicaBean.calcularPesqDensLarvJovenes}" />
 		</h:inputText>	
 	</div>	
 	
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_NumLarvAduEstaIIIyIV" value="Larvas Est. IIIyIV:" />
 		<h:inputText id="frmInp_Pesq_NumLarvAduEstaIIIyIV" value="#{encuestaEntomologicaBean.frmInp_Pesq_NumLarvAduEstaIIIyIV}" style="width: 120px" >
-				<f:ajax event="change" render="frmInp_Pesq_DensLarvAduEstaIIIyIV" listener="#{encuestaEntomologicaBean.calcularPesqDensLarvAdultas}" />
+				<f:ajax event="change" execute="frmInp_Pesq_TotalCucharonadas" render="frmInp_Pesq_DensLarvAduEstaIIIyIV" listener="#{encuestaEntomologicaBean.calcularPesqDensLarvAdultas}" />
 		</h:inputText>	
 	</div>	
 	
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_NumPupas" value="Pupas:" />
 		<h:inputText id="frmInp_Pesq_NumPupas" value="#{encuestaEntomologicaBean.frmInp_Pesq_NumPupas}" style="width: 120px" >
-				<f:ajax event="change" render="frmInp_Pesq_DensPupas" listener="#{encuestaEntomologicaBean.calcularPesqDensPupas}" />
+				<f:ajax event="change" execute="frmInp_Pesq_TotalCucharonadas" render="frmInp_Pesq_DensPupas" listener="#{encuestaEntomologicaBean.calcularPesqDensPupas}" />
 		</h:inputText>		
 	</div>	
 </div>
@@ -715,17 +859,23 @@
 <div style="float: left; width: 400px;">	
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_DensLarvJovEstaIyII" value="Dens. larvaria IyII:" />
-		<h:inputText id="frmInp_Pesq_DensLarvJovEstaIyII" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensLarvJovEstaIyII}" style="width: 120px" />	
+		<h:inputText id="frmInp_Pesq_DensLarvJovEstaIyII" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensLarvJovEstaIyII}" style="width: 120px">
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 	</div>	
 	
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_DensLarvAduEstaIIIyIV" value="Dens. larvaria IIIyIV" />
-		<h:inputText id="frmInp_Pesq_DensLarvAduEstaIIIyIV" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensLarvAduEstaIIIyIV}" style="width: 120px" />	
+		<h:inputText id="frmInp_Pesq_DensLarvAduEstaIIIyIV" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensLarvAduEstaIIIyIV}" style="width: 120px" >
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 	</div>	
 	
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_DensPupas" value="Dens. pupas:" />
-		<h:inputText id="frmInp_Pesq_DensPupas" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensPupas}" style="width: 120px" />	
+		<h:inputText id="frmInp_Pesq_DensPupas" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_DensPupas}" style="width: 120px" >
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 	</div>	
 </div>
 
@@ -734,7 +884,7 @@
 <div style="float: left; width: 450px;">
 	<h:outputLabel for="frmInp_Pesq_Observaciones" value="Observaciones:" />
 	<h:inputTextarea id="frmInp_Pesq_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Pesq_Observaciones}" 
-		style="width: 450px; height:75px; min-width: 450px; min-height: 75px; max-width: 450px; max-height:75px;" />	
+		style="width: 450px; height:80px; min-width: 450px; min-height: 80px; max-width: 450px; max-height:80px;" />	
 </div>
 
 <div style="float: left; width: 450px; margin-top: 5px;">
@@ -742,7 +892,7 @@
 		<h:outputLabel for="frmCal_Pesq_FechaNotificacion" value="Fecha Notif.:" />
 		<h:inputText id="frmCal_Pesq_FechaNotificacion" value="#{encuestaEntomologicaBean.frmCal_Pesq_FechaNotificacion}" style="width: 120px"
 					requiredMessage="Fecha de Notificacion Requerida"  
-					styleClass="txtDefault frmCal_Pesq_FechaNotificacion">
+					styleClass="frmCal_Pesq_FechaNotificacion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -752,8 +902,7 @@
 	
 	<div  style="float: left; width: 250px; margin-left: 20px;">
 		<h:outputLabel for="frmInp_Pesq_Inspector" value="Inspector:" />
-		<h:inputText id="frmInp_Pesq_Inspector" value="#{encuestaEntomologicaBean.frmInp_Pesq_Inspector}" style="width: 250px"  
-					styleClass="txtDefault" />
+		<h:inputText id="frmInp_Pesq_Inspector" value="#{encuestaEntomologicaBean.frmInp_Pesq_Inspector}" style="width: 250px"  />
 	</div>	
 </div>
 
@@ -787,7 +936,7 @@
 		<h:outputLabel for="frmCal_Intv_FechaIntervencion" value="Fecha Intervencion:" />
 		<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px"
 					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
-					styleClass="txtDefault frmCal_Intv_FechaIntervencion">
+					styleClass="frmCal_Intv_FechaIntervencion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -881,7 +1030,7 @@
 		<h:outputLabel for="frmCal_PosIns_FechaInspeccion" value="Fecha de inspeccion:" />
 		<h:inputText id="frmCal_PosIns_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_PosIns_FechaInspeccion}" style="width: 120px"
 					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
-					styleClass="txtDefault frmCal_PosIns_FechaInspeccion">
+					styleClass="frmCal_PosIns_FechaInspeccion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -933,17 +1082,23 @@
 	<div style="float: left; width: 400px;  margin-bottom: 5px;">
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_DensLarvJovEstaIyII" value="Dens. larvaria IyII:" />
-			<h:inputText id="frmInp_PosIns_DensLarvJovEstaIyII" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensLarvJovEstaIyII}" style="width: 120px" />	
+			<h:inputText id="frmInp_PosIns_DensLarvJovEstaIyII" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensLarvJovEstaIyII}" style="width: 120px" >
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 		</div>	
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_DensLarvAduEstaIIIyIV" value="Dens. larvaria IIIyIV" />
-			<h:inputText id="frmInp_PosIns_DensLarvAduEstaIIIyIV" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensLarvAduEstaIIIyIV}" style="width: 120px" />	
+			<h:inputText id="frmInp_PosIns_DensLarvAduEstaIIIyIV" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensLarvAduEstaIIIyIV}" style="width: 120px" >
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 		</div>	
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_DensPupas" value="Densidad pupas:" />
-			<h:inputText id="frmInp_PosIns_DensPupas" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensPupas}" style="width: 120px" />	
+			<h:inputText id="frmInp_PosIns_DensPupas" disabled="true" value="#{encuestaEntomologicaBean.frmInp_PosIns_DensPupas}" style="width: 120px" >
+			<f:convertNumber pattern="#,###,##0.00"/>
+		</h:inputText>	
 		</div>	
 	</div>
 </div>
@@ -965,7 +1120,26 @@
 </p:dialog>
 
 
+<p:dialog	id="idDlgAddOtroCatalogo"
+			draggable="false"
+			closable="true"
+			modal="true"
+			resizable="false"
+			header="Otro Catalogo"
+			widgetVar="dlgOpenModalOtros"
+			height="70"
+			width="150">
 
+<div style="float: left; width: 120px; margin-left: 10px;">
+	<h:outputLabel for="frmInp_OtroValorCatalogo" value="Valor:" />
+	<h:inputText id="frmInp_OtroValorCatalogo" value="#{encuestaEntomologicaBean.frmInp_OtroValorCatalogo}" style="width: 120px" />			
+</div>	
+
+<p:commandButton id="cmbAddOtroCatalogo" value="Agregar" process="@this,:frmEncEnto:frmInp_OtroValorCatalogo" 
+	update="frmEncEnto:frmSom_ClasificacionCriadero,frmEncEnto:frmSom_EspecieAnopheles"  oncomplete="dlgOpenModalOtros.hide()"
+	actionListener="#{encuestaEntomologicaBean.agregaCatalogoOtros}" />
+
+</p:dialog>
 
 
 	

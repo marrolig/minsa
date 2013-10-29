@@ -210,6 +210,19 @@ public class IntervencionDA implements IntervencionServices {
     		if( pIntervencion.getCriaderoIntervencionId() > 0 ){
     			CriaderosIntervencion oDetachedIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pIntervencion.getCriaderoIntervencionId());
     			CriaderosIntervencion oIntervencion=oEM.merge(oDetachedIntervencion);
+    			
+    			oIntervencion.setBsphaericus(pIntervencion.getBsphaericus());
+    			oIntervencion.setBti(pIntervencion.getBti());
+    			oIntervencion.setConsumoBsphaericus(pIntervencion.getConsumoBsphaericus());
+    			oIntervencion.setConsumoBti(pIntervencion.getConsumoBti());
+    			oIntervencion.setDrenaje(pIntervencion.getDrenaje());
+    			oIntervencion.setEva(pIntervencion.getEva());
+    			oIntervencion.setFechaIntervencion(pIntervencion.getFechaIntervencion());
+    			oIntervencion.setLimpieza(pIntervencion.getLimpieza());
+    			oIntervencion.setObservaciones(pIntervencion.getObservaciones());
+    			oIntervencion.setRelleno(pIntervencion.getRelleno());
+    			oIntervencion.setSiembraPeces(pIntervencion.getSiembraPeces());
+    			
             	strUpdate = "Guardar";
     		}else{
     			oEM.persist(pIntervencion);

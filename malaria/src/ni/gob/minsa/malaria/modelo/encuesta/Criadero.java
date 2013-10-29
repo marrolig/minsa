@@ -47,12 +47,12 @@ public class Criadero implements Serializable {
 	private BigDecimal latitud;
 	
 	@NotNull(message="Identificacion si el criadero es temporal o no requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="TIPO",referencedColumnName="CODIGO",nullable=false,updatable=true)	
 	private TiposCriaderos tipoCriadero;
 	
 	@NotNull(message="Identificacion de la clasificacion del criadero requerida")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="CLASIFICACION",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private ClasesCriaderos claseCriadero;
 	
@@ -69,52 +69,52 @@ public class Criadero implements Serializable {
 	private BigDecimal areaMax;
 
 	@NotNull(message="Identificion de abundancia relativa de vegetacion vertical requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="VEG_VERTICAL",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private AbundanciaVegetacion vegVertical;	
 
 	@NotNull(message="Identificion de abundancia relativa de vegetacion emergente requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="VEG_EMERGENTE",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private AbundanciaVegetacion vegEmergente;
 
 	@NotNull(message="Identificion de abundancia relativa de vegetacion flotante requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="VEG_FLOTANTE",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private AbundanciaVegetacion vegFlotante;
 
 	@NotNull(message="Identificion de abundancia relativa de vegetacion sumergida requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="VEG_SUMERGIDA",referencedColumnName="CODIGO",nullable=false,updatable=true)	
 	private AbundanciaVegetacion vegSumergida;
 
 	@NotNull(message="Identificion de abundancia relativa de insectos requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="FAUNA_INSECTO",referencedColumnName="CODIGO",nullable=false,updatable=true)		
 	private AbundanciaFauna faunaInsecto;
 	
 	@NotNull(message="Identificion de abundancia relativa de pesces requerido")	
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="FAUNA_PECES",referencedColumnName="CODIGO",nullable=false,updatable=true)		
 	private AbundanciaFauna faunaPeces;
 
 	@NotNull(message="Identificacion de abundancia relativa de anfibios requerido")	
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="FAUNA_ANFIBIOS",referencedColumnName="CODIGO",nullable=false,updatable=true)			
 	private AbundanciaFauna faunaAnfibios;
 
 	@NotNull(message="Nivel de turbidez del agua requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="TURBIDEZ_AGUA",referencedColumnName="CODIGO",nullable=false,updatable=true)		
 	private TurbidezAgua turbidezAgua;
 
 	@NotNull(message="Movimiento de agua asociada al criadero requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="MOVIMIENTO_AGUA",referencedColumnName="CODIGO",nullable=false,updatable=true)		
 	private MovimientoAgua movimientoAgua;
 	
 	@NotNull(message="Identificacion del nivel de exposicion al sol requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="EXPOSICION_SOL",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private ExposicionSol exposicionSol;	
 	

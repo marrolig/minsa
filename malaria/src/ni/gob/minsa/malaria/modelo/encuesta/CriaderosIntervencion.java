@@ -4,7 +4,6 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -17,17 +16,17 @@ import java.util.Date;
 public class CriaderosIntervencion implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoIntervencionId;
-	private BigDecimal bsphaericus;
-	private BigDecimal bti;
-	private BigDecimal consumoBsphaericus;
-	private BigDecimal consumoBti;
-	private BigDecimal drenaje;
-	private BigDecimal eva;
+	private Long bsphaericus;
+	private Long bti;
+	private Long consumoBsphaericus;
+	private Long consumoBti;
+	private Long drenaje;
+	private Long eva;
 	private Date fechaIntervencion;
-	private BigDecimal limpieza;
+	private Long limpieza;
 	private String observaciones;
-	private BigDecimal relleno;
-	private BigDecimal siembraPeces;
+	private Long relleno;
+	private Long siembraPeces;
 	private CriaderosPesquisa criaderosPesquisa;
 
     public CriaderosIntervencion() {
@@ -47,58 +46,58 @@ public class CriaderosIntervencion implements Serializable {
 	}
 
 
-	public BigDecimal getBsphaericus() {
+	public Long getBsphaericus() {
 		return this.bsphaericus;
 	}
 
-	public void setBsphaericus(BigDecimal bsphaericus) {
+	public void setBsphaericus(Long bsphaericus) {
 		this.bsphaericus = bsphaericus;
 	}
 
 
-	public BigDecimal getBti() {
+	public Long getBti() {
 		return this.bti;
 	}
 
-	public void setBti(BigDecimal bti) {
+	public void setBti(Long bti) {
 		this.bti = bti;
 	}
 
 
 	@Column(name="CONSUMO_BSPHAERICUS")
-	public BigDecimal getConsumoBsphaericus() {
+	public Long getConsumoBsphaericus() {
 		return this.consumoBsphaericus;
 	}
 
-	public void setConsumoBsphaericus(BigDecimal consumoBsphaericus) {
+	public void setConsumoBsphaericus(Long consumoBsphaericus) {
 		this.consumoBsphaericus = consumoBsphaericus;
 	}
 
 
 	@Column(name="CONSUMO_BTI")
-	public BigDecimal getConsumoBti() {
+	public Long getConsumoBti() {
 		return this.consumoBti;
 	}
 
-	public void setConsumoBti(BigDecimal consumoBti) {
+	public void setConsumoBti(Long consumoBti) {
 		this.consumoBti = consumoBti;
 	}
 
 
-	public BigDecimal getDrenaje() {
+	public Long getDrenaje() {
 		return this.drenaje;
 	}
 
-	public void setDrenaje(BigDecimal drenaje) {
+	public void setDrenaje(Long drenaje) {
 		this.drenaje = drenaje;
 	}
 
 
-	public BigDecimal getEva() {
+	public Long getEva() {
 		return this.eva;
 	}
 
-	public void setEva(BigDecimal eva) {
+	public void setEva(Long eva) {
 		this.eva = eva;
 	}
 
@@ -114,11 +113,11 @@ public class CriaderosIntervencion implements Serializable {
 	}
 
 
-	public BigDecimal getLimpieza() {
+	public Long getLimpieza() {
 		return this.limpieza;
 	}
 
-	public void setLimpieza(BigDecimal limpieza) {
+	public void setLimpieza(Long limpieza) {
 		this.limpieza = limpieza;
 	}
 
@@ -132,21 +131,21 @@ public class CriaderosIntervencion implements Serializable {
 	}
 
 
-	public BigDecimal getRelleno() {
+	public Long getRelleno() {
 		return this.relleno;
 	}
 
-	public void setRelleno(BigDecimal relleno) {
+	public void setRelleno(Long relleno) {
 		this.relleno = relleno;
 	}
 
 
 	@Column(name="SIEMBRA_PECES")
-	public BigDecimal getSiembraPeces() {
+	public Long getSiembraPeces() {
 		return this.siembraPeces;
 	}
 
-	public void setSiembraPeces(BigDecimal siembraPeces) {
+	public void setSiembraPeces(Long siembraPeces) {
 		this.siembraPeces = siembraPeces;
 	}
 
