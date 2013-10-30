@@ -99,7 +99,7 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		}
 		
 		String strJPQL = "select pins from CriaderosPosInspeccion pins " +
-				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by pins.criaderoPosInspeccionId";
+				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by pins.fechaInspeccion desc";
 		
 		try{
 			

@@ -85,14 +85,24 @@
 	</p:autoComplete>
 	
 	<p:commandButton id="cmbBuscarCriaderos" value="Buscar" 
-		process=":frmEncEnto:frmInp_ComunidadBusqueda, :frmEncEnto:frmSom_MunicipioBusqueda, :frmEncEnto:frmSom_SilaisBusqueda" 
-		update=":frmEncEnto:dtBusqueda" />
+		process="frmEncEnto:frmInp_ComunidadBusqueda, frmEncEnto:frmSom_MunicipioBusqueda, frmEncEnto:frmSom_SilaisBusqueda" 
+		update="frmEncEnto:dtBusqueda" />
 
 </h:panelGrid>
 
 
-<p:dataTable id="dtBusqueda" value="#{encuestaEntomologicaBean.lazyCriaderos}" var="criadero" style="margin-top: 5px;"
-	paginator="true" paginatorPosition="top" loadingMessage="Cargando registros ..." rows="12" errorMessage="Se ha presentado un error al cargar los datos">
+<p:dataTable id="dtBusqueda" 
+	value="#{encuestaEntomologicaBean.lazyCriaderos}" 
+	var="criadero" style="margin-top: 5px;"
+	paginator="true" paginatorPosition="top" 
+	loadingMessage="Cargando registros ..." 
+	rows="12" errorMessage="Se ha presentado un error al cargar los datos">
+
+	<p:column  headerText="Ultima Notif." style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.fechaUltimaNotificacion}">
+			<f:convertDateTime pattern="dd/MM/yyyy" />
+		</h:outputText>
+	</p:column>
 	
 	<p:column  headerText="Codigo" style="width:10px;text-align:center;">
 		<h:outputText value="#{criadero.codigo}" />
@@ -103,20 +113,16 @@
 	</p:column>
 
 	<p:column  headerText="Comunidad" style="width:10px;text-align:center;">
-		<h:outputText value="#{criadero.comunidad.nombre}" />
-	</p:column>
-
-	<p:column  headerText="Latitud" style="width:10px;text-align:center;">
-		<h:outputText value="#{criadero.latitud}" />
-	</p:column>
-	
-	<p:column  headerText="Longitud" style="width:10px;text-align:center;">
-		<h:outputText value="#{criadero.longitud}" />
+		<h:outputText value="#{criadero.comunidad}" />
 	</p:column>
 	
 	<p:column  headerText="Tipo" style="width:10px;text-align:center;">
-		<h:outputText value="#{criadero.tipoCriadero.valor}" />
+		<h:outputText value="#{criadero.tipo}" />
 	</p:column>
+	
+	<p:column  headerText="Tipo" style="width:10px;text-align:center;">
+		<h:outputText value="#{criadero.clasificacion}" />
+	</p:column>	
 	
 	<p:column  headerText="Dimension" style="width:10px;text-align:center;">
 		<h:outputText value="#{criadero.areaActual}" />
@@ -127,9 +133,9 @@
 	</p:column>		
 	
 	<p:column style="width:10px;text-align:center;" >
-		<p:commandButton id="cmbSeleccionarCriadero" styleClass="navLink button-edit" icon="icon-edit"
-			title="Seleccionar Criadero" process="@this" 
-			update="panelBusqueda,panelEncuesta,panelDatosCriaderoEnc,:frmEncEnto:dtPesquisas,:frmEncEnto:grwMensaje" 
+		<p:commandButton id="cmbSeleccionarCriadero"  styleClass="navLink button-edit" icon="icon-edit"
+			title="Seleccionar" process="@this" 
+			update=":frmEncEnto:panelBusqueda :frmEncEnto:panelEncuesta :frmEncEnto:panelBotones" 
 			actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}">
 			<f:setPropertyActionListener value="#{criadero}" target="#{encuestaEntomologicaBean.seleccionCriadero}" /> 
 		</p:commandButton>
@@ -150,23 +156,6 @@
 	
 	<div style="float: left; width: 210px; margin-bottom: 8px; margin-left: 20px;">
 		<div style="float: left; width: 100px;">
-			<h:outputLabel for="frmInp_SemaEpidemEnc" value="Semana Epidem.:" styleClass="lblDefaultSmall" />
-			<h:inputText id="frmInp_SemaEpidemEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_SemaEpidemEnc}" style="width: 85px;" styleClass="lblDefaultSmall" />
-		</div>
-	
-		<div style="float: left; width: 100px;">
-			<h:outputLabel for="frmInp_AxoEpidemEnc" value="Año Epidem.:" styleClass="lblDefaultSmall" />
-			<h:inputText id="frmInp_AxoEpidemEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_AxoEpidemEnc}" style="width: 85px;"  styleClass="lblDefaultSmall" />
-		</div>
-	</div>
-	
-	<div style="float: left; width: 500px; margin-right: 20px; margin-bottom: 8px;">
-		<h:outputLabel for="frmInp_DatosCriaderoEnc" value="Criadero:" styleClass="lblDefaultSmall" />
-		<h:inputText id="frmInp_DatosCriaderoEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_DatosCriaderoEnc}" style="width: 500px;" styleClass="lblDefaultSmall"  />
-	</div>
-
-	<div style="float: left; width: 210px; margin-bottom: 8px; margin-left: 20px;">
-		<div style="float: left; width: 100px;">
 			<h:outputLabel for="frmInp_DistMaxCasaEnc" value="Dist. max. Casa:" styleClass="lblDefaultSmall" />
 			<h:inputText id="frmInp_DistMaxCasaEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_DistMaxCasaEnc}" style="width: 85px;"  styleClass="lblDefaultSmall" />
 		</div>
@@ -176,10 +165,16 @@
 			<h:inputText id="frmInp_AreaEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_AreaEnc}" style="width: 85px;"  styleClass="lblDefaultSmall" />
 		</div>
 	</div>
+	
+	<div style="float: left; width: 500px; margin-right: 20px; margin-bottom: 8px;">
+		<h:outputLabel for="frmInp_DatosCriaderoEnc" value="Criadero:" styleClass="lblDefaultSmall" />
+		<h:inputText id="frmInp_DatosCriaderoEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_DatosCriaderoEnc}" style="width: 500px;" styleClass="lblDefaultSmall"  />
+	</div>
 
-	<div style="float: left; width: 500px; margin-right: 20px;">
+
+	<div style="float: left; width: 710px; margin-left: 20px;">
 		<h:outputLabel for="frmInp_UbicacionEnc" value="Ubicacion:" styleClass="lblDefaultSmall" />
-		<h:inputText id="frmInp_UbicacionEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_UbicacionEnc}" style="width: 500px;" styleClass="lblDefaultSmall"  />
+		<h:inputText id="frmInp_UbicacionEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_UbicacionEnc}" style="width: 710px;" styleClass="lblDefaultSmall"  />
 	</div>
 
 	<p:commandButton id="cmbCriadero" value="Criaderos" style="margin-top:10px;"
@@ -203,7 +198,7 @@
 	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelPesquisa}">
 	 	
 		<p:ajax event="rowSelect" process="@this" listener="#{encuestaEntomologicaBean.actualizarTrasSeleccionPesquisa}"   
-   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:frmInp_AxoEpidemEnc, :frmEncEnto:frmInp_SemaEpidemEnc, :frmEncEnto:dtIntervencion" />
+   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:dtIntervencion" />
 
 		<p:column headerText="Fecha Insp." style="width:30px; text-aling:center;">
 			<h:outputText value="#{pesq.fechaInspeccion}">
@@ -399,10 +394,13 @@
 		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />
 	<p:commandButton id="cmbGuardar" value="Guardar" process="@this" update="grwMensaje" disabled="#{encuestaEntomologicaBean.cmbGuardar==0}"
 		actionListener="#{encuestaEntomologicaBean.guardar}" />
-	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,panelBusqueda, panelEncuesta, cmbRegresar, cmbGuardar, cmbNuevo" 
+	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this :frmEncEnto:panelBusqueda :frmEncEnto:panelEncuesta :frmEncEnto:cmbRegresar :frmEncEnto:cmbGuardar :frmEncEnto:cmbNuevo" 
 		disabled="#{encuestaEntomologicaBean.cmbRegresar==0}"
 		actionListener="#{encuestaEntomologicaBean.actualizarVisibilidadPaneles}" />		
-	<p:commandButton id="cmbSalir" value="Salir" />
+	<p:commandButton id="cmbSalir" value="Salir"  styleClass="btnDefault" 
+								 style="font-size:11px;" 
+								 process="@this" 
+								 onclick="document.location.replace('../inicio.xhtml');"/>
 </p:panel>
 
 
@@ -454,20 +452,7 @@
 		style="width: 85px; height: 48px;" styleClass="lblDefaultSmall" />
 </div>
 
-<div style="float: left; width: 210px; height:100px; margin-right: 10px;" >
-
-	<div style="float: left; width: 210px; margin-bottom: 8px; margin-right: 10px;">
-		<div style="float: left; width: 100px; margin-right: 10px;">
-			<h:outputLabel for="frmInp_SemanaEpidemiologica" value="Semana Epidem.:" styleClass="lblDefaultSmall" />
-			<h:inputText id="frmInp_SemanaEpidemiologica" value="#{encuestaEntomologicaBean.frmInp_SemanaEpidemiologica}" style="width: 85px;"  styleClass="lblDefaultSmall" />
-		</div>
-	
-		<div style="float: left; width: 100px;">
-			<h:outputLabel for="frmInp_AxoEpidemiologico" value="Año Epidem.:" styleClass="lblDefaultSmall" />
-			<h:inputText id="frmInp_AxoEpidemiologico" value="#{encuestaEntomologicaBean.frmInp_AxoEpidemiologico}" style="width: 85px;"  styleClass="lblDefaultSmall" />
-		</div>
-	</div>
-	
+<div style="float: left; width: 210px; height:70px; margin-right: 10px;" >
 	
 	<div style="float: left; width: 210px; margin-right: 10px; margin-bottom: 5px;">
 		<div style="float: left; width: 100px; margin-right: 10px;">
@@ -492,6 +477,20 @@
 			<f:selectItems value="#{encuestaEntomologicaBean.itemsTiposCriaderos}" var="tipoCriadero" itemValue="#{tipoCriadero.catalogoId}" itemLabel="#{tipoCriadero.valor}" />
 		</h:selectOneMenu>
 	</div>	
+
+<div style="float: left; width: 210px; margin-top: 5px;">
+	<h:outputLabel for="frmSom_ClasificacionCriadero" value="Clasificacion del Criadero:" styleClass="lblDefaultSmall" />	
+	<h:selectOneMenu id="frmSom_ClasificacionCriadero" value="#{encuestaEntomologicaBean.frmSom_ClasificacionCriadero}"
+		style="width: 200px;" 
+		styleClass="txtDefault cboDefault" title="Utilizar selección Otro, para agregar una nueva clasificacion del criadero">
+		<f:selectItem itemLabel="Seleccionar" itemValue="0" />
+		<f:selectItems value="#{encuestaEntomologicaBean.itemsClasesCriaderos}" var="clase" 
+			itemValue="#{clase.catalogoId}" itemLabel="#{clase.valor}" />
+		<f:selectItem itemValue="999999" itemLabel="Otro" />
+			<p:ajax event="change"  process=":frmEncEnto:frmSom_ClasificacionCriadero" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+				listener="#{encuestaEntomologicaBean.openModalAgregarCatOtros}" />
+	</h:selectOneMenu>
+</div>
 
 </div>
 
@@ -542,7 +541,6 @@
 		<h:outputLabel for="frmInp_NombreCriadero" value="Nombre:" styleClass="lblDefaultSmall" />
 		<h:inputText id="frmInp_NombreCriadero" value="#{encuestaEntomologicaBean.frmInp_NombreCriadero}" style="width: 195px;"  styleClass="lblDefaultSmall" />
 	</div>
-
 	
 	<div style="float: left; width: 250px;">
 		<div style="float: left; width: 110px;">
@@ -559,6 +557,7 @@
 
 </div>
 
+
 <div style="float: left; width: 370px; margin-left: 10px;">
 	<h:outputLabel for="frmInp_DireccionCriadero" value="Direccion:" styleClass="lblDefaultSmall" />
 	<h:inputTextarea id="frmInp_DireccionCriadero" value="#{encuestaEntomologicaBean.frmInp_DireccionCriadero}" 
@@ -566,26 +565,16 @@
 		styleClass="txtAreaDefault" />
 </div>
 
-<div style="float: left; width: 210px; margin-top: 5px;">
-	<h:outputLabel for="frmSom_ClasificacionCriadero" value="Clasificacion del Criadero:" styleClass="lblDefaultSmall" />	
-	<h:selectOneMenu id="frmSom_ClasificacionCriadero" value="#{encuestaEntomologicaBean.frmSom_ClasificacionCriadero}"
-		style="width: 200px;"
-		styleClass="txtDefault cboDefault" >
-		<f:selectItem itemLabel="Seleccionar" itemValue="0" />
-		<f:selectItems value="#{encuestaEntomologicaBean.itemsClasesCriaderos}" var="clase" 
-			itemValue="#{clase.catalogoId}" itemLabel="#{clase.valor}" />
-		<f:selectItem itemValue="999999" itemLabel="Otro" />
-			<p:ajax event="change"  process=":frmEncEnto:frmSom_ClasificacionCriadero" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
-				listener="#{encuestaEntomologicaBean.openModalAgregarCatOtros}" />
-	</h:selectOneMenu>
-</div>
+
+
+
 </p:panel>
 
 <p:panel id="panelCaractCriadero" header="Caracterizacion del Criadero" style="height: 250px; margin-top:5px;" styleClass="panDetail">
 
 <div style="float: left; width: 900px; margin-left: 10px; margin-bottom: 5px;">
 	<div style="float: left; width: 210px;">
-		<h:outputLabel for="frmSom_VegVertical" value="Vertical:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_VegVertical" value="Vegetación Vertical:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_VegVertical" value="#{encuestaEntomologicaBean.frmSom_VegVertical}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -596,7 +585,7 @@
 	</div>
 	
 	<div style="float: left; width: 210px; margin-left: 10px;">
-		<h:outputLabel for="frmSom_VegEmergente" value="Emergente:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_VegEmergente" value="Vegentación Emergente:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_VegEmergente" value="#{encuestaEntomologicaBean.frmSom_VegEmergente}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -607,7 +596,7 @@
 	</div>
 	
 	<div style="float: left; width: 210px; margin-left: 10px;">
-		<h:outputLabel for="frmSom_VegFlotante" value="Flotante:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_VegFlotante" value="Vegetación Flotante:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_VegFlotante" value="#{encuestaEntomologicaBean.frmSom_VegFlotante}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -618,7 +607,7 @@
 	</div>
 	
 	<div style="float: left; width: 210px; margin-left: 10px;">
-		<h:outputLabel for="frmSom_VegSumergida" value="Sumergida:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_VegSumergida" value="Vegetación Sumergida:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_VegSumergida" value="#{encuestaEntomologicaBean.frmSom_VegSumergida}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -633,7 +622,7 @@
 
 <div style="float: left; width: 650px;  margin-left: 10px; margin-bottom: 5px;">
 	<div style="float: left; width: 210px;">
-		<h:outputLabel for="frmSom_FaunaInsectos" value="Insectos:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_FaunaInsectos" value="Fauna Insectos:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_FaunaInsectos" value="#{encuestaEntomologicaBean.frmSom_FaunaInsectos}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -644,7 +633,7 @@
 	</div>
 	
 	<div style="float: left; width: 210px; margin-left: 10px;">
-		<h:outputLabel for="frmSom_FaunaPeces" value="Peces:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_FaunaPeces" value="Fauna Peces:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_FaunaPeces" value="#{encuestaEntomologicaBean.frmSom_FaunaPeces}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -655,7 +644,7 @@
 	</div>
 	
 	<div style="float: left; width: 210px; margin-left: 10px;">
-		<h:outputLabel for="frmSom_FaunaAnfibios" value="Anfibios:" styleClass="lblDefaultSmall" />	
+		<h:outputLabel for="frmSom_FaunaAnfibios" value="Fauna Anfibios:" styleClass="lblDefaultSmall" />	
 		<h:selectOneMenu id="frmSom_FaunaAnfibios" value="#{encuestaEntomologicaBean.frmSom_FaunaAnfibios}"
 			style="width: 200px;"
 			styleClass="txtDefault cboDefault" >
@@ -744,8 +733,8 @@
 <div style="float: left; width: 210px;">
 	<h:outputLabel for="frmSom_EspecieAnopheles" value="Especies anopheles:" styleClass="lblDefaultSmall" />	
 	<h:selectManyMenu id="frmSom_EspecieAnopheles" value="#{encuestaEntomologicaBean.frmSom_EspecieAnopheles}" 
-		style="width: 200px; height: 100px;"
-		styleClass="txtDefault cboDefault" >
+		style="width: 200px; height: 90px;"
+		styleClass="txtDefault cboDefault"  title="Utilizar selección otro, para agregar una nueva especie asociada al criadero">
 		<f:selectItems value="#{encuestaEntomologicaBean.itemsEspeciesAnopheles}" var="espanop" 
 			itemValue="#{espanop.catalogoId}" itemLabel="#{espanop.valor}" />
 		<f:selectItem itemValue="999999" itemLabel="Otro" />
@@ -761,7 +750,7 @@
 <div style="float: left; width: 270px; margin-left: 20px;">
 	<h:outputLabel for="frmInp_Observaciones" value="Observaciones:" styleClass="lblDefaultSmall" />
 	<h:inputTextarea id="frmInp_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Observaciones}" 
-		style="width: 270px; height: 160px; max-width:270px; min-width: 270px; max-height: 160px; min-height:160px;"
+		style="width: 250px; height: 160px; max-width:250px; min-width: 250px; max-height: 160px; min-height:160px;"
 		styleClass="txtAreaDefault" />
 </div>
 
@@ -788,7 +777,7 @@
 			resizable="false"
 			header="Detalle Pesquisas"
 			widgetVar="dlgPesquisa"
-			height="250"
+			height="220"
 			width="900">
 
 <p:panel id="panelPesquisa" style="height: 160px;">
@@ -810,12 +799,12 @@
 
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_SemanaEpidemiologica" value="Semana Epidem.:" styleClass="lblDefaultSmall" />
-		<h:inputText id="frmInp_Pesq_SemanaEpidemiologica" value="#{encuestaEntomologicaBean.frmInp_Pesq_SemanaEpidemiologica}" style="width: 120px;"  styleClass="lblDefaultSmall" />
+		<h:inputText id="frmInp_Pesq_SemanaEpidemiologica" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_SemanaEpidemiologica}" style="width: 120px;"  styleClass="lblDefaultSmall" />
 	</div>
 
 	<div style="float: left; width: 120px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_Pesq_AxoEpidemiologico" value="Año Epidem.:" styleClass="lblDefaultSmall" />
-		<h:inputText id="frmInp_Pesq_AxoEpidemiologico" value="#{encuestaEntomologicaBean.frmInp_Pesq_AxoEpidemiologico}" style="width: 120px;"  styleClass="lblDefaultSmall" />
+		<h:inputText id="frmInp_Pesq_AxoEpidemiologico" disabled="true" value="#{encuestaEntomologicaBean.frmInp_Pesq_AxoEpidemiologico}" style="width: 120px;"  styleClass="lblDefaultSmall" />
 	</div>
 </div>
 
@@ -897,6 +886,9 @@
 					requiredMessage="Fecha de Notificacion Requerida"  
 					styleClass="frmCal_Pesq_FechaNotificacion">
 					<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+					<f:ajax event="change" 
+						render="frmInp_Pesq_SemanaEpidemiologica frmInp_Pesq_AxoEpidemiologico" 
+						listener="#{encuestaEntomologicaBean.actualizarSemanaAxoEpi}" />
 		</h:inputText>
 		<script type="text/javascript">
 				jQuery('.frmCal_Pesq_FechaNotificacion').dateEntry({dateFormat: 'dmy/'}); 
@@ -929,13 +921,14 @@
 			resizable="false"
 			header="Detalle Intervencion"
 			widgetVar="dlgIntervencion"
-			height="205"
+			height="330"
 			width="900">
 
-<p:panel id="panelIntervencion" style="height: 150px;">
+<p:panel id="panelIntervencion" style="height: 270px;">
 
-<div style="float: left; width: 400px;">
-	<div style="float: left; width: 120px; height:30px; margin-left: 10px; margin-bottom: 5px;">
+<div style="float: left; width: 560px;">
+
+	<div style="float: left; width: 120px; height:30px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_Intv_FechaIntervencion" value="Fecha Intervencion:" />
 		<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px"
 					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
@@ -947,62 +940,75 @@
 		</script>	
 	</div>
 
-	<div style="float: left;width:400px;  margin-bottom: 5px;">
-		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Limpieza" value="ICF Limpieza:" />
-			<h:inputText id="frmInp_Intv_Limpieza" value="#{encuestaEntomologicaBean.frmInp_Intv_Limpieza}" style="width: 120px" />	
+ 
+	<div style="float: left;width:550px;  margin-bottom: 5px; margin-top: 5px; margin-right: 20px;">
+		<label>Intervención con Control Física</label>
+		<p:panel style="height: 50px;">
+		<div>
+			<div style="float: left; width: 120px; margin-left: 10px;">
+				<h:outputLabel for="frmInp_Intv_Limpieza" value="Limpieza:" />
+				<h:inputText id="frmInp_Intv_Limpieza" value="#{encuestaEntomologicaBean.frmInp_Intv_Limpieza}" style="width: 120px" />	
+			</div>
+			
+			<div style="float: left; width: 120px; margin-left: 10px;">
+				<h:outputLabel for="frmInp_Intv_Eva" value="Elim.vegt.Acuat.:" />
+				<h:inputText id="frmInp_Intv_Eva" value="#{encuestaEntomologicaBean.frmInp_Intv_Eva}" style="width: 120px" />	
+			</div>
+			
+			<div style="float: left; width: 120px; margin-left: 10px;">
+				<h:outputLabel for="frmInp_Intv_Drenaje" value="Drenaje:" />
+				<h:inputText id="frmInp_Intv_Drenaje" value="#{encuestaEntomologicaBean.frmInp_Intv_Drenaje}" style="width: 120px" />	
+			</div>
+	
+			<div style="float: left; width: 120px; margin-left: 10px;">
+				<h:outputLabel for="frmInp_Intv_Relleno" value="Relleno:" />
+				<h:inputText id="frmInp_Intv_Relleno" value="#{encuestaEntomologicaBean.frmInp_Intv_Relleno}" style="width: 120px" />	
+			</div>
 		</div>
-		
-		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Eva" value="ICF Elim.vegt.Acuat.:" />
-			<h:inputText id="frmInp_Intv_Eva" value="#{encuestaEntomologicaBean.frmInp_Intv_Eva}" style="width: 120px" />	
-		</div>
-		
-		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Drenaje" value="ICF Drenaje:" />
-			<h:inputText id="frmInp_Intv_Drenaje" value="#{encuestaEntomologicaBean.frmInp_Intv_Drenaje}" style="width: 120px" />	
-		</div>
+		</p:panel>
 	</div>
 	
-	<div style="float: left;width:400px;  margin-bottom: 5px;">
+	<div style="float: left;width:550px;  margin-bottom: 5px;">
+	<label>Intervención con Control Biológica</label>
+	<p:panel style="height: 50px;">		
 		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Relleno" value="ICF Relleno:" />
-			<h:inputText id="frmInp_Intv_Relleno" value="#{encuestaEntomologicaBean.frmInp_Intv_Relleno}" style="width: 120px" />	
-		</div>
-		
-		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Bsphaericus" value="ICB Bsphaericus:" />
+			<h:outputLabel for="frmInp_Intv_Bsphaericus" value="Bsphaericus:" />
 			<h:inputText id="frmInp_Intv_Bsphaericus" value="#{encuestaEntomologicaBean.frmInp_Intv_Bsphaericus}" style="width: 120px" />	
 		</div>
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_Bti" value="ICB Bti:" />
+			<h:outputLabel for="frmInp_Intv_Bti" value="B.thuringiensis (Bti):" />
 			<h:inputText id="frmInp_Intv_Bti" value="#{encuestaEntomologicaBean.frmInp_Intv_Bti}" style="width: 120px" />	
 		</div>
-	</div>
-		
-	<div style="float: left;width:400px;">
+
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_Intv_SiembraPeces" value="ICB Peces:" />
 			<h:inputText id="frmInp_Intv_SiembraPeces" value="#{encuestaEntomologicaBean.frmInp_Intv_SiembraPeces}" style="width: 120px" />	
 		</div>
-		
+	</p:panel>
+
+	</div>
+
+	<div style="float: left;width:550px;">
+	<label>Consumo de Larvicida</label>
+	<p:panel style="height: 50px;">		
 		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_ConsumoBsphaericus" value="Consm. Bsphaericus:" />
+			<h:outputLabel for="frmInp_Intv_ConsumoBsphaericus" value="Bsphaericus:" />
 			<h:inputText id="frmInp_Intv_ConsumoBsphaericus" value="#{encuestaEntomologicaBean.frmInp_Intv_ConsumoBsphaericus}" style="width: 120px" />	
 		</div>
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
-			<h:outputLabel for="frmInp_Intv_ConsumoBti" value="Consm. Bti:" />
+			<h:outputLabel for="frmInp_Intv_ConsumoBti" value="B.thuringiensis (Bti):" />
 			<h:inputText id="frmInp_Intv_ConsumoBti" value="#{encuestaEntomologicaBean.frmInp_Intv_ConsumoBti}" style="width: 120px" />	
 		</div>
+	</p:panel>
 	</div>
 </div>
 
-<div style="float: left; width: 450px;">
+<div style="float: left; width: 260px; margin-top: 40px; margin-left: 10px;">
 	<h:outputLabel for="frmInp_Intv_Observaciones" value="Observaciones:" />
 	<h:inputTextarea id="frmInp_Intv_Observaciones" value="#{encuestaEntomologicaBean.frmInp_Intv_Observaciones}"
-		style="width: 450px; height: 117px; min-width: 450px; min-height: 117px; max-width: 450px; max-height:117px;" />	
+		style="width: 270px; height: 200px; min-width: 270px; min-height: 200px; max-width: 270px; max-height:200px;" />	
 </div>
 </p:panel>
 

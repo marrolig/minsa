@@ -161,7 +161,7 @@ public class IntervencionDA implements IntervencionServices {
 		}
 		
 		String strJPQL = "select int from CriaderosIntervencion int " +
-				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by int.criaderoIntervencionId";
+				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by int.fechaIntervencion desc";
 		
 		try{
 			

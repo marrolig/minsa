@@ -17,7 +17,7 @@ import java.util.Date;
 public class CriaderosPesquisa implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoPesquisaId;
-	private Short añoEpidemiologico;
+	private Integer añoEpidemiologico;
 	private Criadero criadero;
 	private Short cuchColectadas;
 	private Short cuchPositivas;
@@ -32,7 +32,7 @@ public class CriaderosPesquisa implements Serializable {
 	private Short puntosMuestreados;
 	private Short pupas;
 	private Boolean revisado;
-	private Short semanaEpidemiologica;
+	private Integer semanaEpidemiologica;
 	private String usuarioRegistro;
 	private String usuarioRevision;
 
@@ -54,11 +54,11 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="AÑO_EPIDEMIOLOGICO")
-	public Short getAñoEpidemiologico() {
+	public Integer getAñoEpidemiologico() {
 		return this.añoEpidemiologico;
 	}
 
-	public void setAñoEpidemiologico(Short añoEpidemiologico) {
+	public void setAñoEpidemiologico(Integer añoEpidemiologico) {
 		this.añoEpidemiologico = añoEpidemiologico;
 	}
 
@@ -204,11 +204,11 @@ public class CriaderosPesquisa implements Serializable {
 
 
 	@Column(name="SEMANA_EPIDEMIOLOGICA")
-	public Short getSemanaEpidemiologica() {
+	public Integer getSemanaEpidemiologica() {
 		return this.semanaEpidemiologica;
 	}
 
-	public void setSemanaEpidemiologica(Short semanaEpidemiologica) {
+	public void setSemanaEpidemiologica(Integer semanaEpidemiologica) {
 		this.semanaEpidemiologica = semanaEpidemiologica;
 	}
 

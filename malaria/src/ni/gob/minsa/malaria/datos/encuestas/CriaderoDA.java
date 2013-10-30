@@ -3,6 +3,8 @@
  */
 package ni.gob.minsa.malaria.datos.encuestas;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,11 +29,13 @@ import ni.gob.minsa.malaria.modelo.encuesta.ExposicionSol;
 import ni.gob.minsa.malaria.modelo.encuesta.MovimientoAgua;
 import ni.gob.minsa.malaria.modelo.encuesta.TiposCriaderos;
 import ni.gob.minsa.malaria.modelo.encuesta.TurbidezAgua;
+import ni.gob.minsa.malaria.modelo.encuesta.noEntidad.CriaderosUltimaNotificacion;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.general.ClaseEvento;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
+import ni.gob.minsa.malaria.modelo.poblacion.noEntidad.ViviendaUltimaEncuesta;
 import ni.gob.minsa.malaria.modelo.vigilancia.ColVol;
 import ni.gob.minsa.malaria.modelo.vigilancia.EventoSalud;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices;
@@ -94,9 +98,6 @@ public class CriaderoDA implements CriaderoServices {
 
 	}
 	
-	/* (non-Javadoc)
-	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#obtenerCriaderos(int, int, java.lang.String, java.lang.Boolean, ni.gob.minsa.malaria.modelo.poblacion.Comunidad)
-	 */
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
 			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
@@ -153,9 +154,114 @@ public class CriaderoDA implements CriaderoServices {
 		return oResultado;
 	}
 	
-	/* (non-Javadoc)
-	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#obtenerCriaderos(int, int, java.lang.String, java.lang.Boolean, ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva)
-	 */
+	@Override
+	public InfoResultado obtenerCriaderosDto(int pPaginaActual,
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
+			Comunidad pComunidad) {
+		InfoResultado oResultado = new InfoResultado();
+				
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pComunidad == null ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Comunidad no identificada");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
+					+ "	Select " 
+					+ "	  Cr.Criadero_Id, "
+					+ "	  cr.codigo, "
+					+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
+					+ "	  Cr.Nombre, "
+					+ "	  ( Select Nombre From General.Comunidades Where Codigo = Cr.Comunidad ) Comunidad, "
+					+ "	  Cr.Direccion, "
+					+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Tipo ) Tipo, "
+					+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Clasificacion ) Clasificacion, "
+					+ "	  Cr.Area_Actual, "
+					+ "	  Cr.Distancia_Casa "
+					+ "	From Criaderos Cr "
+					+ "	  Inner Join Params On 1=1 "
+					+ "	  Left Join Criaderos_Pesquisas Ps On Ps.Criadero = Cr.Codigo "
+					+ "	Where "
+					+ "	  Ps.Fecha_Notificacion = ( Select Max(Fecha_Notificacion) From Criaderos_Pesquisas Where Criadero = Cr.Codigo ) "
+					+ "	  And ( Cr.Comunidad = Pcomu Or '0' = Pcomu ) "
+					+ "	  and ( '0' = pMuni or pMuni = ( "
+					+ "	                                  Select Se.Municipio " 
+					+ "	                                  From General.Comunidades Cm Left Join General.Sectores Se On Cm.Sector = Se.Codigo "
+					+ "	                                  Where Cm.Codigo = Cr.Comunidad  ) ) "
+					+ "	  And ( '0' = Psilais Or Psilais = (  "
+					+ "	                                      Select Distinct Entidad_Adtva From General.Unidades Where Codigo = "
+					+ "	                                      ( Select Unidad From General.Sectores Where Codigo = ( "
+					+ "	                                        select sector from general.comunidades where codigo = cr.comunidad )))) "
+					+ "	Order By "
+					+ "	  ps.fecha_notificacion desc";
+		
+		try{
+			
+			query = em.createNativeQuery(strSQL);
+			query.setParameter(1,0);
+			query.setParameter(2,0);
+			query.setParameter(3,pComunidad.getCodigo());
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			List<Object[]> oFilasResultados=query.getResultList();
+        	Object[] oFilaResultado;
+			
+			if( oFilasResultados.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(oFilasResultados.size());
+            if (oResultado.getFilasAfectadas()<=pPaginaActual) pPaginaActual-=oResultado.getFilasAfectadas();
+            pPaginaActual=oResultado.getFilasAfectadas()<=pPaginaActual ? 0: pPaginaActual;
+            query.setFirstResult(pPaginaActual);
+            query.setMaxResults(pRegistroPorPagina);
+			
+            oFilasResultados = null;
+            oFilasResultados=query.getResultList();
+            
+			List<CriaderosUltimaNotificacion> resultado = new ArrayList<CriaderosUltimaNotificacion>();
+			for(int i=0;i<oFilasResultados.size();i++){
+        		CriaderosUltimaNotificacion oCriadero = new CriaderosUltimaNotificacion();
+        		oFilaResultado=oFilasResultados.get(i);
+        		
+        		oCriadero.setCriaderoId( ((BigDecimal) oFilaResultado[0]).longValue());
+        		oCriadero.setCodigo(oFilaResultado[1].toString());
+        		oCriadero.setFechaUltimaNotificacion((Date) oFilaResultado[2]);
+        		oCriadero.setNombre(oFilaResultado[3].toString());
+        		oCriadero.setComunidad(oFilaResultado[4].toString());
+        		oCriadero.setDireccion(oFilaResultado[5].toString());
+        		oCriadero.setTipo(oFilaResultado[6].toString());
+        		oCriadero.setClasificacion(oFilaResultado[7].toString());
+        		oCriadero.setDistanciaCasa(((BigDecimal)oFilaResultado[8]).longValue());
+        		oCriadero.setAreaActual(((BigDecimal)oFilaResultado[9]).longValue());
+        		
+        		resultado.add(oCriadero);
+        	}
+			
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+	}
+
+	
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
 			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
@@ -222,10 +328,114 @@ public class CriaderoDA implements CriaderoServices {
 		return oResultado;
 	}
 
+	@Override
+	public InfoResultado obtenerCriaderosDto(int pPaginaActual,
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
+			long pCodSilais) {
+		InfoResultado oResultado = new InfoResultado();
+				
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pCodSilais == 0 ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Silais no identificado");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
+					+ "	Select " 
+					+ "	  Cr.Criadero_Id, "
+					+ "	  cr.codigo, "
+					+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
+					+ "	  Cr.Nombre, "
+					+ "	  ( Select Nombre From General.Comunidades Where Codigo = Cr.Comunidad ) Comunidad, "
+					+ "	  Cr.Direccion, "
+					+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Tipo ) Tipo, "
+					+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Clasificacion ) Clasificacion, "
+					+ "	  Cr.Area_Actual, "
+					+ "	  Cr.Distancia_Casa "
+					+ "	From Criaderos Cr "
+					+ "	  Inner Join Params On 1=1 "
+					+ "	  Left Join Criaderos_Pesquisas Ps On Ps.Criadero = Cr.Codigo "
+					+ "	Where "
+					+ "	  Ps.Fecha_Notificacion = ( Select Max(Fecha_Notificacion) From Criaderos_Pesquisas Where Criadero = Cr.Codigo ) "
+					+ "	  And ( Cr.Comunidad = Pcomu Or '0' = Pcomu ) "
+					+ "	  and ( '0' = pMuni or pMuni = ( "
+					+ "	                                  Select Se.Municipio " 
+					+ "	                                  From General.Comunidades Cm Left Join General.Sectores Se On Cm.Sector = Se.Codigo "
+					+ "	                                  Where Cm.Codigo = Cr.Comunidad  ) ) "
+					+ "	  And ( '0' = Psilais Or Psilais = (  "
+					+ "	                                      Select Distinct Entidad_Adtva From General.Unidades Where Codigo = "
+					+ "	                                      ( Select Unidad From General.Sectores Where Codigo = ( "
+					+ "	                                        select sector from general.comunidades where codigo = cr.comunidad )))) "
+					+ "	Order By "
+					+ "	  ps.fecha_notificacion desc";
+		
+		try{
+			
+			query = em.createNativeQuery(strSQL);
+			query.setParameter(1,pCodSilais);
+			query.setParameter(2,0);
+			query.setParameter(3,0);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			List<Object[]> oFilasResultados=query.getResultList();
+        	Object[] oFilaResultado;
+			
+			if( oFilasResultados.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(oFilasResultados.size());
+            if (oResultado.getFilasAfectadas()<=pPaginaActual) pPaginaActual-=oResultado.getFilasAfectadas();
+            pPaginaActual=oResultado.getFilasAfectadas()<=pPaginaActual ? 0: pPaginaActual;
+            query.setFirstResult(pPaginaActual);
+            query.setMaxResults(pRegistroPorPagina);
+			
+            oFilasResultados = null;
+            oFilasResultados=query.getResultList();
+            
+			List<CriaderosUltimaNotificacion> resultado = new ArrayList<CriaderosUltimaNotificacion>();
+			for(int i=0;i<oFilasResultados.size();i++){
+        		CriaderosUltimaNotificacion oCriadero = new CriaderosUltimaNotificacion();
+        		oFilaResultado=oFilasResultados.get(i);
+        		
+        		oCriadero.setCriaderoId( ((BigDecimal) oFilaResultado[0]).longValue());
+        		oCriadero.setCodigo(oFilaResultado[1].toString());
+        		oCriadero.setFechaUltimaNotificacion((Date) oFilaResultado[2]);
+        		oCriadero.setNombre(oFilaResultado[3].toString());
+        		oCriadero.setComunidad(oFilaResultado[4].toString());
+        		oCriadero.setDireccion(oFilaResultado[5].toString());
+        		oCriadero.setTipo(oFilaResultado[6].toString());
+        		oCriadero.setClasificacion(oFilaResultado[7].toString());
+        		oCriadero.setDistanciaCasa(((BigDecimal)oFilaResultado[8]).longValue());
+        		oCriadero.setAreaActual(((BigDecimal)oFilaResultado[9]).longValue());
+        		
+        		resultado.add(oCriadero);
+        	}
+			
+            oResultado.setObjeto(resultado);
+            oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;
+	}
 	
-	/* (non-Javadoc)
-	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#obtenerCriaderos(int, int, java.lang.String, java.lang.Boolean, ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica)
-	 */
+	
 	@Override
 	public InfoResultado obtenerCriaderos(int pPaginaActual,
 			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
@@ -288,6 +498,112 @@ public class CriaderoDA implements CriaderoServices {
 		return oResultado;
 	}	
 
+	@Override
+	public InfoResultado obtenerCriaderosDto(int pPaginaActual,
+			int pRegistroPorPagina, String pFieldSort, SortOrder pSortOrder,
+			String pCodMunicipio) {
+		InfoResultado oResultado = new InfoResultado();
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pCodMunicipio == null || pCodMunicipio.isEmpty() ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Municipio no identificado");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
+			+ "	Select " 
+			+ "	  Cr.Criadero_Id, "
+			+ "	  cr.codigo, "
+			+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
+			+ "	  Cr.Nombre, "
+			+ "	  ( Select Nombre From General.Comunidades Where Codigo = Cr.Comunidad ) Comunidad, "
+			+ "	  Cr.Direccion, "
+			+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Tipo ) Tipo, "
+			+ "	  (Select Valor From General.Catalogos Where Codigo = Cr.Clasificacion ) Clasificacion, "
+			+ "	  Cr.Area_Actual, "
+			+ "	  Cr.Distancia_Casa "
+			+ "	From Criaderos Cr "
+			+ "	  Inner Join Params On 1=1 "
+			+ "	  Left Join Criaderos_Pesquisas Ps On Ps.Criadero = Cr.Codigo "
+			+ "	Where "
+			+ "	  Ps.Fecha_Notificacion = ( Select Max(Fecha_Notificacion) From Criaderos_Pesquisas Where Criadero = Cr.Codigo ) "
+			+ "	  And ( Cr.Comunidad = Pcomu Or '0' = Pcomu ) "
+			+ "	  and ( '0' = pMuni or pMuni = ( "
+			+ "	                                  Select Se.Municipio " 
+			+ "	                                  From General.Comunidades Cm Left Join General.Sectores Se On Cm.Sector = Se.Codigo "
+			+ "	                                  Where Cm.Codigo = Cr.Comunidad  ) ) "
+			+ "	  And ( '0' = Psilais Or Psilais = (  "
+			+ "	                                      Select Distinct Entidad_Adtva From General.Unidades Where Codigo = "
+			+ "	                                      ( Select Unidad From General.Sectores Where Codigo = ( "
+			+ "	                                        select sector from general.comunidades where codigo = cr.comunidad )))) "
+			+ "	Order By "
+			+ "	  ps.fecha_notificacion desc";
+
+		try{
+			
+			query = em.createNativeQuery(strSQL);
+			query.setParameter(1,0);
+			query.setParameter(2,pCodMunicipio);
+			query.setParameter(3,0);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			List<Object[]> oFilasResultados=query.getResultList();
+			Object[] oFilaResultado;
+			
+			if( oFilasResultados.isEmpty()){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registros no encontrados");
+				return oResultado;
+			}
+			
+			oResultado.setFilasAfectadas(oFilasResultados.size());
+		    if (oResultado.getFilasAfectadas()<=pPaginaActual) pPaginaActual-=oResultado.getFilasAfectadas();
+		    pPaginaActual=oResultado.getFilasAfectadas()<=pPaginaActual ? 0: pPaginaActual;
+		    query.setFirstResult(pPaginaActual);
+		    query.setMaxResults(pRegistroPorPagina);
+			
+		    oFilasResultados = null;
+		    oFilasResultados=query.getResultList();
+		    
+			List<CriaderosUltimaNotificacion> resultado = new ArrayList<CriaderosUltimaNotificacion>();
+			for(int i=0;i<oFilasResultados.size();i++){
+				CriaderosUltimaNotificacion oCriadero = new CriaderosUltimaNotificacion();
+				oFilaResultado=oFilasResultados.get(i);
+				
+        		oCriadero.setCriaderoId( ((BigDecimal) oFilaResultado[0]).longValue());
+        		oCriadero.setCodigo(oFilaResultado[1].toString());
+        		oCriadero.setFechaUltimaNotificacion((Date) oFilaResultado[2]);
+        		oCriadero.setNombre(oFilaResultado[3].toString());
+        		oCriadero.setComunidad(oFilaResultado[4].toString());
+        		oCriadero.setDireccion(oFilaResultado[5].toString());
+        		oCriadero.setTipo(oFilaResultado[6].toString());
+        		oCriadero.setClasificacion(oFilaResultado[7].toString());
+        		oCriadero.setDistanciaCasa(((BigDecimal)oFilaResultado[8]).longValue());
+        		oCriadero.setAreaActual(((BigDecimal)oFilaResultado[9]).longValue());
+				
+				resultado.add(oCriadero);
+			}
+			
+		    oResultado.setObjeto(resultado);
+		    oResultado.setOk(true);
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}		
+		return oResultado;
+	}	
+	
 	/* (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices#guardarCriadero(ni.gob.minsa.malaria.modelo.encuesta.Criadero)
 	 */

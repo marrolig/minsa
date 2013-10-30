@@ -98,7 +98,7 @@ public class PesquisaDA implements PesquisaServices {
 			return oResultado;
 		}
 		
-		String strJPQL = "select psq from CriaderosPesquisa psq where psq.criadero.codigo = :pCodCriadero order by psq.criaderoPesquisaId";
+		String strJPQL = "select psq from CriaderosPesquisa psq where psq.criadero.codigo = :pCodCriadero order by psq.fechaInspeccion desc";
 		
 		try{
 			
