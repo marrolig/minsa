@@ -99,12 +99,12 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		}
 		
 		String strJPQL = "select pins from CriaderosPosInspeccion pins " +
-				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by criaderoPosInspeccionId";
+				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by pins.criaderoPosInspeccionId";
 		
 		try{
 			
 			query = em.createQuery(strJPQL);
-			query.setParameter("pPesquisaId", pIntervencion.getCriaderoIntervencionId());
+			query.setParameter("pIntervencionId", pIntervencion.getCriaderoIntervencionId());
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
 			resultado = (List<CriaderosPosInspeccion>) query.getResultList();
@@ -161,12 +161,12 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		}
 		
 		String strJPQL = "select pins from CriaderosPosInspeccion pins " +
-				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by criaderoPosInspeccionId";
+				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by pins.criaderoPosInspeccionId";
 		
 		try{
 			
 			query = em.createQuery(strJPQL);
-			query.setParameter("pPesquisaId", pIntervencion.getCriaderoIntervencionId());
+			query.setParameter("pIntervencionId", pIntervencion.getCriaderoIntervencionId());
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
 			resultado = (List<CriaderosPosInspeccion>) query.getResultList();
@@ -213,6 +213,9 @@ public class PosInspeccionDA implements PosInspeccionServices {
     		if( pPosIns.getCriaderoPosInspeccionId() > 0 ){
     			CriaderosPosInspeccion oDetachedPosInspeccion = (CriaderosPosInspeccion)oEM.find(CriaderosPosInspeccion.class, pPosIns.getCriaderoPosInspeccionId());
     			oPosIns=oEM.merge(oDetachedPosInspeccion);
+    			
+    			CriaderosIntervencion oIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pPosIns.getCriaderosIntervencione().getCriaderoIntervencionId());
+    			oPosIns.setCriaderosIntervencione(oIntervencion);
     			
     			oPosIns.setUsuarioRegistro(pPosIns.getUsuarioRegistro());
     			oPosIns.setCuchColectadas(pPosIns.getCuchColectadas());
@@ -352,8 +355,8 @@ public class PosInspeccionDA implements PosInspeccionServices {
     	int n = 0;
     	
 		try{
-			
-			query = oEM.createNamedQuery("DELETE FROM CRIADEROS_POS_INSPECCIONES " +
+
+			query = oEM.createNativeQuery("DELETE FROM CRIADEROS_POS_INSPECCIONES " +
 					" WHERE INTERVENCION = " + pIntervencion.getCriaderoIntervencionId());
 			n = query.executeUpdate();
 			

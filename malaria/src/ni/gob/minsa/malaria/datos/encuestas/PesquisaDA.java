@@ -98,7 +98,7 @@ public class PesquisaDA implements PesquisaServices {
 			return oResultado;
 		}
 		
-		String strJPQL = "select psq from CriaderosPesquisa psq where psq.criadero.codigo = :pCodCriadero order by criaderoPesquisaId";
+		String strJPQL = "select psq from CriaderosPesquisa psq where psq.criadero.codigo = :pCodCriadero order by psq.criaderoPesquisaId";
 		
 		try{
 			
@@ -209,7 +209,10 @@ public class PesquisaDA implements PesquisaServices {
     			
     			oPesquisa.setAñoEpidemiologico(pPesquisa.getAñoEpidemiologico());
     			oPesquisa.setSemanaEpidemiologica(pPesquisa.getSemanaEpidemiologica());
-//    			oPesquisa.setCriadero(pPesquisa.getCriadero());
+    			
+    			Criadero oCriadero = (Criadero)oEM.find(Criadero.class, pPesquisa.getCriadero().getCriaderoId());
+    			oPesquisa.setCriadero(oCriadero);
+    			
     			oPesquisa.setCuchColectadas(pPesquisa.getCuchColectadas());
     			oPesquisa.setCuchPositivas(pPesquisa.getCuchPositivas());
     			oPesquisa.setFechaInspeccion(pPesquisa.getFechaInspeccion());

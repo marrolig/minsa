@@ -14,7 +14,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  * 
  */
 @Entity
-@Table(name="ML_CRIADEROSESPECIES")
+@Table(name="CRIADEROS_ESPECIES")
 public class CriaderosEspecie implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long criaderoEspecieId;
@@ -53,7 +53,7 @@ public class CriaderosEspecie implements Serializable {
 
 
 	@NotNull(message="Identificacion del tipo de especie anophele requerido")
-	@ManyToOne(targetEntity=Catalogo.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="ESPECIE_ANOPHELE",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	public EspeciesAnopheles getEspecieAnophele() {
 		return this.especieAnophele;

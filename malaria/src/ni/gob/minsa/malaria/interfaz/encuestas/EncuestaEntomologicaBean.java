@@ -672,6 +672,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return oResultado;			
 		}				
 		
+		if( frmSom_ClasificacionCriadero == null || frmSom_ClasificacionCriadero == 999999 ){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Opcion Clasificacion criadero otro no permitido");
+			oResultado.setMensajeDetalle("Agregar otra clasificacion a traves de ventana emergente solicitada por el sistema");
+			oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+			return oResultado;			
+		}
+		
 		if( frmSom_VegVertical == null || frmSom_VegVertical.equals("0") ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Completar Tipo y Abundancia relativa de vegetacion vertical");
@@ -770,12 +778,25 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return oResultado;			
 		}		
 		
+		
 		if( frmSom_EspecieAnopheles == null || frmSom_EspecieAnopheles.isEmpty() ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Completar Especies Anopheles");
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
 			return oResultado;			
 		}		
+		
+		String str;
+		for(int i=0 ; i < frmSom_EspecieAnopheles.size(); i++){
+			str = String.valueOf(frmSom_EspecieAnopheles.get(i));
+			if( str.equals("999999")){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Opcion Especie Anopheles Otro no permitida");
+				oResultado.setMensajeDetalle("Agregar otra especie a traves de ventana emergente solicitada por el sistema");
+				oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+				return oResultado;
+			}
+		}
 		
 		if( frmInp_Observaciones == null || frmInp_Observaciones.isEmpty() ){
 			oResultado.setOk(false);
@@ -1235,8 +1256,10 @@ public class EncuestaEntomologicaBean implements Serializable {
 				return;
 			}
 			
+			frmDt_ListaIntervencionEliminar = new ArrayList<CriaderosIntervencion>();
 			frmDt_ListaIntervencion = new ArrayList<CriaderosIntervencion>();
-			frmDt_ListaPosInspeccion = new ArrayList<CriaderosPosInspeccion>();			
+			frmDt_ListaPosInspeccion = new ArrayList<CriaderosPosInspeccion>();
+			
 			frmDt_ListaPesquisas.remove(oSelPesquisa);
 			oSelPesquisa = null;
 			
@@ -1309,7 +1332,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_SemaEpidemEnc = oSelPesquisa.getSemanaEpidemiologica();
 		frmInp_AxoEpidemEnc = oSelPesquisa.getAñoEpidemiologico();
 		frmInp_Inspector = oSelPesquisa.getInspector();
-		frmCal_FechaNotificacion = oSelPesquisa.getFechaNotificacion();			
+		frmCal_FechaNotificacion = oSelPesquisa.getFechaNotificacion();	
+		
+		InfoResultado oResultado = srvIntervencion.obtenerIntervencionesPorPesquisa(oSelPesquisa);
+		if( oResultado.isOk() && oResultado.getObjeto() != null){
+			frmDt_ListaIntervencion = (List<CriaderosIntervencion>) oResultado.getObjeto();
+		}else frmDt_ListaIntervencion = new ArrayList<CriaderosIntervencion>();
+		
 	}
 	
 	public CriaderosPesquisa getoSelPesquisa() {
@@ -1338,7 +1367,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		}
 		oSelIntervencion = null;
 		limpiarDatosModalIntervencion();
-		RequestContext.getCurrentInstance().execute("dlgAgregarIntervencion.show();");
+		RequestContext.getCurrentInstance().execute("dlgIntervencion.show();");
 	}
 	
 	public void agregarIntervencion(){
@@ -1418,7 +1447,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oIntervencion.setConsumoBti(frmInp_Intv_ConsumoBti);
 		oIntervencion.setObservaciones(frmInp_Intv_Observaciones);
 		oIntervencion.setCriaderosPesquisa(oSelPesquisa);
-		
+		oIntervencion.setSiembraPeces(frmInp_Intv_SiembraPeces);
 		
 		
 		InfoResultado oResultado = null;
@@ -1499,7 +1528,16 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Intv_ConsumoBsphaericus = oIntervencion.getConsumoBsphaericus();
 		frmInp_Intv_ConsumoBti = oIntervencion.getConsumoBti();
 		frmInp_Intv_Observaciones = oIntervencion.getObservaciones();
+		frmInp_Intv_SiembraPeces = oIntervencion.getSiembraPeces();
 		
+	}
+	
+	public void actualizarTrasSeleccionIntervencion(SelectEvent evt){
+		if( oSelIntervencion == null) return;
+		InfoResultado oResultado = srvPosInspeccion.obtenerPosInspeccionesPorPorIntervencion(oSelIntervencion);
+		if( oResultado.isOk() && oResultado.getObjeto() != null ){
+			frmDt_ListaPosInspeccion = (List<CriaderosPosInspeccion>) oResultado.getObjeto();
+		}else frmDt_ListaPosInspeccion = new ArrayList<CriaderosPosInspeccion>();
 	}
 	
 	public CriaderosIntervencion getoSelIntervencion() {
@@ -1530,10 +1568,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oSelPosInspeccion = null;
 		
 		limpiarDatosModalPosInspeccion();
-		RequestContext.getCurrentInstance().execute("dlgAgregarPosInspeccion.show();");
+		RequestContext.getCurrentInstance().execute("dlgPosInspeccion.show();");
 	}
 	
 	public void agregarPosInspeccion(){
+	
 				
 		if( frmCal_PosIns_FechaInspeccion == null ){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"Completar Fecha Inspeccion","");
@@ -1586,6 +1625,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 		CriaderosPosInspeccion oPosInspeccion = new CriaderosPosInspeccion();
 		if( oSelPosInspeccion == null ) oPosInspeccion = oSelPosInspeccion;
 		
+		
+		oPosInspeccion.setCriaderosIntervencione(oSelIntervencion);
 		oPosInspeccion.setFechaInspeccion(frmCal_PosIns_FechaInspeccion);
 		oPosInspeccion.setPuntosMuestreados(frmInp_PosIns_PuntosMuestreados);
 		oPosInspeccion.setCuchColectadas(frmInp_PosIns_TotalCucharonadas);
@@ -1594,7 +1635,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oPosInspeccion.setLarvasAdultas(frmInp_PosIns_NumLarvAduEstaIIIyIV);
 		oPosInspeccion.setPupas(frmInp_PosIns_NumPupas);
 		oPosInspeccion.setObservacion(frmInp_PosIns_Observaciones);
-		
 		oPosInspeccion.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
 		oPosInspeccion.setFechaRegistro(new Date());
 		
@@ -1679,17 +1719,17 @@ public class EncuestaEntomologicaBean implements Serializable {
 	
 	public void calcularPosInsDensLarvJovenes(){
 		frmInp_PosIns_DensLarvJovEstaIyII = 
-			calcularDensidad( frmInp_PosIns_NumLarvJovEstaIyII, frmInp_Pesq_TotalCucharonadas);
+			calcularDensidad( frmInp_PosIns_NumLarvJovEstaIyII, frmInp_PosIns_TotalCucharonadas);
 	}
 
 	public void calcularPosInsDensLarvAdultas(){
 		frmInp_PosIns_DensLarvAduEstaIIIyIV = 
-			calcularDensidad( frmInp_PosIns_NumLarvAduEstaIIIyIV, frmInp_Pesq_TotalCucharonadas);
+			calcularDensidad( frmInp_PosIns_NumLarvAduEstaIIIyIV, frmInp_PosIns_TotalCucharonadas);
 	}	
 
 	public void calcularPosInsDensPupas(){
 		frmInp_PosIns_DensPupas = 
-			calcularDensidad( frmInp_PosIns_NumPupas, frmInp_Pesq_TotalCucharonadas);
+			calcularDensidad( frmInp_PosIns_NumPupas, frmInp_PosIns_TotalCucharonadas);
 	}	
 
 	public CriaderosPosInspeccion getoSelPosInspeccion() {
@@ -1764,7 +1804,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 				frmSom_ClasificacionCriadero = oCatalogo.getCatalogoId();
 			}else if( this.componenteIdCatOtros.equals("frmEncEnto:frmSom_EspecieAnopheles")){
 				itemsEspeciesAnopheles = srvCatEspAnopheles.ListarActivos();
-				if( frmSom_EspecieAnopheles == null ) frmSom_EspecieAnopheles = new ArrayList<Long>(); 
+				if( frmSom_EspecieAnopheles == null ) frmSom_EspecieAnopheles = new ArrayList<Long>();
+				frmSom_EspecieAnopheles.remove(999999);
 				frmSom_EspecieAnopheles.add(oCatalogo.getCatalogoId());
 			}			
 			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
@@ -1869,8 +1910,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 			if( listaEspeciesCriadero == null ) listaEspeciesCriadero = new ArrayList<CriaderosEspecie>(); 
 			
 			boolean existe = false;
+			String str;
+			long oLong;
 			if( listaEspeciesCriadero != null && frmSom_EspecieAnopheles != null) {
-				for(Long oLong : frmSom_EspecieAnopheles){
+				for(int i=0; i<frmSom_EspecieAnopheles.size();i++){
+					oLong = Long.valueOf(String.valueOf(frmSom_EspecieAnopheles.get(i)));
 					oEspecie = new CriaderosEspecie();
 					oResultado = null;
 					for(CriaderosEspecie oEspCri: listaEspeciesCriadero){
@@ -1893,7 +1937,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 				}
 				
 				for(CriaderosEspecie oEspCri1 : listaEspeciesCriadero){
-					for(Long oLong: frmSom_EspecieAnopheles){
+					for(int i=0; i < frmSom_EspecieAnopheles.size() ;i++){
+						oLong = Long.valueOf(String.valueOf(frmSom_EspecieAnopheles.get(i)));
 						if( oEspCri1.getEspecieAnophele().getCatalogoId() == oLong ){
 							existe = true;
 							break;

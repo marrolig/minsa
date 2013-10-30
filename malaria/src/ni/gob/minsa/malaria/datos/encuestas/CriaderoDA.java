@@ -17,9 +17,16 @@ import org.primefaces.model.SortOrder;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
+import ni.gob.minsa.malaria.modelo.encuesta.AbundanciaFauna;
+import ni.gob.minsa.malaria.modelo.encuesta.AbundanciaVegetacion;
 import ni.gob.minsa.malaria.modelo.encuesta.AddCatalogo;
 import ni.gob.minsa.malaria.modelo.encuesta.AddSistemaCatalogo;
+import ni.gob.minsa.malaria.modelo.encuesta.ClasesCriaderos;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
+import ni.gob.minsa.malaria.modelo.encuesta.ExposicionSol;
+import ni.gob.minsa.malaria.modelo.encuesta.MovimientoAgua;
+import ni.gob.minsa.malaria.modelo.encuesta.TiposCriaderos;
+import ni.gob.minsa.malaria.modelo.encuesta.TurbidezAgua;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.general.ClaseEvento;
@@ -299,34 +306,65 @@ public class CriaderoDA implements CriaderoServices {
     		if( pCriadero.getCriaderoId() > 0 ){
         		Criadero oDetachedCriadero = (Criadero)oEM.find(Criadero.class, pCriadero.getCriaderoId());
             	oCriadero=oEM.merge(oDetachedCriadero);
-            	
+
             	oCriadero.setAreaActual(pCriadero.getAreaActual());
             	oCriadero.setAreaMax(pCriadero.getAreaMax());
             	oCriadero.setAreaMin(pCriadero.getAreaMin());
-            	oCriadero.setClaseCriadero(pCriadero.getClaseCriadero());
+            	
+            	ClasesCriaderos oClasCri = (ClasesCriaderos)oEM.find(ClasesCriaderos.class, pCriadero.getClaseCriadero().getCatalogoId());
+            	oCriadero.setClaseCriadero(oClasCri);
+
             	oCriadero.setCloro(pCriadero.getCloro());
             	oCriadero.setCodigo(pCriadero.getCodigo());
-            	oCriadero.setComunidad(pCriadero.getComunidad());
+            	
+            	Comunidad oComu = (Comunidad)oEM.find(Comunidad.class, pCriadero.getComunidad().getComunidadId());            	
+            	oCriadero.setComunidad(oComu);
+            	
             	oCriadero.setDireccion(pCriadero.getDireccion());
             	oCriadero.setDistanciaCasa(pCriadero.getDistanciaCasa());
-            	oCriadero.setExposicionSol(pCriadero.getExposicionSol());
-            	oCriadero.setFaunaAnfibios(pCriadero.getFaunaAnfibios());
-            	oCriadero.setFaunaInsecto(pCriadero.getFaunaInsecto());
-            	oCriadero.setFaunaPeces(pCriadero.getFaunaPeces());
+            	
+            	ExposicionSol oExpSol = (ExposicionSol) oEM.find(ExposicionSol.class, pCriadero.getExposicionSol().getCatalogoId());
+            	oCriadero.setExposicionSol(oExpSol);
+            	
+            	AbundanciaFauna oFauAnfi = (AbundanciaFauna) oEM.find(AbundanciaFauna.class,pCriadero.getFaunaAnfibios().getCatalogoId());
+            	oCriadero.setFaunaAnfibios(oFauAnfi);
+            	
+            	AbundanciaFauna oFauInsec = (AbundanciaFauna) oEM.find(AbundanciaFauna.class,pCriadero.getFaunaInsecto().getCatalogoId());
+            	oCriadero.setFaunaInsecto(oFauInsec);
+            	
+            	AbundanciaFauna oFauPeces = (AbundanciaFauna) oEM.find(AbundanciaFauna.class,pCriadero.getFaunaPeces().getCatalogoId());
+            	oCriadero.setFaunaPeces(oFauPeces);
+            	
             	oCriadero.setLatitud(pCriadero.getLatitud());
             	oCriadero.setLongitud(pCriadero.getLongitud());
-            	oCriadero.setMovimientoAgua(pCriadero.getMovimientoAgua());
+            	
+            	MovimientoAgua oMovAgua = (MovimientoAgua) oEM.find(MovimientoAgua.class, pCriadero.getMovimientoAgua().getCatalogoId());
+            	oCriadero.setMovimientoAgua(oMovAgua);
+            	
             	oCriadero.setObservaciones(pCriadero.getObservaciones());
             	oCriadero.setPh(pCriadero.getPh());
             	oCriadero.setTemperatura(pCriadero.getTemperatura());
-            	oCriadero.setTipoCriadero(pCriadero.getTipoCriadero());
-            	oCriadero.setTurbidezAgua(pCriadero.getTurbidezAgua());
+            	
+            	TiposCriaderos oTipCri = (TiposCriaderos) oEM.find(TiposCriaderos.class, pCriadero.getTipoCriadero().getCatalogoId());
+            	oCriadero.setTipoCriadero(oTipCri);
+            	
+            	TurbidezAgua oTurbAgua = (TurbidezAgua) oEM.find(TurbidezAgua.class, pCriadero.getTurbidezAgua().getCatalogoId());
+            	oCriadero.setTurbidezAgua(oTurbAgua);
+            	
             	oCriadero.setUsuarioRegistro(pCriadero.getUsuarioRegistro());
-            	oCriadero.setVegEmergente(pCriadero.getVegEmergente());
-            	oCriadero.setVegFlotante(pCriadero.getVegFlotante());
-            	oCriadero.setVegSumergida(pCriadero.getVegSumergida());
-            	oCriadero.setVegVertical(pCriadero.getVegVertical());
-            	oCriadero.setUsuarioRegistro(pCriadero.getUsuarioRegistro());
+            	
+            	AbundanciaVegetacion oVegEmer = (AbundanciaVegetacion) oEM.find(AbundanciaVegetacion.class, pCriadero.getVegEmergente().getCatalogoId());
+            	oCriadero.setVegEmergente(oVegEmer);
+            	
+            	AbundanciaVegetacion oVegFlo = (AbundanciaVegetacion) oEM.find(AbundanciaVegetacion.class, pCriadero.getVegFlotante().getCatalogoId());
+            	oCriadero.setVegFlotante(oVegFlo);
+            	
+            	AbundanciaVegetacion oVegSum = (AbundanciaVegetacion) oEM.find(AbundanciaVegetacion.class, pCriadero.getVegSumergida().getCatalogoId());
+            	oCriadero.setVegSumergida(oVegSum);
+            	
+            	AbundanciaVegetacion oVegVer = (AbundanciaVegetacion) oEM.find(AbundanciaVegetacion.class, pCriadero.getVegVertical().getCatalogoId());
+            	oCriadero.setVegVertical(oVegVer);
+            	
             	
             	strUpdate = "Guardar";
     		}else{

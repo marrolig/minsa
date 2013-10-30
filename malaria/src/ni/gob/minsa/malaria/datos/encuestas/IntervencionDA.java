@@ -14,6 +14,7 @@ import javax.validation.ConstraintViolationException;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
+import ni.gob.minsa.malaria.modelo.encuesta.ClasesCriaderos;
 import ni.gob.minsa.malaria.modelo.encuesta.CriaderosIntervencion;
 import ni.gob.minsa.malaria.modelo.encuesta.CriaderosPesquisa;
 import ni.gob.minsa.malaria.servicios.encuestas.IntervencionServices;
@@ -99,7 +100,7 @@ public class IntervencionDA implements IntervencionServices {
 		}
 		
 		String strJPQL = "select int from CriaderosIntervencion int " +
-				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by criaderoIntervencionId";
+				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by int.criaderoIntervencionId";
 		
 		try{
 			
@@ -160,7 +161,7 @@ public class IntervencionDA implements IntervencionServices {
 		}
 		
 		String strJPQL = "select int from CriaderosIntervencion int " +
-				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by criaderoIntervencionId";
+				" where int.criaderosPesquisa.criaderoPesquisaId = :pPesquisaId order by int.criaderoIntervencionId";
 		
 		try{
 			
@@ -210,6 +211,9 @@ public class IntervencionDA implements IntervencionServices {
     		if( pIntervencion.getCriaderoIntervencionId() > 0 ){
     			CriaderosIntervencion oDetachedIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pIntervencion.getCriaderoIntervencionId());
     			CriaderosIntervencion oIntervencion=oEM.merge(oDetachedIntervencion);
+    			
+    			CriaderosPesquisa oPesquisa = (CriaderosPesquisa)oEM.find(CriaderosPesquisa.class, pIntervencion.getCriaderosPesquisa().getCriaderoPesquisaId());
+    			oIntervencion.setCriaderosPesquisa(oPesquisa);
     			
     			oIntervencion.setBsphaericus(pIntervencion.getBsphaericus());
     			oIntervencion.setBti(pIntervencion.getBti());
@@ -348,7 +352,7 @@ public class IntervencionDA implements IntervencionServices {
     	
 		try{
 			
-			query = oEM.createNamedQuery("DELETE FROM CRIADEROS_INTERVENCIONES " +
+			query = oEM.createNativeQuery("DELETE FROM CRIADEROS_INTERVENCIONES " +
 					" WHERE PESQUISA = " + pPesquisa.getCriaderoPesquisaId());
 			n = query.executeUpdate();
 			

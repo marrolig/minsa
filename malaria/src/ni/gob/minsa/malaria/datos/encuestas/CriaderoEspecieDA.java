@@ -16,8 +16,10 @@ import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.encuesta.Criadero;
 import ni.gob.minsa.malaria.modelo.encuesta.CriaderosEspecie;
+import ni.gob.minsa.malaria.modelo.encuesta.EspeciesAnopheles;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderosEspecieServices;
 import ni.gob.minsa.malaria.soporte.Mensajes;
+import ni.gob.minsa.malaria.soporte.Utilidades;
 
 /**
  * @author dev
@@ -155,7 +157,7 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
 			return oResultado;
 		}
 		
-		String strJPQL = "select esp from CriaderosEspecie esp where esp.criadero.codigo = :pCodCriadero order by criaderoEspecieId";
+		String strJPQL = "select esp from CriaderosEspecie esp where esp.criadero.codigo = :pCodCriadero order by esp.criaderoEspecieId";
 		
 		try{
 			
@@ -225,8 +227,18 @@ public class CriaderoEspecieDA implements CriaderosEspecieServices {
     	
     	try{
     		if( pEspecie.getCriaderoEspecieId() > 0 ){
+    			
     			CriaderosEspecie oDetachedCriaderoEspecie = (CriaderosEspecie)oEM.find(CriaderosEspecie.class, pEspecie.getCriaderoEspecieId());
     			oCriaderoEspecie=oEM.merge(oDetachedCriaderoEspecie);
+    			
+    			Criadero oCriadero = (Criadero) oEM.find(Criadero.class, pEspecie.getCriadero().getCriaderoId());
+    			oCriaderoEspecie.setCriadero(oCriadero);
+    			
+    			EspeciesAnopheles oEspecie = (EspeciesAnopheles) oEM.find(EspeciesAnopheles.class, pEspecie.getEspecieAnophele().getCatalogoId());
+    			oCriaderoEspecie.setEspecieAnophele(oEspecie);
+    			
+    			oCriaderoEspecie.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+    			
             	strUpdate = "Guardar";
     		}else{
     			oEM.persist(pEspecie);

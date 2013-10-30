@@ -187,7 +187,7 @@
 
 </p:panel>
 
-<div style="height: 350px; overflow: auto;">	
+<div id="panelScrollTablas" style="height: 270px; overflow:auto; padding-bottom: 5px;">	
 
 <div>
 	<label>Pesquisa</label>
@@ -203,7 +203,7 @@
 	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelPesquisa}">
 	 	
 		<p:ajax event="rowSelect" process="@this" listener="#{encuestaEntomologicaBean.actualizarTrasSeleccionPesquisa}"   
-   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:frmInp_AxoEpidemEnc, :frmEncEnto:frmInp_SemaEpidemEnc" />
+   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:frmInp_AxoEpidemEnc, :frmEncEnto:frmInp_SemaEpidemEnc, :frmEncEnto:dtIntervencion" />
 
 		<p:column headerText="Fecha Insp." style="width:30px; text-aling:center;">
 			<h:outputText value="#{pesq.fechaInspeccion}">
@@ -272,6 +272,9 @@
 	 	rowKey="#{intr}"
 	 	selectionMode="single" selection="#{encuestaEntomologicaBean.oSelIntervencion}">
 
+		<p:ajax event="rowSelect" process="@this" listener="#{encuestaEntomologicaBean.actualizarTrasSeleccionIntervencion}"   
+   	    	update=":frmEncEnto:grwMensaje, :frmEncEnto:dtPosInspeccion" />
+
 		<p:column headerText="Fecha Intrv." style="width:30px; text-aling:center;">
 			<h:outputText value="#{intr.fechaIntervencion}">
 				<f:convertDateTime pattern="dd/MM/yyyy" />
@@ -299,7 +302,7 @@
 		</p:column>
 				
 		<p:column headerText="Peces" style="width:10px;text-align:center;" >
-			<h:outputText value="#{intr.peces}" />
+			<h:outputText value="#{intr.siembraPeces}" />
 		</p:column>
 
 		<p:column headerText="Cons. Bsphaericus" style="width:10px;text-align:center;" >
@@ -311,9 +314,9 @@
 		</p:column>		
 		
 		<p:column style="width:40px;text-align:center;" >
-			<p:commandButton id="cmbEditarIntervencion" value="Editar" 
-				title="Editar" process="@this" update=":frmEncEnto:panelIntervencion" oncomplete="dlgAgregarIntervencion.show()">
-				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.seleccionIntervencion}" /> 
+			<p:commandButton id="cmbEditarIntervencion" styleClass="navLink button-edit" icon="icon-edit" title="Editar" 
+				process="@this" update=":frmEncEnto:panelIntervencion" oncomplete="dlgIntervencion.show()">
+				<f:setPropertyActionListener value="#{intr}" target="#{encuestaEntomologicaBean.editarIntervencion}" /> 
 			</p:commandButton>
 		</p:column>
 
@@ -370,7 +373,7 @@
 		
 		<p:column style="width:40px;text-align:center;" >
 			<p:commandButton id="cmbEditarPosInspeccion" value="Editar"
-				title="Editar" process="@this" update=":frmEncEnto:panelPosInspeccion" oncomplete="dlgAgregarPosInspeccion.show()">
+				title="Editar" process="@this" update=":frmEncEnto:panelPosInspeccion" oncomplete="dlgPosInspeccion.show()">
 				<f:setPropertyActionListener value="#{posi}" target="#{encuestaEntomologicaBean.seleccionPosInspeccion}" /> 
 			</p:commandButton>
 		</p:column>
@@ -932,7 +935,7 @@
 <p:panel id="panelIntervencion" style="height: 150px;">
 
 <div style="float: left; width: 400px;">
-	<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 5px;">
+	<div style="float: left; width: 120px; height:30px; margin-left: 10px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_Intv_FechaIntervencion" value="Fecha Intervencion:" />
 		<h:inputText id="frmCal_Intv_FechaIntervencion" value="#{encuestaEntomologicaBean.frmCal_Intv_FechaIntervencion}" style="width: 120px"
 					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
@@ -1026,7 +1029,7 @@
 <p:panel id="panelPosInspeccion" style="height: 150px;">	
 
 <div style="float: left; width: 400px;">
-	<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 5px;">
+	<div style="float: left; width: 120px; height:30px; margin-left: 10px; margin-bottom: 5px;">
 		<h:outputLabel for="frmCal_PosIns_FechaInspeccion" value="Fecha de inspeccion:" />
 		<h:inputText id="frmCal_PosIns_FechaInspeccion" value="#{encuestaEntomologicaBean.frmCal_PosIns_FechaInspeccion}" style="width: 120px"
 					requiredMessage="La Fecha de Apertura del Puesto de Notificación es requerida"  
@@ -1060,21 +1063,21 @@
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_NumLarvJovEstaIyII" value="Larvas Est. IyII:" />
 			<h:inputText id="frmInp_PosIns_NumLarvJovEstaIyII" value="#{encuestaEntomologicaBean.frmInp_PosIns_NumLarvJovEstaIyII}" style="width: 120px" >
-					<f:ajax event="change" render="frmInp_PosIns_DensLarvJovEstaIyII" listener="#{encuestaEntomologicaBean.calcularPosInsDensLarvJovenes}" />
+					<f:ajax event="change" execute="frmInp_PosIns_TotalCucharonadas" render="frmInp_PosIns_DensLarvJovEstaIyII" listener="#{encuestaEntomologicaBean.calcularPosInsDensLarvJovenes}" />
 			</h:inputText>			
 		</div>	
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_NumLarvAduEstaIIIyIV" value="Larvas Est. IIIyIV:" />
 			<h:inputText id="frmInp_PosIns_NumLarvAduEstaIIIyIV" value="#{encuestaEntomologicaBean.frmInp_PosIns_NumLarvAduEstaIIIyIV}" style="width: 120px" >
-					<f:ajax event="change" render="frmInp_PosIns_DensLarvAduEstaIIIyIV" listener="#{encuestaEntomologicaBean.calcularPosInsDensLarvAdultas}" />
+					<f:ajax event="change" execute="frmInp_PosIns_TotalCucharonadas" render="frmInp_PosIns_DensLarvAduEstaIIIyIV" listener="#{encuestaEntomologicaBean.calcularPosInsDensLarvAdultas}" />
 			</h:inputText>			
 		</div>	
 		
 		<div style="float: left; width: 120px; margin-left: 10px;">
 			<h:outputLabel for="frmInp_PosIns_NumPupas" value="Pupas:" />
 			<h:inputText id="frmInp_PosIns_NumPupas" value="#{encuestaEntomologicaBean.frmInp_PosIns_NumPupas}" style="width: 120px" >
-					<f:ajax event="change" render="frmInp_PosIns_DensPupas" listener="#{encuestaEntomologicaBean.calcularPosInsDensPupas}" />
+					<f:ajax event="change" execute="frmInp_PosIns_TotalCucharonadas" render="frmInp_PosIns_DensPupas" listener="#{encuestaEntomologicaBean.calcularPosInsDensPupas}" />
 			</h:inputText>			
 		</div>	
 	</div>
@@ -1128,9 +1131,9 @@
 			header="Otro Catalogo"
 			widgetVar="dlgOpenModalOtros"
 			height="70"
-			width="150">
+			width="170">
 
-<div style="float: left; width: 120px; margin-left: 10px;">
+<div style="float: left; width: 120px; margin-left: 10px; margin-bottom: 10px;">
 	<h:outputLabel for="frmInp_OtroValorCatalogo" value="Valor:" />
 	<h:inputText id="frmInp_OtroValorCatalogo" value="#{encuestaEntomologicaBean.frmInp_OtroValorCatalogo}" style="width: 120px" />			
 </div>	
@@ -1138,7 +1141,7 @@
 <p:commandButton id="cmbAddOtroCatalogo" value="Agregar" process="@this,:frmEncEnto:frmInp_OtroValorCatalogo" 
 	update="frmEncEnto:frmSom_ClasificacionCriadero,frmEncEnto:frmSom_EspecieAnopheles"  oncomplete="dlgOpenModalOtros.hide()"
 	actionListener="#{encuestaEntomologicaBean.agregaCatalogoOtros}" />
-
+<p:commandButton value="Cancelar" onclick="dlgOpenModalOtros.hide()" style="margin-left: 5px;" />
 </p:dialog>
 
 
