@@ -200,6 +200,66 @@ private static final long serialVersionUID = 1L;
 	private Unidad unidadTransfusionSelected;
 	private long unidadTransfusionSelectedId;
 	
+	//atributos vinculados a manejo clínico -Investigación Hospitalaria	-
+	private BigDecimal manejoClinico=BigDecimal.valueOf(0);
+	private Date inicioTratamientoMClinico;
+	private Date finTratamientoMClinico;
+	private List<Medicamento> medicamentosAntiMalaricos;
+	private Medicamento medicamentoSelected;
+	private long medicamentoSelectedId;
+	private List<EntidadAdtva> entidadesMClinico;
+	private EntidadAdtva entidadMClinicoSelected;
+	private long entidadNClinicoSelectedId;
+	private List<Unidad> unidadesMClinico;
+	private Unidad unidadMClinicoSelected;
+	private long unidadMClinicoSelectedId;
+	private String numeroExpedienteMClinico;
+	private Date fechaIngresoMClinico;
+	private BigDecimal diasEstanciaMClinico;
+	private BigDecimal convivientesTratadosMClinico;
+	private BigDecimal colateralesTratadosMClinico;
+	private BigDecimal tratamientoCompletoMClinico=BigDecimal.valueOf(0);
+	private BigDecimal tratamientoSupervisadoMClinico=BigDecimal.valueOf(0);
+	private BigDecimal controlParasitarioMClinico=BigDecimal.valueOf(0);
+	private BigDecimal numDiasPosterioresMClinico;
+	private BigDecimal resultControlPositivoMClinico;
+	private BigDecimal condicionFinalMClinico;
+	private Date fechaDefuncionMClinico;
+	private BigDecimal automedicacionMClinico=BigDecimal.valueOf(0);
+	private String medicamentosAutomedicacionMClinico;
+	
+	//Atributos vinculados al resultado de la investigacion
+	private BigDecimal infeccionEnResidenciaRInv=BigDecimal.valueOf(0);
+	private Pais paisRInvSelected;
+	private long paisRInvSelectedId;
+	private List<DivisionPolitica> deptsSintomasRInv;
+	private DivisionPolitica deptRInvSelected;
+	private long deptRInvSelectedId;
+	private List<DivisionPolitica> munisSintomasRInv;
+	private DivisionPolitica muniRInvSelected;
+	private long muniRInvSelectedId;
+	private Comunidad comuRInvSelected;
+	private Date fechaInfeccionRInv;
+	private List<ClasificacionClinica> clasificsClinicasRInv;
+	private ClasificacionClinica clasifClinicaRInvSelected;
+	private long clasifClinicaRInvSelectedId;
+	private List<TipoRecurrencia> tiposInfeccionesRInv;
+	private TipoRecurrencia tipoInfeccionRInvSelected;
+	private long tipoInfeccionRInvSelectedId;
+	private List<TipoComplicacion> tiposComplicacionesRInv;
+	private TipoComplicacion tipoComplicacionRInvSelected;
+	private long tipoComplicacionRInvSelectedId;
+	private List<ClasificacionCaso> clasificacionesCasosRInv;
+	private ClasificacionCaso clasificacionCasoRInvSelected;
+	private long clasificacionCasoRInvSelectedId;
+
+	private String observaciones;
+	private String responsableInvest;
+	private String epidemiologo;
+	private BigDecimal nivelAutorizacion=BigDecimal.valueOf(0);
+	private BigDecimal casoCerrado=BigDecimal.valueOf(0);
+	private Date fechaCierre;
+	
 	// ----------------------------------------------------------
 	// atributos vinculados a los servicios y capa DAO
 	// ----------------------------------------------------------
@@ -208,6 +268,7 @@ private static final long serialVersionUID = 1L;
 	private static DivisionPoliticaService divisionPoliticaService = new DivisionPoliticaDA();
 	private static ComunidadService comunidadService = new ComunidadDA();
 	private static PaisService paisService = new PaisDA();
+	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<ClasificacionCaso,Integer> clasificacionCasoService=new CatalogoElementoDA(ClasificacionCaso.class,"ClasificacionCaso");
@@ -218,9 +279,9 @@ private static final long serialVersionUID = 1L;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<Medicamento, Integer> medicamentoService=new CatalogoElementoDA(Medicamento.class,"Medicamento");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<TipoComplicacion, Integer> tipoComplicacion=new CatalogoElementoDA(TipoComplicacion.class,"TipoComplicacion");
+	private static CatalogoElementoService<TipoComplicacion, Integer> tipoComplicacionService=new CatalogoElementoDA(TipoComplicacion.class,"TipoComplicacion");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<TipoRecurrencia, Integer> tipoRecurrencia=new CatalogoElementoDA(TipoRecurrencia.class,"TipoRecurrencia");
+	private static CatalogoElementoService<TipoRecurrencia, Integer> tipoRecurrenciaService=new CatalogoElementoDA(TipoRecurrencia.class,"TipoRecurrencia");
 	
 	private static MuestreoHematicoService muestreoHematicoService = new MuestreoHematicoDA();
 	private static InvestigacionService investigacionService = new InvestigacionDA();
@@ -257,6 +318,7 @@ private static final long serialVersionUID = 1L;
 		}
 		this.capaActiva=2;
 		this.investigacionMalariaSelected=(InvestigacionMalaria)oResInvestigacionSel.getObjeto();
+		iniciarCapa2();
 		//Si no se encuentra una Investigación para la E2 seleccionada, quiere decir que estamos agregando una nueva M10; 
 		//de no ser nulo quiere decir que estamos editando una M10. 
 		if (this.investigacionMalariaSelected != null) {
@@ -285,12 +347,8 @@ private static final long serialVersionUID = 1L;
 			}else{
 				this.longitud=null;
 				this.latitud=null;
-			}
-			this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
-			this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
-			
+			}	
 		}
-		
 	}
 	
 	public void onSintomaticoSelected(){
@@ -548,7 +606,7 @@ private static final long serialVersionUID = 1L;
 		this.deptLugInicioSelected=oDept;
 		this.deptLugInicioSelectedId=oDept.getDivisionPoliticaId();
 		
-		this.deptsSintomasLugsAntes = divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
+		this.munisLugsInicios = divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
 	}
 	
 	public void cambiarDeptLugAnte(){
@@ -896,7 +954,6 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private void iniciarCapa2(){
-		
 		this.esSintomatico=0;
 		this.fechaInicioSintoma=null;
 		this.sintomasLugaresAntes=null;
@@ -912,8 +969,8 @@ private static final long serialVersionUID = 1L;
 		
 		this.sintomasLugaresAntes=null;
 		this.sintomasLugaresOtros=null;
-	
 		
+		//Atributos vinculados a Investigación de transfuciones
 		this.antTransfusion=BigDecimal.valueOf(0);
 		this.fechaTransfusion=null;
 		this.paisTransfusionSelected=null;
@@ -922,8 +979,70 @@ private static final long serialVersionUID = 1L;
 		this.unidadTransfusionSelected=null;
 		this.unidadTransfusionSelectedId=0;
 		
+		
+		//Atributos vinculados a manejo clínico - Investigación Hospitalaria-
+		this.manejoClinico=BigDecimal.valueOf(0);
+		this.inicioTratamientoMClinico=null;
+		this.finTratamientoMClinico=null;
+		this.medicamentoSelected=null;
+		this.medicamentoSelectedId=0;
+		this.entidadMClinicoSelected=null;
+		this.entidadNClinicoSelectedId=0;
+		this.unidadesMClinico=null;
+		this.unidadMClinicoSelected=null;
+		this.unidadMClinicoSelectedId=0;
+		this.numeroExpedienteMClinico="";
+		this.fechaIngresoMClinico=null;
+		this.diasEstanciaMClinico=null;
+		this.convivientesTratadosMClinico=null;
+		this.colateralesTratadosMClinico=null;
+		this.tratamientoCompletoMClinico=BigDecimal.valueOf(0);
+		this.tratamientoSupervisadoMClinico=BigDecimal.valueOf(0);
+		this.controlParasitarioMClinico=BigDecimal.valueOf(0);
+		this.numDiasPosterioresMClinico=null;
+		this.resultControlPositivoMClinico=null;
+		this.condicionFinalMClinico=null;
+		this.fechaDefuncionMClinico=null;
+		this.automedicacionMClinico=BigDecimal.valueOf(0);
+		this.medicamentosAutomedicacionMClinico=null;
+		
+		//Atributos vinculados al resultado de la investigacion
+		this.infeccionEnResidenciaRInv=BigDecimal.valueOf(0);
+		this.paisRInvSelected=null;
+		this.paisRInvSelectedId=0;
+		this.deptsSintomasRInv=null;
+		this.deptRInvSelected=null;
+		this.deptRInvSelectedId=0;
+		this.munisSintomasRInv=null;
+		this.muniRInvSelected=null;
+		this.muniRInvSelectedId=0;
+		this.comuRInvSelected=null;
+		this.fechaInfeccionRInv=null;
+		
+		this.clasifClinicaRInvSelected=null;
+		this.clasifClinicaRInvSelectedId=0;
+		this.tipoInfeccionRInvSelected=null;
+		this.tipoInfeccionRInvSelectedId=0;
+		
+		this.tipoComplicacionRInvSelected=null;
+		this.tipoComplicacionRInvSelectedId=0;
+		this.clasificacionCasoRInvSelected=null;
+		this.clasificacionCasoRInvSelectedId=0;
+
+		this.observaciones="";
+		this.responsableInvest="";
+		this.epidemiologo="";
+		this.nivelAutorizacion=BigDecimal.valueOf(0);
+		this.casoCerrado=BigDecimal.valueOf(0);
+		this.fechaCierre=null;
+		
+		this.tiposInfeccionesRInv = tipoRecurrenciaService.ListarActivos();
 		this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
 		this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
+		this.medicamentosAntiMalaricos = medicamentoService.ListarActivos();
+		this.clasificsClinicasRInv = clasificacionClinicaService.ListarActivos();
+		this.tiposComplicacionesRInv = tipoComplicacionService.ListarActivos();
+		this.clasificacionesCasosRInv=clasificacionCasoService.ListarActivos();
 	}
 	
 	// inicia las variables primarias de modo tal que
@@ -955,7 +1074,7 @@ private static final long serialVersionUID = 1L;
 		};		
 	}
 	
-	private void iniInvestigacionMedicamentos(){
+	private void obtenerInvestigacionMedicamentos(){
 		this.investigacionesMedicamentos = null;
 		if(this.investigacionMalariaSelected==null || this.investigacionMalariaSelected.getInvestigacionMalariaId() < 1){
 			return;
@@ -1582,6 +1701,419 @@ private static final long serialVersionUID = 1L;
 	public List<Unidad> getUnidadesTransfusion() {
 		return unidadesTransfusion;
 	}
-	
+
+	public BigDecimal getManejoClinico() {
+		return manejoClinico;
+	}
+
+	public void setManejoClinico(BigDecimal manejoClinico) {
+		this.manejoClinico = manejoClinico;
+	}
+
+	public Date getInicioTratamientoMClinico() {
+		return inicioTratamientoMClinico;
+	}
+
+	public void setInicioTratamientoMClinico(Date inicioTratamientoMClinico) {
+		this.inicioTratamientoMClinico = inicioTratamientoMClinico;
+	}
+
+	public Date getFinTratamientoMClinico() {
+		return finTratamientoMClinico;
+	}
+
+	public void setFinTratamientoMClinico(Date finTratamientoMClinico) {
+		this.finTratamientoMClinico = finTratamientoMClinico;
+	}
+
+	public Medicamento getMedicamentoSelected() {
+		return medicamentoSelected;
+	}
+
+	public void setMedicamentoSelected(Medicamento medicamentoSelected) {
+		this.medicamentoSelected = medicamentoSelected;
+	}
+
+	public long getMedicamentoSelectedId() {
+		return medicamentoSelectedId;
+	}
+
+	public void setMedicamentoSelectedId(long medicamentoSelectedId) {
+		this.medicamentoSelectedId = medicamentoSelectedId;
+	}
+
+	public EntidadAdtva getEntidadMClinicoSelected() {
+		return entidadMClinicoSelected;
+	}
+
+	public void setEntidadMClinicoSelected(EntidadAdtva entidadMClinicoSelected) {
+		this.entidadMClinicoSelected = entidadMClinicoSelected;
+	}
+
+	public long getEntidadNClinicoSelectedId() {
+		return entidadNClinicoSelectedId;
+	}
+
+	public void setEntidadNClinicoSelectedId(long entidadNClinicoSelectedId) {
+		this.entidadNClinicoSelectedId = entidadNClinicoSelectedId;
+	}
+
+	public Unidad getUnidadMClinicoSelected() {
+		return unidadMClinicoSelected;
+	}
+
+	public void setUnidadMClinicoSelected(Unidad unidadMClinicoSelected) {
+		this.unidadMClinicoSelected = unidadMClinicoSelected;
+	}
+
+	public long getUnidadMClinicoSelectedId() {
+		return unidadMClinicoSelectedId;
+	}
+
+	public void setUnidadMClinicoSelectedId(long unidadMClinicoSelectedId) {
+		this.unidadMClinicoSelectedId = unidadMClinicoSelectedId;
+	}
+
+	public String getNumeroExpedienteMClinico() {
+		return numeroExpedienteMClinico;
+	}
+
+	public void setNumeroExpedienteMClinico(String numeroExpedienteMClinico) {
+		this.numeroExpedienteMClinico = numeroExpedienteMClinico;
+	}
+
+	public BigDecimal getDiasEstanciaMClinico() {
+		return diasEstanciaMClinico;
+	}
+
+	public void setDiasEstanciaMClinico(BigDecimal diasEstanciaMClinico) {
+		this.diasEstanciaMClinico = diasEstanciaMClinico;
+	}
+
+	public BigDecimal getConvivientesTratadosMClinico() {
+		return convivientesTratadosMClinico;
+	}
+
+	public void setConvivientesTratadosMClinico(
+			BigDecimal convivientesTratadosMClinico) {
+		this.convivientesTratadosMClinico = convivientesTratadosMClinico;
+	}
+
+	public BigDecimal getColateralesTratadosMClinico() {
+		return colateralesTratadosMClinico;
+	}
+
+	public void setColateralesTratadosMClinico(BigDecimal colateralesTratadosMClinico) {
+		this.colateralesTratadosMClinico = colateralesTratadosMClinico;
+	}
+
+	public BigDecimal getTratamientoCompletoMClinico() {
+		return tratamientoCompletoMClinico;
+	}
+
+	public void setTratamientoCompletoMClinico(
+			BigDecimal tratamientoCompletoMClinico) {
+		this.tratamientoCompletoMClinico = tratamientoCompletoMClinico;
+	}
+
+	public BigDecimal getTratamientoSupervisadoMClinico() {
+		return tratamientoSupervisadoMClinico;
+	}
+
+	public void setTratamientoSupervisadoMClinico(
+			BigDecimal tratamientoSupervisadoMClinico) {
+		this.tratamientoSupervisadoMClinico = tratamientoSupervisadoMClinico;
+	}
+
+	public BigDecimal getControlParasitarioMClinico() {
+		return controlParasitarioMClinico;
+	}
+
+	public void setControlParasitarioMClinico(BigDecimal controlParasitarioMClinico) {
+		this.controlParasitarioMClinico = controlParasitarioMClinico;
+	}
+
+	public BigDecimal getNumDiasPosterioresMClinico() {
+		return numDiasPosterioresMClinico;
+	}
+
+	public void setNumDiasPosterioresMClinico(BigDecimal numDiasPosterioresMClinico) {
+		this.numDiasPosterioresMClinico = numDiasPosterioresMClinico;
+	}
+
+	public BigDecimal getResultControlPositivoMClinico() {
+		return resultControlPositivoMClinico;
+	}
+
+	public void setResultControlPositivoMClinico(
+			BigDecimal resultControlPositivoMClinico) {
+		this.resultControlPositivoMClinico = resultControlPositivoMClinico;
+	}
+
+	public BigDecimal getCondicionFinalMClinico() {
+		return condicionFinalMClinico;
+	}
+
+	public void setCondicionFinalMClinico(BigDecimal condicionFinalMClinico) {
+		this.condicionFinalMClinico = condicionFinalMClinico;
+	}
+
+	public Date getFechaDefuncionMClinico() {
+		return fechaDefuncionMClinico;
+	}
+
+	public void setFechaDefuncionMClinico(Date fechaDefuncionMClinico) {
+		this.fechaDefuncionMClinico = fechaDefuncionMClinico;
+	}
+
+	public BigDecimal getAutomedicacionMClinico() {
+		return automedicacionMClinico;
+	}
+
+	public void setAutomedicacionMClinico(BigDecimal automedicacionMClinico) {
+		this.automedicacionMClinico = automedicacionMClinico;
+	}
+
+	public String getMedicamentosAutomedicacionMClinico() {
+		return medicamentosAutomedicacionMClinico;
+	}
+
+	public void setMedicamentosAutomedicacionMClinico(String medicamentosAutomedicacion) {
+		this.medicamentosAutomedicacionMClinico = medicamentosAutomedicacion;
+	}
+
+	public List<Medicamento> getMedicamentosAntiMalaricos() {
+		return medicamentosAntiMalaricos;
+	}
+
+	public List<EntidadAdtva> getEntidadesMClinico() {
+		return entidadesMClinico;
+	}
+
+	public List<Unidad> getUnidadesMClinico() {
+		return unidadesMClinico;
+	}
+
+	public Date getFechaIngresoMClinico() {
+		return fechaIngresoMClinico;
+	}
+
+	public void setFechaIngresoMClinico(Date fechaIngresoMClinico) {
+		this.fechaIngresoMClinico = fechaIngresoMClinico;
+	}
+
+	public BigDecimal getInfeccionEnResidenciaRInv() {
+		return infeccionEnResidenciaRInv;
+	}
+
+	public void setInfeccionEnResidenciaRInv(BigDecimal infeccionEnResidenciaRInv) {
+		this.infeccionEnResidenciaRInv = infeccionEnResidenciaRInv;
+	}
+
+	public Pais getPaisRInvSelected() {
+		return paisRInvSelected;
+	}
+
+	public void setPaisRInvSelected(Pais paisRInvSelected) {
+		this.paisRInvSelected = paisRInvSelected;
+	}
+
+	public long getPaisRInvSelectedId() {
+		return paisRInvSelectedId;
+	}
+
+	public void setPaisRInvSelectedId(long paisRInvSelectedId) {
+		this.paisRInvSelectedId = paisRInvSelectedId;
+	}
+
+	public DivisionPolitica getDeptRInvSelected() {
+		return deptRInvSelected;
+	}
+
+	public void setDeptRInvSelected(DivisionPolitica deptRInvSelected) {
+		this.deptRInvSelected = deptRInvSelected;
+	}
+
+	public long getDeptRInvSelectedId() {
+		return deptRInvSelectedId;
+	}
+
+	public void setDeptRInvSelectedId(long deptRInvSelectedId) {
+		this.deptRInvSelectedId = deptRInvSelectedId;
+	}
+
+	public DivisionPolitica getMuniRInvSelected() {
+		return muniRInvSelected;
+	}
+
+	public void setMuniRInvSelected(DivisionPolitica muniRInvSelected) {
+		this.muniRInvSelected = muniRInvSelected;
+	}
+
+	public long getMuniRInvSelectedId() {
+		return muniRInvSelectedId;
+	}
+
+	public void setMuniRInvSelectedId(long muniRInvSelectedId) {
+		this.muniRInvSelectedId = muniRInvSelectedId;
+	}
+
+	public Comunidad getComuRInvSelected() {
+		return comuRInvSelected;
+	}
+
+	public void setComuRInvSelected(Comunidad comuRInvSelected) {
+		this.comuRInvSelected = comuRInvSelected;
+	}
+
+	public Date getFechaInfeccionRInv() {
+		return fechaInfeccionRInv;
+	}
+
+	public void setFechaInfeccionRInv(Date fechaInfeccionRInv) {
+		this.fechaInfeccionRInv = fechaInfeccionRInv;
+	}
+
+	public ClasificacionClinica getClasifClinicaRInvSelected() {
+		return clasifClinicaRInvSelected;
+	}
+
+	public void setClasifClinicaRInvSelected(
+			ClasificacionClinica clasifClinicaRInvSelected) {
+		this.clasifClinicaRInvSelected = clasifClinicaRInvSelected;
+	}
+
+	public long getClasifClinicaRInvSelectedId() {
+		return clasifClinicaRInvSelectedId;
+	}
+
+	public void setClasifClinicaRInvSelectedId(long clasifClinicaRInvSelectedId) {
+		this.clasifClinicaRInvSelectedId = clasifClinicaRInvSelectedId;
+	}
+
+	public TipoRecurrencia getTipoInfeccionRInvSelected() {
+		return tipoInfeccionRInvSelected;
+	}
+
+	public void setTipoInfeccionRInvSelected(
+			TipoRecurrencia tipoInfeccionRInvSelected) {
+		this.tipoInfeccionRInvSelected = tipoInfeccionRInvSelected;
+	}
+
+	public long getTipoInfeccionRInvSelectedId() {
+		return tipoInfeccionRInvSelectedId;
+	}
+
+	public void setTipoInfeccionRInvSelectedId(long tipoInfeccionRInvSelectedId) {
+		this.tipoInfeccionRInvSelectedId = tipoInfeccionRInvSelectedId;
+	}
+
+	public TipoComplicacion getTipoComplicacionRInvSelected() {
+		return tipoComplicacionRInvSelected;
+	}
+
+	public void setTipoComplicacionRInvSelected(
+			TipoComplicacion tipoComplicacionRInvSelected) {
+		this.tipoComplicacionRInvSelected = tipoComplicacionRInvSelected;
+	}
+
+	public long getTipoComplicacionRInvSelectedId() {
+		return tipoComplicacionRInvSelectedId;
+	}
+
+	public void setTipoComplicacionRInvSelectedId(
+			long tipoComplicacionRInvSelectedId) {
+		this.tipoComplicacionRInvSelectedId = tipoComplicacionRInvSelectedId;
+	}
+
+	public ClasificacionCaso getClasificacionCasoRInvSelected() {
+		return clasificacionCasoRInvSelected;
+	}
+
+	public void setClasificacionCasoRInvSelected(
+			ClasificacionCaso clasificacionCasoRInvSelected) {
+		this.clasificacionCasoRInvSelected = clasificacionCasoRInvSelected;
+	}
+
+	public long getClasificacionCasoRInvSelectedId() {
+		return clasificacionCasoRInvSelectedId;
+	}
+
+	public void setClasificacionCasoRInvSelectedId(
+			long clasificacionCasoRInvSelectedId) {
+		this.clasificacionCasoRInvSelectedId = clasificacionCasoRInvSelectedId;
+	}
+
+	public String getObservaciones() {
+		return observaciones;
+	}
+
+	public void setObservaciones(String observaciones) {
+		this.observaciones = observaciones;
+	}
+
+	public String getResponsableInvest() {
+		return responsableInvest;
+	}
+
+	public void setResponsableInvest(String responsableInvest) {
+		this.responsableInvest = responsableInvest;
+	}
+
+	public String getEpidemiologo() {
+		return epidemiologo;
+	}
+
+	public void setEpidemiologo(String epidemiologo) {
+		this.epidemiologo = epidemiologo;
+	}
+
+	public BigDecimal getNivelAutorizacion() {
+		return nivelAutorizacion;
+	}
+
+	public void setNivelAutorizacion(BigDecimal nivelAutorizacion) {
+		this.nivelAutorizacion = nivelAutorizacion;
+	}
+
+	public BigDecimal getCasoCerrado() {
+		return casoCerrado;
+	}
+
+	public void setCasoCerrado(BigDecimal casoCerrado) {
+		this.casoCerrado = casoCerrado;
+	}
+
+	public Date getFechaCierre() {
+		return fechaCierre;
+	}
+
+	public void setFechaCierre(Date fechaCierre) {
+		this.fechaCierre = fechaCierre;
+	}
+
+	public List<DivisionPolitica> getDeptsSintomasRInv() {
+		return deptsSintomasRInv;
+	}
+
+	public List<DivisionPolitica> getMunisSintomasRInv() {
+		return munisSintomasRInv;
+	}
+
+	public List<ClasificacionClinica> getClasificsClinicasRInv() {
+		return clasificsClinicasRInv;
+	}
+
+	public List<TipoRecurrencia> getTiposInfeccionesRInv() {
+		return tiposInfeccionesRInv;
+	}
+
+	public List<TipoComplicacion> getTiposComplicacionesRInv() {
+		return tiposComplicacionesRInv;
+	}
+
+	public List<ClasificacionCaso> getClasificacionesCasosRInv() {
+		return clasificacionesCasosRInv;
+	}
 	
 }
