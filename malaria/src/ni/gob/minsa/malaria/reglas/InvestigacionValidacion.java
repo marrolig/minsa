@@ -11,6 +11,9 @@ import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMedicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
+import ni.gob.minsa.malaria.soporte.Utilidades;
 
 public class InvestigacionValidacion {
 	
@@ -250,6 +253,101 @@ public class InvestigacionValidacion {
 		if (pInvestigacionMedicamento.getMedicamento()==null || pInvestigacionMedicamento.getMedicamento().getCodigo().trim().equals("")) {
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar el medicamento antimalárico utilizado");
+			return oResultado;
+		}
+		oResultado.setOk(true);
+		return oResultado;
+	}
+	
+	public static InfoResultado validarSintomaLugarAnte(SintomaLugarAnte pLugarAnte){
+		InfoResultado oResultado = new InfoResultado();
+		oResultado.setOk(true);
+		
+		if (pLugarAnte==null) {
+			return oResultado;
+		}
+		if(pLugarAnte.getPais()==null || pLugarAnte.getPais().getPaisId() < 1){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el país en el cual se presentaron síntomas ");
+			return oResultado;
+		}
+		if(pLugarAnte.getPais().getCodigoAlfados().equals(Utilidades.PAIS_CODIGO) && 
+				(pLugarAnte.getMunicipio()==null || pLugarAnte.getMunicipio().getDivisionPoliticaId() < 1)){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si el lugar donde inician los síntomas es nacional, debe indicarse el municipio");
+			return oResultado;
+		}
+		if(pLugarAnte.getFechaUltima()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar la fecha de último día de estadía en el lugar visitado");
+			return oResultado;
+		}
+		
+		if(pLugarAnte.getFechaUltima().after(new Date())){
+			oResultado.setMensaje("la fecha de último día de estadía no puede ser posterior a la fecha actual");
+			oResultado.setOk(false);
+			return oResultado;
+		}
+		if(pLugarAnte.getEstadia()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el número de días de permanencia en el lugar visitado");
+			return oResultado;
+		}
+		if(pLugarAnte.getPersonasSintomas()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar si se encontró con personas con malaria o fiebre en el lugar referido");
+			return oResultado;
+		}
+		oResultado.setOk(true);
+		return oResultado;
+	}
+	
+	public static InfoResultado validarSintomaLugarOtro(SintomaLugarOtro pLugarOtro){
+		InfoResultado oResultado = new InfoResultado();
+		oResultado.setOk(true);
+		
+		if (pLugarOtro==null) {
+			return oResultado;
+		}
+		if(pLugarOtro.getPais()==null || pLugarOtro.getPais().getPaisId() < 1){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el país en el cual se presentaron síntomas ");
+			return oResultado;
+		}
+		if(pLugarOtro.getPais().getCodigoAlfados().equals(Utilidades.PAIS_CODIGO) && 
+				(pLugarOtro.getMunicipio()==null || pLugarOtro.getMunicipio().getDivisionPoliticaId() < 1)){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si el lugar donde inician los síntomas es nacional, debe indicarse el municipio");
+			return oResultado;
+		}
+		if(pLugarOtro.getMesInicio()==null || (pLugarOtro.getMesInicio() == BigDecimal.valueOf(0))){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el mes de inicio de los síntomas");
+			return oResultado;
+		}
+		if(pLugarOtro.getAñoInicio()==null || (pLugarOtro.getAñoInicio() == BigDecimal.valueOf(0))){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el año de inicio de los síntomas");
+			return oResultado;
+		}
+		if(pLugarOtro.getEstadia()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar el número de días de permanencia en el lugar visitado");
+			return oResultado;
+		}
+		if(pLugarOtro.getDiagnosticoPositivo()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar si existió un diagnóstico positivo de malaria");
+			return oResultado;
+		}
+		if(pLugarOtro.getAutomedicacion()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar si la persona se automedicó ");
+			return oResultado;
+		}
+		if(pLugarOtro.getTratamientoCompleto()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar si la persona completó el tratamiento antimalárico");
 			return oResultado;
 		}
 		oResultado.setOk(true);

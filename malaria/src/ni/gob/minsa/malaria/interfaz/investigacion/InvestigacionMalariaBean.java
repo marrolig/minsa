@@ -2,8 +2,10 @@ package ni.gob.minsa.malaria.interfaz.investigacion;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +50,7 @@ import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Pais;
 import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoHematico;
+import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
 import ni.gob.minsa.malaria.reglas.Operacion;
 import ni.gob.minsa.malaria.servicios.estructura.EntidadAdtvaService;
 import ni.gob.minsa.malaria.servicios.estructura.UnidadService;
@@ -65,6 +68,7 @@ import ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 import ni.gob.minsa.malaria.soporte.Utilidades;
 
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
@@ -132,7 +136,7 @@ private static final long serialVersionUID = 1L;
 	
 	//atributos vinculados a investigacion de sintomas.
 	private int esSintomatico=0;
-	private Date fechaInicioSintomas;
+	private Date fechaInicioSintoma;
 	private int sintomaInicio=-2;
 	private List<EstadoFebril> estadosFebriles;
 	private long estadoFebrilSelectedId;
@@ -145,6 +149,7 @@ private static final long serialVersionUID = 1L;
 	private SintomaLugarOtro sintomaLugarOtroSelected;
 	private long sintomaLugarOtroSelectedId;
 	private List<Pais> paises;
+	
 	private Pais paisLugInicioSelected;
 	private long paisLugInicioSelectedId;
 	private List<DivisionPolitica> deptsLugsInicios;
@@ -157,6 +162,43 @@ private static final long serialVersionUID = 1L;
 	private BigDecimal estadiaLugar;
 	private BigDecimal usaMosquitero=BigDecimal.valueOf(-2);
 	private BigDecimal viajeZonaRiesgo=BigDecimal.valueOf(0);
+	
+	private Date fechaUltimaLugAnte;
+	private BigDecimal estadiaLugAnte;
+	private Pais paisLugAnteSelected;
+	private long paisLugAnteSelectedId;
+	private List<DivisionPolitica> deptsSintomasLugsAntes;
+	private DivisionPolitica deptLugAnteSelected;
+	private long deptLugAnteSelectedId;
+	private List<DivisionPolitica> munisSintomasLugsAntes;
+	private DivisionPolitica muniLugAnteSelected;
+	private long muniLugAnteSelectedId;
+	private Comunidad comuLugAnteSelected;
+	private BigDecimal personaSintomaLugAnte=BigDecimal.valueOf(0);
+	
+	private Date fechaUltimaLugOtro;
+	private BigDecimal estadiaLugOtro;
+	private Pais paisLugOtroSelected;
+	private long paisLugOtroSelectedId;
+	private List<DivisionPolitica> deptsSintomasLugsOtros;
+	private DivisionPolitica deptLugOtroSelected;
+	private long deptLugOtroSelectedId;
+	private List<DivisionPolitica> munisSintomasLugsOtros;
+	private DivisionPolitica muniLugOtroSelected;
+	private long muniLugOtroSelectedId;
+	private Comunidad comuLugOtroSelected;
+	private BigDecimal autoMedicacionLugOtro=BigDecimal.valueOf(0);
+	private BigDecimal diagPositivoLugOtro=BigDecimal.valueOf(0);
+	private BigDecimal tratamientoCompletoLugOtro=BigDecimal.valueOf(0);
+	
+	//atributos vinculados a antecedentes de transfusión.
+	BigDecimal antTransfusion=BigDecimal.valueOf(0);
+	private Date fechaTransfusion;
+	private Pais paisTransfusionSelected;
+	private long paisTransfusionSelectedId;
+	private List<Unidad> unidadesTransfusion;
+	private Unidad unidadTransfusionSelected;
+	private long unidadTransfusionSelectedId;
 	
 	// ----------------------------------------------------------
 	// atributos vinculados a los servicios y capa DAO
@@ -246,6 +288,7 @@ private static final long serialVersionUID = 1L;
 			}
 			this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
 			this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
+			
 		}
 		
 	}
@@ -253,7 +296,7 @@ private static final long serialVersionUID = 1L;
 	public void onSintomaticoSelected(){
 		if(this.esSintomatico==0){
 			this.sintomaInicio=-2;
-			this.fechaInicioSintomas=null;
+			this.fechaInicioSintoma=null;
 			this.sintomasLugaresAntes=null;
 			this.sintomasLugaresOtros=null;
 			this.paisLugInicioSelected=null;
@@ -295,9 +338,41 @@ private static final long serialVersionUID = 1L;
 		this.usaMosquitero=BigDecimal.valueOf(-2);
 	}
 	
+	public void onAntTransfusionSelected(){
+		this.fechaTransfusion=null;
+		this.paisTransfusionSelected=null;
+		this.paisTransfusionSelectedId=0;
+		this.unidadSelected=null;
+		this.unidadSelectedId=0;
+		if(this.antTransfusion.intValue()==1){
+			InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
+			if(oResultado.isOk()){
+				if (!oResultado.isOk()) {
+					return;
+				}
+				Pais oPais=(Pais)oResultado.getObjeto();
+				this.paisTransfusionSelected=oPais;
+				this.paisTransfusionSelectedId=oPais.getPaisId();
+				this.unidadesTransfusion=null;
+			}
+		}
+	}
+	
 	public List<Comunidad> completarComuLugInicio(String query) {
 		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
 		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniLugInicioSelectedId,query);
+		return oComunidades;
+	}
+	
+	public List<Comunidad> completarComuLugAnte(String query){
+		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
+		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniLugAnteSelectedId,query);
+		return oComunidades;
+	}
+	
+	public List<Comunidad> completarComuLugOtro(String query){
+		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
+		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniLugOtroSelectedId,query);
 		return oComunidades;
 	}
 	
@@ -341,6 +416,22 @@ private static final long serialVersionUID = 1L;
 		this.unidadSelectedId=oUnidad.getUnidadId();
 	}
 	
+	public void cambiarUnidadTransfusion(){
+		if(this.unidadTransfusionSelectedId==0){
+			return;
+		}
+		
+		InfoResultado oResultado=unidadService.Encontrar(this.unidadTransfusionSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+
+		Unidad oUnidad=(Unidad)oResultado.getObjeto();
+		this.unidadTransfusionSelected=oUnidad;
+		this.unidadTransfusionSelectedId=oUnidad.getUnidadId();
+	}
+	
 	public void cambiarPaisLugInicio(){
 		this.deptsLugsInicios=null;
 		this.deptLugInicioSelected=null;
@@ -366,6 +457,77 @@ private static final long serialVersionUID = 1L;
 		this.deptsLugsInicios = divisionPoliticaService.DepartamentosActivos();
 	}
 	
+	public void cambiarPaisLugAnte(){
+		this.deptsSintomasLugsAntes=null;
+		this.deptLugAnteSelected=null;
+		this.deptLugAnteSelectedId=0;
+		this.munisSintomasLugsAntes=null;
+		this.muniLugAnteSelected=null;
+		this.muniLugAnteSelectedId=0;
+		this.comuLugAnteSelected=null;
+		
+		InfoResultado oResultado=paisService.Encontrar(this.paisLugAnteSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		Pais oPais=(Pais)oResultado.getObjeto();
+		this.paisLugAnteSelected=oPais;
+		this.paisLugAnteSelectedId=oPais.getPaisId();
+		
+		if(paisLugAnteSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugAnteSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false){
+			return;
+		}
+		this.deptsSintomasLugsAntes = divisionPoliticaService.DepartamentosActivos();
+	}
+	
+	public void cambiarPaisLugOtro(){
+		this.deptsSintomasLugsOtros=null;
+		this.deptLugOtroSelected=null;
+		this.deptLugOtroSelectedId=0;
+		this.munisSintomasLugsOtros=null;
+		this.muniLugOtroSelected=null;
+		this.muniLugOtroSelectedId=0;
+		this.comuLugOtroSelected=null;
+		
+		InfoResultado oResultado=paisService.Encontrar(this.paisLugOtroSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		Pais oPais=(Pais)oResultado.getObjeto();
+		this.paisLugOtroSelected=oPais;
+		this.paisLugOtroSelectedId=oPais.getPaisId();
+		
+		if(paisLugOtroSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugOtroSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false){
+			return;
+		}
+		this.deptsSintomasLugsOtros = divisionPoliticaService.DepartamentosActivos();
+	}
+	
+	public void cambiarPaisTransfusion(){
+		this.unidadesTransfusion=null;
+		this.unidadTransfusionSelected=null;
+		this.unidadTransfusionSelectedId=0;
+		
+		InfoResultado oResultado=paisService.Encontrar(this.paisTransfusionSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		Pais oPais=(Pais)oResultado.getObjeto();
+		this.paisTransfusionSelected=oPais;
+		this.paisTransfusionSelectedId=oPais.getPaisId();
+		
+		if(paisTransfusionSelected.getCodigoAlfados().trim().equals("") || 
+				paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false){
+			return;
+		}
+		this.unidadesTransfusion = null;
+	}
+	
 	public void cambiarDeptLugInicio(){
 		this.munisLugsInicios=null;
 		this.muniLugInicioSelected=null;
@@ -386,11 +548,91 @@ private static final long serialVersionUID = 1L;
 		this.deptLugInicioSelected=oDept;
 		this.deptLugInicioSelectedId=oDept.getDivisionPoliticaId();
 		
-		this.munisLugsInicios = divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
+		this.deptsSintomasLugsAntes = divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
+	}
+	
+	public void cambiarDeptLugAnte(){
+		this.munisSintomasLugsAntes=null;
+		this.muniLugAnteSelected=null;
+		this.muniLugAnteSelectedId=0;
+		this.comuLugAnteSelected=null;
+		
+		if(this.paisLugAnteSelected==null ||( paisLugAnteSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugAnteSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.deptLugAnteSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.deptLugAnteSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oDept =(DivisionPolitica) oResultado.getObjeto();
+		this.deptLugAnteSelected=oDept;
+		this.deptLugAnteSelectedId=oDept.getDivisionPoliticaId();
+		
+		this.munisSintomasLugsAntes = divisionPoliticaService.MunicipiosActivos(this.deptLugAnteSelectedId);
+	}
+	
+	public void cambiarDeptLugOtro(){
+		this.munisSintomasLugsOtros=null;
+		this.muniLugOtroSelected=null;
+		this.muniLugOtroSelectedId=0;
+		this.comuLugOtroSelected=null;
+		
+		if(this.paisLugOtroSelected==null ||( paisLugOtroSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugOtroSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.deptLugOtroSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.deptLugOtroSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oDept =(DivisionPolitica) oResultado.getObjeto();
+		this.deptLugOtroSelected=oDept;
+		this.deptLugOtroSelectedId=oDept.getDivisionPoliticaId();
+		
+		this.munisSintomasLugsOtros = divisionPoliticaService.MunicipiosActivos(this.deptLugOtroSelectedId);
+	}
+	
+	public void cambiarMuniLugAnte(){
+		this.comuLugAnteSelected=null;
+		if(this.paisLugAnteSelected==null ||( paisLugAnteSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugAnteSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.paisLugAnteSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.muniLugAnteSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oMuni = (DivisionPolitica)oResultado.getObjeto();
+		this.muniLugAnteSelected=oMuni;
+		this.muniLugAnteSelectedId=oMuni.getDivisionPoliticaId();
+	}
+	
+	public void cambiarMuniLugOtro(){
+		this.comuLugOtroSelected=null;
+		if(this.paisLugOtroSelected==null ||( paisLugOtroSelected.getCodigoAlfados().trim().equals("") || 
+				paisLugOtroSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.paisLugOtroSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.muniLugOtroSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oMuni = (DivisionPolitica)oResultado.getObjeto();
+		this.muniLugOtroSelected=oMuni;
+		this.muniLugOtroSelectedId=oMuni.getDivisionPoliticaId();
 	}
 	
 	public void cambiarMuniLugInicio(){
-		this.comuLugInicioSelected=null;
+		this.comuLugAnteSelected=null;
 		if(this.paisLugInicioSelected==null ||( paisLugInicioSelected.getCodigoAlfados().trim().equals("") || 
 				paisLugInicioSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
 				|| this.muniLugInicioSelectedId ==0){
@@ -406,8 +648,208 @@ private static final long serialVersionUID = 1L;
 		this.muniLugInicioSelectedId=oMuni.getDivisionPoliticaId();
 	}
 	
+	public void agregarSintomaLugarAnte(){
+		this.fechaUltimaLugAnte=null;
+		this.estadiaLugAnte=null;
+		this.personaSintomaLugAnte=null;
+		this.paisLugAnteSelected=null;
+		this.paisLugAnteSelectedId=0;
+		this.deptsSintomasLugsAntes=null;
+		this.deptLugAnteSelected=null;
+		this.deptLugAnteSelectedId=0;
+		this.munisSintomasLugsAntes=null;
+		this.muniLugAnteSelected=null;
+		this.muniLugAnteSelectedId=0;
+		this.comuLugAnteSelected=null;
+		
+		InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
+		if (!oResultado.isOk()) {
+			return;
+		}
+		
+		Pais oPais = (Pais) oResultado.getObjeto();
+		this.paisLugAnteSelected = oPais;
+		this.paisLugAnteSelectedId = oPais.getPaisId();
+		this.deptsSintomasLugsAntes = divisionPoliticaService.DepartamentosActivos();
+	}
+	
+	public void agregarSintomaLugarOtro(){
+		this.fechaUltimaLugOtro=null;
+		this.estadiaLugOtro=null;
+		this.autoMedicacionLugOtro=BigDecimal.valueOf(0);
+		this.diagPositivoLugOtro=BigDecimal.valueOf(0);
+		this.tratamientoCompletoLugOtro=BigDecimal.valueOf(0);
+		this.paisLugOtroSelected=null;
+		this.paisLugOtroSelectedId=0;
+		this.deptsSintomasLugsOtros=null;
+		this.deptLugOtroSelected=null;
+		this.deptLugOtroSelectedId=0;
+		this.munisSintomasLugsOtros=null;
+		this.muniLugOtroSelected=null;
+		this.muniLugOtroSelectedId=0;
+		this.comuLugOtroSelected=null;
+		
+		InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
+		if (!oResultado.isOk()) {
+			return;
+		}
+		
+		Pais oPais = (Pais) oResultado.getObjeto();
+		this.paisLugOtroSelected = oPais;
+		this.paisLugOtroSelectedId = oPais.getPaisId();
+		this.deptsSintomasLugsOtros = divisionPoliticaService.DepartamentosActivos();
+	}
+	
+	public void guardarSintomaLugarAnte(){
+		RequestContext oContext = RequestContext.getCurrentInstance(); 
+		InfoResultado oResultado = new InfoResultado();
+		SintomaLugarAnte oSintomaLugar = new SintomaLugarAnte();
+		oSintomaLugar.setPais(this.paisLugAnteSelected);
+		oSintomaLugar.setMunicipio(this.muniLugAnteSelected);
+		oSintomaLugar.setComunidad(this.comuLugAnteSelected);
+		oSintomaLugar.setFechaUltima(this.fechaUltimaLugAnte);
+		oSintomaLugar.setEstadia(this.estadiaLugAnte);
+		oSintomaLugar.setPersonasSintomas(this.personaSintomaLugAnte);
+		oSintomaLugar.setUsuarioRegistro(this.infoSesion.getUsername());
+		oSintomaLugar.setFechaRegistro(Calendar.getInstance().getTime());
+		//Si se está agregando una M1O a la E2, agregaremos el objeto a la lista de objetos de "Sintimas Lugares Antes", y se persistirá 
+		//cada elemento en la lista hasta que se guarde la M10
+		if (this.investigacionMalariaSelected == null|| this.investigacionMalariaSelected.getInvestigacionMalariaId() == 0) {
+			oResultado = InvestigacionValidacion.validarSintomaLugarAnte(oSintomaLugar);
+			if (oResultado.isOk()) {
+				if (this.sintomasLugaresAntes == null) {
+					this.sintomasLugaresAntes = new ArrayList<SintomaLugarAnte>();
+				}
+				// Identificador temporal, el cual será reemplazado al momento
+				// de persistirlo
+				oSintomaLugar.setSintomaLugarAntesId(this.sintomasLugaresAntes
+						.size() + 1);
+				this.sintomasLugaresAntes.add(oSintomaLugar);
+			}
+		} else {
+			oResultado=sintomaLugarAnteService.Agregar(oSintomaLugar);
+			obtenerSintomasLugaresAntes();
+		}
+		if (!oResultado.isOk()) {
+			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			if (msg!=null)
+				FacesContext.getCurrentInstance().addMessage(null, msg);
+			oContext.addCallbackParam("agregarLugAnteOK", false); 
+			return;
+		}else{
+			oContext.addCallbackParam("agregarLugAnteOK", true); 
+		}	
+	}
+	
+	public void guardarSintomaLugarOtro(){
+		RequestContext oContext = RequestContext.getCurrentInstance(); 
+		InfoResultado oResultado = new InfoResultado();
+		SintomaLugarOtro oSintomaLugar = new SintomaLugarOtro();
+		oSintomaLugar.setPais(this.paisLugOtroSelected);
+		oSintomaLugar.setMunicipio(this.muniLugOtroSelected);
+		oSintomaLugar.setComunidad(this.comuLugOtroSelected);
+		oSintomaLugar.setEstadia(estadiaLugOtro);
+		oSintomaLugar.setAutomedicacion(this.autoMedicacionLugOtro);
+		oSintomaLugar.setDiagnosticoPositivo(this.diagPositivoLugOtro);
+		oSintomaLugar.setTratamientoCompleto(this.tratamientoCompletoLugOtro);
+		if(this.fechaUltimaLugOtro!=null){
+			oSintomaLugar.setAñoInicio(BigDecimal.valueOf(Integer.parseInt(new SimpleDateFormat("yyyy").format(this.fechaUltimaLugOtro))));
+			oSintomaLugar.setMesInicio(BigDecimal.valueOf(Integer.parseInt(new SimpleDateFormat("MM").format(this.fechaUltimaLugOtro))));
+		}
+		oSintomaLugar.setUsuarioRegistro(this.infoSesion.getUsername());
+		oSintomaLugar.setFechaRegistro(Calendar.getInstance().getTime());
+		
+		//Si se está agregando una M1O a la E2, agregaremos el objeto a la lista de objetos de "Sintimas Lugares Otros", y se persistirá 
+		//cada elemento en la lista hasta que se guarde la M10
+		if (this.investigacionMalariaSelected == null|| this.investigacionMalariaSelected.getInvestigacionMalariaId() == 0) {
+			oResultado = InvestigacionValidacion.validarSintomaLugarOtro(oSintomaLugar);
+			if (oResultado.isOk()) {
+				if (this.sintomasLugaresOtros == null) {
+					this.sintomasLugaresOtros = new ArrayList<SintomaLugarOtro>();
+				}
+				// Identificador temporal, el cual será reemplazado al momento
+				// de persistirlo
+				oSintomaLugar.setSintomaLugarOtroId(this.sintomasLugaresOtros.size() + 1);
+				this.sintomasLugaresOtros.add(oSintomaLugar);
+			}
+		} else {
+			oResultado=sintomaLugarOtroService.Agregar(oSintomaLugar);
+			obtenerSintomasLugaresOtros();
+		}
+		if (!oResultado.isOk()) {
+			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			if (msg!=null)
+				FacesContext.getCurrentInstance().addMessage(null, msg);
+			oContext.addCallbackParam("agregarLugOtroOK", false); 
+			return;
+		}else{
+			oContext.addCallbackParam("agregarLugOtroOK", true); 
+		}	
+	}
+	
+	public void eliminarSintomaLugarAnte(){
+		if (this.sintomaLugarAnteSelectedId==0){
+			return;
+		}
+		InfoResultado oResultado = new InfoResultado();
+		//Si aún no se ha persistido la M10 quiere decir que los elementos en la lista tampoco, por lo que únicamente
+		//se removera de la lista
+		if(this.investigacionMalariaSelected==null || this.investigacionMalariaSelected.getInvestigacionMalariaId()==0){
+			
+			for(int i=0;i<=this.sintomasLugaresAntes.size();i++){
+				if(this.sintomasLugaresAntes.get(i).getSintomaLugarAntesId() == this.sintomaLugarAnteSelectedId){
+					this.sintomasLugaresAntes.remove(i);
+				}
+			}
+			oResultado.setOk(true);
+			oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
+		}else{
+			oResultado=sintomaLugarAnteService.Eliminar(this.sintomaLugarAnteSelectedId);
+			if (oResultado.isOk()){
+				oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
+				obtenerSintomasLugaresAntes();
+			}
+		}
+		
+		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+		if (msg!=null){
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
+	public void eliminarSintomaLugarOtro(){
+		if (this.sintomaLugarOtroSelectedId==0){
+			return;
+		}
+		InfoResultado oResultado = new InfoResultado();
+		//Si aún no se ha persistido la M10 quiere decir que los elementos en la lista tampoco, por lo que únicamente
+		//se removera de la lista
+		if(this.investigacionMalariaSelected==null || this.investigacionMalariaSelected.getInvestigacionMalariaId()==0){
+			
+			for(int i=0;i<=this.sintomasLugaresOtros.size();i++){
+				if(this.sintomasLugaresOtros.get(i).getSintomaLugarOtroId() == this.sintomaLugarOtroSelectedId){
+					this.sintomasLugaresOtros.remove(i);
+				}
+			}
+			oResultado.setOk(true);
+			oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
+		}else{
+			oResultado=sintomaLugarOtroService.Eliminar(this.sintomaLugarOtroSelectedId);
+			if (oResultado.isOk()){
+				oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
+				obtenerSintomasLugaresOtros();
+			}
+		}
+		
+		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+		if (msg!=null){
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	}
+	
 	public void regresarCapa1() {
 		iniciarCapa1();
+		iniciarCapa2();
 	}
 		
 	
@@ -448,10 +890,38 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private void iniciarCapa1(){
-		
+		this.capaActiva=1;
+		this.muestreoHematicoSelected=null;
+		this.muestreoHematicoSelectedId=0;
 	}
 	
 	private void iniciarCapa2(){
+		
+		this.esSintomatico=0;
+		this.fechaInicioSintoma=null;
+		this.sintomasLugaresAntes=null;
+		this.sintomasLugaresOtros=null;
+		this.paisLugInicioSelected=null;
+		this.paisLugInicioSelectedId=0;
+		this.deptsLugsInicios=null;
+		this.deptLugInicioSelected=null;
+		this.deptLugInicioSelectedId=0;
+		this.munisLugsInicios=null;
+		this.muniLugInicioSelected=null;
+		this.muniLugInicioSelectedId=0;
+		
+		this.sintomasLugaresAntes=null;
+		this.sintomasLugaresOtros=null;
+	
+		
+		this.antTransfusion=BigDecimal.valueOf(0);
+		this.fechaTransfusion=null;
+		this.paisTransfusionSelected=null;
+		this.paisTransfusionSelectedId=0;
+		this.unidadesTransfusion=null;
+		this.unidadTransfusionSelected=null;
+		this.unidadTransfusionSelectedId=0;
+		
 		this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
 		this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
 	}
@@ -496,7 +966,7 @@ private static final long serialVersionUID = 1L;
 		
 	}
 	
-	private void iniSintomasLugaresAntes(){
+	private void obtenerSintomasLugaresAntes(){
 		this.sintomasLugaresAntes=null;
 		if(this.investigacionSintomaSelected==null||this.investigacionSintomaSelectedId < 1){
 			return;
@@ -505,7 +975,7 @@ private static final long serialVersionUID = 1L;
 	}
 	
 
-	private void iniSintomasLugaresOtros(){
+	private void obtenerSintomasLugaresOtros(){
 		this.sintomasLugaresOtros=null;
 		if(this.investigacionSintomaSelected==null||this.investigacionSintomaSelectedId < 1){
 			return;
@@ -749,12 +1219,12 @@ private static final long serialVersionUID = 1L;
 		this.esSintomatico = esSintomatico;
 	}
 
-	public Date getFechaInicioSintomas() {
-		return fechaInicioSintomas;
+	public Date getFechaInicioSintoma() {
+		return fechaInicioSintoma;
 	}
 
-	public void setFechaInicioSintomas(Date fechaInicioSintomas) {
-		this.fechaInicioSintomas = fechaInicioSintomas;
+	public void setFechaInicioSintoma(Date fechaInicioSintoma) {
+		this.fechaInicioSintoma = fechaInicioSintoma;
 	}
 
 	public long getEstadoFebrilSelectedId() {
@@ -868,7 +1338,250 @@ private static final long serialVersionUID = 1L;
 	public void setViajeZonaRiesgo(BigDecimal viajeZonaRiesgo) {
 		this.viajeZonaRiesgo = viajeZonaRiesgo;
 	}
+
+	public Date getFechaUltimaLugAnte() {
+		return fechaUltimaLugAnte;
+	}
+
+	public void setFechaUltimaLugAnte(Date fechaUltimaLugAnte) {
+		this.fechaUltimaLugAnte = fechaUltimaLugAnte;
+	}
+
+	public BigDecimal getEstadiaLugAnte() {
+		return estadiaLugAnte;
+	}
+
+	public void setEstadiaLugAnte(BigDecimal estadiaLugAnte) {
+		this.estadiaLugAnte = estadiaLugAnte;
+	}
+
+	public Pais getPaisLugAnteSelected() {
+		return paisLugAnteSelected;
+	}
+
+	public void setPaisLugAnteSelected(Pais paisLugAnteSelected) {
+		this.paisLugAnteSelected = paisLugAnteSelected;
+	}
+
+	public long getPaisLugAnteSelectedId() {
+		return paisLugAnteSelectedId;
+	}
+
+	public void setPaisLugAnteSelectedId(long paisLugAnteSelectedId) {
+		this.paisLugAnteSelectedId = paisLugAnteSelectedId;
+	}
+
+	public DivisionPolitica getDeptLugAnteSelected() {
+		return deptLugAnteSelected;
+	}
+
+	public void setDeptLugAnteSelected(DivisionPolitica deptLugAnteSelected) {
+		this.deptLugAnteSelected = deptLugAnteSelected;
+	}
+
+	public long getDeptLugAnteSelectedId() {
+		return deptLugAnteSelectedId;
+	}
+
+	public void setDeptLugAnteSelectedId(long deptLugAnteSelectedId) {
+		this.deptLugAnteSelectedId = deptLugAnteSelectedId;
+	}
+
+	public DivisionPolitica getMuniLugAnteSelected() {
+		return muniLugAnteSelected;
+	}
+
+	public void setMuniLugAnteSelected(DivisionPolitica muniLugAnteSelected) {
+		this.muniLugAnteSelected = muniLugAnteSelected;
+	}
+
+	public long getMuniLugAnteSelectedId() {
+		return muniLugAnteSelectedId;
+	}
+
+	public void setMuniLugAnteSelectedId(long muniLugAnteSelectedId) {
+		this.muniLugAnteSelectedId = muniLugAnteSelectedId;
+	}
+
+	public Comunidad getComuLugAnteSelected() {
+		return comuLugAnteSelected;
+	}
+
+	public void setComuLugAnteSelected(Comunidad comuLugAnteSelected) {
+		this.comuLugAnteSelected = comuLugAnteSelected;
+	}
+
+	public BigDecimal getPersonaSintomaLugAnte() {
+		return personaSintomaLugAnte;
+	}
+
+	public void setPersonaSintomaLugAnte(BigDecimal personaSintomaLugAnte) {
+		this.personaSintomaLugAnte = personaSintomaLugAnte;
+	}
+
+	public List<DivisionPolitica> getDeptsSintomasLugsAntes() {
+		return deptsSintomasLugsAntes;
+	}
+
+	public List<DivisionPolitica> getMunisSintomasLugsAntes() {
+		return munisSintomasLugsAntes;
+	}
+
+	public Date getFechaUltimaLugOtro() {
+		return fechaUltimaLugOtro;
+	}
+
+	public void setFechaUltimaLugOtro(Date fechaUltimaLugOtro) {
+		this.fechaUltimaLugOtro = fechaUltimaLugOtro;
+	}
 	
+	public BigDecimal getEstadiaLugOtro() {
+		return estadiaLugOtro;
+	}
+
+	public void setEstadiaLugOtro(BigDecimal estadiaLugOtro) {
+		this.estadiaLugOtro = estadiaLugOtro;
+	}
+
+	public Pais getPaisLugOtroSelected() {
+		return paisLugOtroSelected;
+	}
+
+	public void setPaisLugOtroSelected(Pais paisLugOtroSelected) {
+		this.paisLugOtroSelected = paisLugOtroSelected;
+	}
+
+	public long getPaisLugOtroSelectedId() {
+		return paisLugOtroSelectedId;
+	}
+
+	public void setPaisLugOtroSelectedId(long paisLugOtroSelectedId) {
+		this.paisLugOtroSelectedId = paisLugOtroSelectedId;
+	}
+
+	public DivisionPolitica getDeptLugOtroSelected() {
+		return deptLugOtroSelected;
+	}
+
+	public void setDeptLugOtroSelected(DivisionPolitica deptLugOtroSelected) {
+		this.deptLugOtroSelected = deptLugOtroSelected;
+	}
+
+	public long getDeptLugOtroSelectedId() {
+		return deptLugOtroSelectedId;
+	}
+
+	public void setDeptLugOtroSelectedId(long deptLugOtroSelectedId) {
+		this.deptLugOtroSelectedId = deptLugOtroSelectedId;
+	}
+
+	public DivisionPolitica getMuniLugOtroSelected() {
+		return muniLugOtroSelected;
+	}
+
+	public void setMuniLugOtroSelected(DivisionPolitica muniLugOtroSelected) {
+		this.muniLugOtroSelected = muniLugOtroSelected;
+	}
+
+	public long getMuniLugOtroSelectedId() {
+		return muniLugOtroSelectedId;
+	}
+
+	public void setMuniLugOtroSelectedId(long muniLugOtroSelectedId) {
+		this.muniLugOtroSelectedId = muniLugOtroSelectedId;
+	}
+
+	public Comunidad getComuLugOtroSelected() {
+		return comuLugOtroSelected;
+	}
+
+	public void setComuLugOtroSelected(Comunidad comuLugOtroSelected) {
+		this.comuLugOtroSelected = comuLugOtroSelected;
+	}
+
+	public BigDecimal getAutoMedicacionLugOtro() {
+		return autoMedicacionLugOtro;
+	}
+
+	public void setAutoMedicacionLugOtro(BigDecimal autoMedicacionLugOtro) {
+		this.autoMedicacionLugOtro = autoMedicacionLugOtro;
+	}
+
+	public BigDecimal getDiagPositivoLugOtro() {
+		return diagPositivoLugOtro;
+	}
+
+	public void setDiagPositivoLugOtro(BigDecimal diagPositivoLugOtro) {
+		this.diagPositivoLugOtro = diagPositivoLugOtro;
+	}
+
+	public BigDecimal getTratamientoCompletoLugOtro() {
+		return tratamientoCompletoLugOtro;
+	}
+
+	public void setTratamientoCompletoLugOtro(BigDecimal tratamientoCompletoLugOtro) {
+		this.tratamientoCompletoLugOtro = tratamientoCompletoLugOtro;
+	}
+
+	public List<DivisionPolitica> getDeptsSintomasLugsOtros() {
+		return deptsSintomasLugsOtros;
+	}
+
+	public List<DivisionPolitica> getMunisSintomasLugsOtros() {
+		return munisSintomasLugsOtros;
+	}
+
+	public BigDecimal getAntTransfusion() {
+		return antTransfusion;
+	}
+
+	public void setAntTransfusion(BigDecimal antTransfusion) {
+		this.antTransfusion = antTransfusion;
+	}
+
+	public Date getFechaTransfusion() {
+		return fechaTransfusion;
+	}
+
+	public void setFechaTransfusion(Date fechaTransfusion) {
+		this.fechaTransfusion = fechaTransfusion;
+	}
+
+	public Pais getPaisTransfusionSelected() {
+		return paisTransfusionSelected;
+	}
+
+	public void setPaisTransfusionSelected(Pais paisTransfusionSelected) {
+		this.paisTransfusionSelected = paisTransfusionSelected;
+	}
+
+	public long getPaisTransfusionSelectedId() {
+		return paisTransfusionSelectedId;
+	}
+
+	public void setPaisTransfusionSelectedId(long paisTransfusionSelectedId) {
+		this.paisTransfusionSelectedId = paisTransfusionSelectedId;
+	}
+
+	public Unidad getUnidadTransfusionSelected() {
+		return unidadTransfusionSelected;
+	}
+
+	public void setUnidadTransfusionSelected(Unidad unidadTransfusionSelected) {
+		this.unidadTransfusionSelected = unidadTransfusionSelected;
+	}
+
+	public long getUnidadTransfusionSelectedId() {
+		return unidadTransfusionSelectedId;
+	}
+
+	public void setUnidadTransfusionSelectedId(long unidadTransfusionSelectedId) {
+		this.unidadTransfusionSelectedId = unidadTransfusionSelectedId;
+	}
+
+	public List<Unidad> getUnidadesTransfusion() {
+		return unidadesTransfusion;
+	}
 	
 	
 }

@@ -12,6 +12,8 @@ import javax.validation.ConstraintViolationException;
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
+import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
+import ni.gob.minsa.malaria.reglas.VigilanciaValidacion;
 import ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarOtroService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 
@@ -159,7 +161,9 @@ public class SintomaLugarOtroDA implements SintomaLugarOtroService {
     	oEM.getTransaction().begin();
 		@SuppressWarnings("unused")
 		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
-
+		 
+		 oResultado=InvestigacionValidacion.validarSintomaLugarOtro(pSintomaLugarOtro);
+		if (!oResultado.isOk()) return oResultado;
         try{
             oEM.persist(pSintomaLugarOtro);
             oEM.getTransaction().commit();
