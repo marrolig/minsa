@@ -223,13 +223,15 @@ private static final long serialVersionUID = 1L;
 	private BigDecimal controlParasitarioMClinico=BigDecimal.valueOf(0);
 	private BigDecimal numDiasPosterioresMClinico;
 	private BigDecimal resultControlPositivoMClinico;
-	private BigDecimal condicionFinalMClinico;
+	private BigDecimal condicionFinalMClinico=BigDecimal.valueOf(1);
 	private Date fechaDefuncionMClinico;
 	private BigDecimal automedicacionMClinico=BigDecimal.valueOf(0);
 	private String medicamentosAutomedicacionMClinico;
 	
 	//Atributos vinculados al resultado de la investigacion
-	private BigDecimal infeccionEnResidenciaRInv=BigDecimal.valueOf(0);
+		
+	//Investigación Lugares
+	private BigDecimal infeccionEnResidenciaRInv=BigDecimal.valueOf(1);
 	private Pais paisRInvSelected;
 	private long paisRInvSelectedId;
 	private List<DivisionPolitica> deptsSintomasRInv;
@@ -239,6 +241,7 @@ private static final long serialVersionUID = 1L;
 	private DivisionPolitica muniRInvSelected;
 	private long muniRInvSelectedId;
 	private Comunidad comuRInvSelected;
+	
 	private Date fechaInfeccionRInv;
 	private List<ClasificacionClinica> clasificsClinicasRInv;
 	private ClasificacionClinica clasifClinicaRInvSelected;
@@ -416,6 +419,68 @@ private static final long serialVersionUID = 1L;
 		}
 	}
 	
+	public void onManejoClinicoSelected(){
+		if(this.manejoClinico.intValue()==0){
+			this.entidadMClinicoSelected=null;
+			this.entidadNClinicoSelectedId=0;
+			this.unidadesMClinico=null;
+			this.unidadMClinicoSelected=null;
+			this.unidadMClinicoSelectedId=0;
+			this.numeroExpedienteMClinico="";
+			this.fechaIngresoMClinico=null;
+			this.diasEstanciaMClinico=null;
+		}
+	}
+	
+	public void onResultControlPositivoMClinicoSelected(){
+		if(this.controlParasitarioMClinico.intValue()==0){
+			this.resultControlPositivoMClinico=null;
+			this.numDiasPosterioresMClinico=null;
+		}
+	}
+	public void onCondicionFinalMClinico(){
+		if(this.condicionFinalMClinico.intValue()==1){
+			this.fechaDefuncionMClinico=null;
+		}
+	}
+	
+	public void onAutomedicacionMClinico(){
+		if(this.automedicacionMClinico.intValue()==0){
+			this.medicamentosAutomedicacionMClinico=null;
+		}
+	}
+	
+	public void onCasoCerradoSelected(){
+		if(this.casoCerrado.intValue()==0){
+			this.fechaCierre=null;
+		}
+	}
+	
+	public void onInfeccionRInvSelected(){
+		this.paisRInvSelected=null;
+		this.paisRInvSelectedId=0;
+		this.deptsSintomasRInv=null;
+		this.deptRInvSelected=null;
+		this.deptRInvSelectedId=0;
+		this.munisSintomasRInv=null;
+		this.muniRInvSelected=null;
+		this.muniRInvSelectedId=0;
+		this.comuRInvSelected=null;
+		
+		if(this.infeccionEnResidenciaRInv.intValue()==0){
+			InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
+			if(oResultado.isOk()){
+				if (!oResultado.isOk()) {
+					return;
+				}
+				Pais oPais=(Pais)oResultado.getObjeto();
+				this.paisRInvSelected=oPais;
+				this.paisRInvSelectedId=oPais.getPaisId();
+				this.deptsSintomasRInv= divisionPoliticaService.DepartamentosActivos();
+			}
+		}
+	}
+	
 	public List<Comunidad> completarComuLugInicio(String query) {
 		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
 		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniLugInicioSelectedId,query);
@@ -431,6 +496,12 @@ private static final long serialVersionUID = 1L;
 	public List<Comunidad> completarComuLugOtro(String query){
 		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
 		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniLugOtroSelectedId,query);
+		return oComunidades;
+	}
+	
+	public List<Comunidad> completarComuRInv(String query){
+		List<Comunidad> oComunidades = new ArrayList<Comunidad>();
+		oComunidades=comunidadService.ComunidadesPorMunicipioYNombre(this.muniRInvSelectedId,query);
 		return oComunidades;
 	}
 	
@@ -586,6 +657,31 @@ private static final long serialVersionUID = 1L;
 		this.unidadesTransfusion = null;
 	}
 	
+	public void cambiarPaisRInv(){
+		this.deptsSintomasRInv=null;
+		this.deptRInvSelected=null;
+		this.deptRInvSelectedId=0;
+		this.munisSintomasRInv=null;
+		this.muniRInvSelected=null;
+		this.muniRInvSelectedId=0;
+		this.comuRInvSelected=null;
+		
+		InfoResultado oResultado=paisService.Encontrar(this.paisLugInicioSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		Pais oPais=(Pais)oResultado.getObjeto();
+		this.paisRInvSelected=oPais;
+		this.paisRInvSelectedId=oPais.getPaisId();
+		
+		if(this.paisRInvSelected==null ||( paisRInvSelected.getCodigoAlfados().trim().equals("") || 
+				paisRInvSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)){
+			return;
+		}
+		this.deptsSintomasRInv = divisionPoliticaService.DepartamentosActivos();
+	}
+	
 	public void cambiarDeptLugInicio(){
 		this.munisLugsInicios=null;
 		this.muniLugInicioSelected=null;
@@ -654,6 +750,29 @@ private static final long serialVersionUID = 1L;
 		
 		this.munisSintomasLugsOtros = divisionPoliticaService.MunicipiosActivos(this.deptLugOtroSelectedId);
 	}
+
+	public void cambiarDeptRInv(){
+		this.munisSintomasRInv=null;
+		this.muniRInvSelected=null;
+		this.muniRInvSelectedId=0;
+		this.comuRInvSelected=null;
+		
+		if(this.paisRInvSelected==null ||( paisRInvSelected.getCodigoAlfados().trim().equals("") || 
+				paisRInvSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.paisRInvSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.deptRInvSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oDept =(DivisionPolitica) oResultado.getObjeto();
+		this.deptRInvSelected=oDept;
+		this.deptRInvSelectedId=oDept.getDivisionPoliticaId();
+		
+		this.munisSintomasRInv = divisionPoliticaService.MunicipiosActivos(this.deptRInvSelectedId);
+	}
 	
 	public void cambiarMuniLugAnte(){
 		this.comuLugAnteSelected=null;
@@ -704,6 +823,25 @@ private static final long serialVersionUID = 1L;
 		DivisionPolitica oMuni = (DivisionPolitica)oResultado.getObjeto();
 		this.muniLugInicioSelected=oMuni;
 		this.muniLugInicioSelectedId=oMuni.getDivisionPoliticaId();
+	}
+	
+	public void cambiarMuniRInv(){
+		this.comuLugAnteSelected=null;
+		
+	
+		if(this.paisRInvSelected==null ||( paisRInvSelected.getCodigoAlfados().trim().equals("") || 
+				paisRInvSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)
+				|| this.muniRInvSelectedId ==0){
+			return;
+		}
+		InfoResultado oResultado=divisionPoliticaService.Encontrar(this.muniRInvSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+		DivisionPolitica oMuni = (DivisionPolitica)oResultado.getObjeto();
+		this.muniRInvSelected=oMuni;
+		this.muniRInvSelectedId=oMuni.getDivisionPoliticaId();
 	}
 	
 	public void agregarSintomaLugarAnte(){
@@ -1001,13 +1139,13 @@ private static final long serialVersionUID = 1L;
 		this.controlParasitarioMClinico=BigDecimal.valueOf(0);
 		this.numDiasPosterioresMClinico=null;
 		this.resultControlPositivoMClinico=null;
-		this.condicionFinalMClinico=null;
+		this.condicionFinalMClinico=BigDecimal.valueOf(1);
 		this.fechaDefuncionMClinico=null;
 		this.automedicacionMClinico=BigDecimal.valueOf(0);
 		this.medicamentosAutomedicacionMClinico=null;
 		
 		//Atributos vinculados al resultado de la investigacion
-		this.infeccionEnResidenciaRInv=BigDecimal.valueOf(0);
+		this.infeccionEnResidenciaRInv=BigDecimal.valueOf(1);
 		this.paisRInvSelected=null;
 		this.paisRInvSelectedId=0;
 		this.deptsSintomasRInv=null;
