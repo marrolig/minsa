@@ -22,6 +22,8 @@ import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
 import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
+import ni.gob.minsa.malaria.reglas.PersonaValidacion;
+import ni.gob.minsa.malaria.reglas.VigilanciaValidacion;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 
@@ -206,8 +208,64 @@ public class InvestigacionDA implements InvestigacionService {
 			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
 			InvestigacionHospitalario pInvestigacionHospitalario) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		InfoResultado oResultado=new InfoResultado();
+		oResultado=InvestigacionValidacion.validarInvestigacionMalaria(
+				pInvestigacionMalaria,
+				pInvestigacionSintoma,
+				pInvestigacionMedicamento,
+				pInvestigacionLugar,
+				pInvestigacionTransfusion,
+				pInvestigacionHospitalario);
+		if (!oResultado.isOk()) return oResultado;
+		
+    	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+    	oEM.getTransaction().begin();
+    	@SuppressWarnings("unused")
+		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
+		
+    	try{
+			return oResultado;
+		} catch (EntityExistsException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Guardar");
+    		oResultado.setMensaje(Mensajes.EXCEPCION_REGISTRO_EXISTE);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (ConstraintViolationException iExcepcion) {
+    		oResultado.setExcepcion(true);
+    		ConstraintViolation<?> oConstraintViolation = iExcepcion.getConstraintViolations().iterator().next();
+    		oResultado.setMensaje(oConstraintViolation.getMessage());
+    		oResultado.setFuenteError(oConstraintViolation.getPropertyPath().toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    	} 
+    	catch (PersistenceException iExPersistencia) {
+    		oResultado.setFilasAfectadas(0);
+    		oResultado.setExcepcion(false);
+    		oResultado.setFuenteError("Guardar");
+    		oResultado.setMensaje(Mensajes.REGISTRO_NO_GUARDADO);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
+    		oResultado.setOk(false);
+    		return oResultado;
+    		
+    	} catch (Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);
+    		return oResultado;
+    		
+    	} finally{
+    		oEM.close();
+    	}
 	}
 	/*
 	 * (non-Javadoc)
@@ -230,11 +288,10 @@ public class InvestigacionDA implements InvestigacionService {
 				pInvestigacionMalaria,
 				pInvestigacionSintoma,
 				pInvestigacionMedicamento,
+				pInvestigacionLugar,
 				pInvestigacionTransfusion,
 				pInvestigacionHospitalario);
 		if (!oResultado.isOk()) return oResultado;
-		
-		
 		
 		EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
@@ -281,7 +338,6 @@ public class InvestigacionDA implements InvestigacionService {
         			}
         		}
             }
-            
            //Agregando los objetos relacionados a Investigación Lugar.
             if(pInvestigacionLugar!=null){
             	pInvestigacionLugar.setInvestigacionMalaria(pInvestigacionMalaria);
@@ -292,7 +348,7 @@ public class InvestigacionDA implements InvestigacionService {
             	pInvestigacionTransfusion.setInvestigacionMalaria(pInvestigacionMalaria);
             	oEM.persist(pInvestigacionTransfusion);
             }
-          //Agregando los objetos relacionados a atención hospitalaria.
+            //Agregando los objetos relacionados a atención hospitalaria.
             if(pInvestigacionHospitalario!=null){
             	pInvestigacionHospitalario.setInvestigacionMalaria(pInvestigacionMalaria);
             	oEM.persist(pInvestigacionHospitalario);

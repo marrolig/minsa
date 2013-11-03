@@ -380,12 +380,11 @@
 							 
 							 <h:outputLabel for="cboSintomaInicio" styleClass="lblDefaultSmall" 
 							   value="Lugar donde Iniciaron Los Síntomas:" 
-							   style="position:absolute; left:10px; top:8px; width:150px;"/>
+							   style="position:absolute; left:10px; top:8px; width:185px;"/>
 							 <h:selectOneMenu id="cboSintomaInicio" styleClass="txtDefault cboDefault"  
-						 		style="position:absolute; left:10px;top:23px;width:180px;"
+						 		style="position:absolute; left:10px;top:23px;width:185px;"
 						 		value="#{investigacionMalariaBean.sintomaInicio}"
 						 		disabled="#{investigacionMalariaBean.esSintomatico==0}">
-						 			<f:selectItem  itemValue="-2" itemLabel=" "/>
 						 			<f:selectItem itemValue="0" itemLabel="Otra Localidad" /> 
 									<f:selectItem itemValue="1" itemLabel="Lugar de Residencia Actual" />
 									<f:selectItem itemValue="-1" itemLabel="No sabe" />
@@ -399,7 +398,7 @@
 								value="País inicio síntomas:"
 								style="position:absolute; left:200px; top:8px;" />
 							<h:selectOneMenu id="cboPaisLugInicio" styleClass="txtDefault cboDefault"
-								style="position:absolute; left:200px;top:23px;width:210px;"
+								style="position:absolute; left:200px;top:23px;width:215px;"
 								value="#{investigacionMalariaBean.paisLugInicioSelectedId}"
 								disabled="#{investigacionMalariaBean.esSintomatico==0 or investigacionMalariaBean.sintomaInicio!=0}">
 								<f:selectItem itemValue="0" itemLabel=" " />
@@ -416,7 +415,7 @@
 								value="Departamento:"
 								style="position:absolute; left:420px; top:8px;" />
 							<h:selectOneMenu id="cboDeptLugInicio" styleClass="txtDefault cboDefault"
-								style="position:absolute; left:420px;top:23px;width:260px;"
+								style="position:absolute; left:420px;top:23px;width:270px;"
 								value="#{investigacionMalariaBean.deptLugInicioSelectedId}"
 								disabled="#{investigacionMalariaBean.esSintomatico==0 or investigacionMalariaBean.sintomaInicio!=0}">
 								<f:selectItem itemValue="0" itemLabel=" " />
@@ -462,14 +461,27 @@
 							
 							<h:outputLabel for="txtEstadiaLugar" styleClass="lblDefaultSmall" 
 							   value="Días de Estadía:" 
-							   style="position:absolute; left:420px; top:50px;"/>
+							   style="position:absolute; left:350px; top:50px;"/>
 							<h:inputText id="txtEstadiaLugar"  maxlength="3"
-							style="position:absolute; left:420px; top:65px; width:135px;"
+							style="position:absolute; left:350px; top:65px; width:135px;"
 							 value="#{investigacionMalariaBean.estadiaLugar}" styleClass="txtDefault entero"
 							 disabled="#{investigacionMalariaBean.esSintomatico==0 or investigacionMalariaBean.sintomaInicio!=0}" />
 							 <script type="text/javascript">
 								jQuery(".entero").format({precision: 0,allow_negative:true,autofix:false});
-							</script> 
+							</script>
+							
+							<h:outputLabel for="cboPersonaConSintomaLugar" styleClass="lblDefaultSmall" 
+							   value="Personas con Malaria o Fiebre:" 
+							   style="position:absolute; left:495px; top:50px;"/>
+							 <h:selectOneMenu id="cboPersonaConSintomaLugar" styleClass="txtDefault cboDefault"  
+						 		 disabled="#{investigacionMalariaBean.esSintomatico==0}"
+						 		style="position:absolute; left:495px;top:65px;width:130px;"
+						 		value="#{investigacionMalariaBean.personaConSintomaLugar}">
+						 			<f:selectItem itemValue="0" itemLabel="No" /> 
+									<f:selectItem itemValue="1" itemLabel="Si" />
+									<f:selectItem itemValue="-1" itemLabel="No Sabe" />
+							</h:selectOneMenu>
+								
 					</p:panel>
 					
 						<p:panel id="panInvLugAntes"
@@ -1191,12 +1203,13 @@
 									  styleClass="txtDefault" 
 									  value="#{investigacionMalariaBean.epidemiologo}"/>
 						 	</p:panel>
+						 	
 						 	<p:panel id="panCierre"
-							 	 	style="position:absolute; top:1215px; left:5px; height:50px; width:960px;" 
+							 	 	style="position:absolute; top:1280px; left:5px; height:50px; width:960px;" 
 							 	 	styleClass="panDetail">
 							 	 	
 							 	 	<h:outputLabel for="cboCasoCerrado" styleClass="lblDefaultSmall" 
-								    value="Nivel Autorización:" 
+								    value="Caso Cerrado:" 
 								    style="position:absolute; left:10px; top:8px;"/>
 							 	 	<h:selectOneMenu id="cboCasoCerrado" styleClass="txtDefault cboDefault"  
 							 		style="position:absolute; left:10px;top:23px;width:160px;"
@@ -1545,15 +1558,16 @@
 								jQuery(".estadiaLugAnte").format({precision: 0,allow_negative:true,autofix:false});
 							</script> 
 							
-							<h:outputLabel for="txtPersonaSintomaLugAnte" styleClass="lblDefaultSmall" 
-							   value="Personas con Malaria o Fiebre:" 
-							   style="position:absolute; left:225px; top:93px;"/>
-							<h:inputText id="txtPersonaSintomaLugAnte"  maxlength="3"
-							style="position:absolute; left:225px; top:108px; width:50px;"
-							 value="#{investigacionMalariaBean.personaSintomaLugAnte}" styleClass="txtDefault sintomaLugAnte" />
-							 <script type="text/javascript">
-								jQuery(".sintomaLugAnte").format({precision: 0,allow_negative:true,autofix:false});
-							</script> 
+							 <h:outputLabel for="cboPersonaSintomaLugAnte" styleClass="lblDefaultSmall" 
+							   value="Personas con Malaria o Fiebre::" 
+							   style="position:absolute; left:225px; top:93px; width:150px;"/>
+							 <h:selectOneMenu id="cboPersonaSintomaLugAnte" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:225px;top:108px;width:180px;"
+						 		value="#{investigacionMalariaBean.personaSintomaLugAnte}">
+						 			<f:selectItem itemValue="0" itemLabel="No" /> 
+									<f:selectItem itemValue="1" itemLabel="Si" />
+							</h:selectOneMenu>
+							
 				  		</p:panel>
 						<p:panel id="panButtonNuevoLugAnte" 
 						 style="position:absolute; width:560px; top:160px;left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;"

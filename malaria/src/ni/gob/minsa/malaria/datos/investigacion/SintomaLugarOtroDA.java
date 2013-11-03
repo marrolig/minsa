@@ -13,7 +13,6 @@ import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
 import ni.gob.minsa.malaria.reglas.InvestigacionValidacion;
-import ni.gob.minsa.malaria.reglas.VigilanciaValidacion;
 import ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarOtroService;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 
