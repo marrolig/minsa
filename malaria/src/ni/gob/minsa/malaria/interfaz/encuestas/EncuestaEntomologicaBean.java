@@ -1191,14 +1191,17 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oSelPesquisa.setInspector(frmInp_Pesq_Inspector);
 		
 		if( frmDt_ListaPesquisas == null ) frmDt_ListaPesquisas = new ArrayList<CriaderosPesquisa>();
-		if( isEditPesquisa == false ) frmDt_ListaPesquisas.add(oSelPesquisa);
+		if( isEditPesquisa == false ){
+			frmDt_ListaPesquisas.add(oSelPesquisa);
+			oSelIntervencion = null;
+			oSelPosInspeccion = null;
+		}
 		else isEditPesquisa = false;
 		
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO,"Agregado","");
 		if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
 		
-		oSelIntervencion = null;
-		oSelPosInspeccion = null;
+
 		
 	}
 	
@@ -1489,6 +1492,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return;
 		}
 		
+		limpiarDatosModalPosInspeccion();
 		if( oSelPosInspeccion != null) editarPosInspeccion(oSelPosInspeccion);
 		RequestContext.getCurrentInstance().execute("dlgPosInspeccion.show();");
 	}
