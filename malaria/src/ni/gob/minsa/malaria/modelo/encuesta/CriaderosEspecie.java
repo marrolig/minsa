@@ -16,6 +16,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
 @Entity
 @Table(name="CRIADEROS_ESPECIES")
 public class CriaderosEspecie implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 	private long criaderoEspecieId;
 	private Criadero criadero;
@@ -41,7 +42,7 @@ public class CriaderosEspecie implements Serializable {
 
 
 	@NotNull(message="Criadero es requerido")
-	@ManyToOne(targetEntity=Criadero.class,fetch=FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name="CRIADERO",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	public Criadero getCriadero() {
 		return this.criadero;

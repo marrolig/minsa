@@ -144,9 +144,9 @@ public class IntervencionDA implements IntervencionServices {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public InfoResultado obtenerIntervencionesPorPesquisa(CriaderosPesquisa pPesquisa) {
+	public InfoResultado obtenerIntervencionPorPesquisa(CriaderosPesquisa pPesquisa) {
 		InfoResultado oResultado = new InfoResultado();
-		List<CriaderosIntervencion> resultado = null;
+		CriaderosIntervencion resultado = null;
 		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		Query query = null;
@@ -169,14 +169,13 @@ public class IntervencionDA implements IntervencionServices {
 			query.setParameter("pPesquisaId", pPesquisa.getCriaderoPesquisaId());
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
-			resultado = (List<CriaderosIntervencion>) query.getResultList();
-			if( resultado.isEmpty()){
+			resultado = (CriaderosIntervencion) query.getSingleResult();
+			if( resultado == null){
 				oResultado.setOk(false);
 				oResultado.setMensaje("Registros no encontrados");
 				return oResultado;
 			}
 			
-			oResultado.setFilasAfectadas(resultado.size());
             oResultado.setObjeto(resultado);
             oResultado.setOk(true);
             
@@ -205,12 +204,12 @@ public class IntervencionDA implements IntervencionServices {
 //    	@SuppressWarnings("unused")
 //		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);		
     	String strUpdate = "";
-		
+    	CriaderosIntervencion oIntervencion = null;
     	
     	try{
     		if( pIntervencion.getCriaderoIntervencionId() > 0 ){
     			CriaderosIntervencion oDetachedIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pIntervencion.getCriaderoIntervencionId());
-    			CriaderosIntervencion oIntervencion=oEM.merge(oDetachedIntervencion);
+    			oIntervencion=oEM.merge(oDetachedIntervencion);
     			
     			CriaderosPesquisa oPesquisa = (CriaderosPesquisa)oEM.find(CriaderosPesquisa.class, pIntervencion.getCriaderosPesquisa().getCriaderoPesquisaId());
     			oIntervencion.setCriaderosPesquisa(oPesquisa);
@@ -237,6 +236,9 @@ public class IntervencionDA implements IntervencionServices {
     		oResultado.setFilasAfectadas(1);
     		oResultado.setOk(true);
    			
+    		if( strUpdate.equals("Guardar") ) oResultado.setObjeto(oIntervencion);
+    		else oResultado.setObjeto(pIntervencion);
+    		
    			
     	} catch (EntityExistsException iExPersistencia) {
     		oResultado.setFilasAfectadas(0);

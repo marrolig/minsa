@@ -26,7 +26,7 @@ public class CriaderosPosInspeccion implements Serializable {
 	private Short puntosMuestreados;
 	private Short pupas;
 	private String usuarioRegistro;
-	private CriaderosIntervencion criaderosIntervencione;
+	private CriaderosIntervencion criaderosIntervencion;
 
     public CriaderosPosInspeccion() {
     }
@@ -143,17 +143,18 @@ public class CriaderosPosInspeccion implements Serializable {
 		this.usuarioRegistro = usuarioRegistro;
 	}
 
-
-	//bi-directional many-to-one association to CriaderosIntervencion
 	@NotNull(message="Criadero intervencion requerido")
-    @ManyToOne(targetEntity=CriaderosIntervencion.class,fetch=FetchType.LAZY)
+    @ManyToOne
 	@JoinColumn(name="INTERVENCION",nullable=false,updatable=true)
-	public CriaderosIntervencion getCriaderosIntervencione() {
-		return this.criaderosIntervencione;
+	public CriaderosIntervencion getCriaderosIntervencion() {
+		return criaderosIntervencion;
 	}
 
-	public void setCriaderosIntervencione(CriaderosIntervencion criaderosIntervencione) {
-		this.criaderosIntervencione = criaderosIntervencione;
+
+	public void setCriaderosIntervencion(CriaderosIntervencion criaderosIntervencion) {
+		this.criaderosIntervencion = criaderosIntervencion;
 	}
+	
+	
 	
 }

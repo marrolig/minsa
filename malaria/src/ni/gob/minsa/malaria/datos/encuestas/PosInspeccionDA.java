@@ -144,9 +144,9 @@ public class PosInspeccionDA implements PosInspeccionServices {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public InfoResultado obtenerPosInspeccionesPorPorIntervencion(CriaderosIntervencion pIntervencion) {
+	public InfoResultado obtenerPosInspeccionPorPorIntervencion(CriaderosIntervencion pIntervencion) {
 		InfoResultado oResultado = new InfoResultado();
-		List<CriaderosPosInspeccion> resultado = null;
+		CriaderosPosInspeccion resultado = null;
 		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		Query query = null;
@@ -161,7 +161,7 @@ public class PosInspeccionDA implements PosInspeccionServices {
 		}
 		
 		String strJPQL = "select pins from CriaderosPosInspeccion pins " +
-				" where pins.criaderosIntervencione.criaderoIntervencionId = :pIntervencionId order by pins.criaderoPosInspeccionId";
+				" where pins.criaderosIntervencion.criaderoIntervencionId = :pIntervencionId order by pins.criaderoPosInspeccionId";
 		
 		try{
 			
@@ -169,14 +169,13 @@ public class PosInspeccionDA implements PosInspeccionServices {
 			query.setParameter("pIntervencionId", pIntervencion.getCriaderoIntervencionId());
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
-			resultado = (List<CriaderosPosInspeccion>) query.getResultList();
-			if( resultado.isEmpty()){
+			resultado = (CriaderosPosInspeccion) query.getSingleResult();
+			if( resultado == null){
 				oResultado.setOk(false);
 				oResultado.setMensaje("Registros no encontrados");
 				return oResultado;
 			}
 			
-			oResultado.setFilasAfectadas(resultado.size());
             oResultado.setObjeto(resultado);
             oResultado.setOk(true);
             
@@ -214,8 +213,8 @@ public class PosInspeccionDA implements PosInspeccionServices {
     			CriaderosPosInspeccion oDetachedPosInspeccion = (CriaderosPosInspeccion)oEM.find(CriaderosPosInspeccion.class, pPosIns.getCriaderoPosInspeccionId());
     			oPosIns=oEM.merge(oDetachedPosInspeccion);
     			
-    			CriaderosIntervencion oIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pPosIns.getCriaderosIntervencione().getCriaderoIntervencionId());
-    			oPosIns.setCriaderosIntervencione(oIntervencion);
+    			CriaderosIntervencion oIntervencion = (CriaderosIntervencion)oEM.find(CriaderosIntervencion.class, pPosIns.getCriaderosIntervencion().getCriaderoIntervencionId());
+    			oPosIns.setCriaderosIntervencion(oIntervencion);
     			
     			oPosIns.setUsuarioRegistro(pPosIns.getUsuarioRegistro());
     			oPosIns.setCuchColectadas(pPosIns.getCuchColectadas());
