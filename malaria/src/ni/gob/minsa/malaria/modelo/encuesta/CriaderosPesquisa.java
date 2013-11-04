@@ -31,7 +31,7 @@ public class CriaderosPesquisa implements Serializable {
 	private String observacion;
 	private Short puntosMuestreados;
 	private Short pupas;
-	private Boolean revisado;
+	private boolean revisado;
 	private Integer semanaEpidemiologica;
 	private String usuarioRegistro;
 	private String usuarioRevision;
@@ -193,12 +193,12 @@ public class CriaderosPesquisa implements Serializable {
 		this.pupas = pupas;
 	}
 
-
-	public Boolean isRevisado() {
+	@Column(name="REVISADO")
+	public boolean isRevisado() {
 		return this.revisado;
 	}
 
-	public void setRevisado(Boolean revisado) {
+	public void setRevisado(boolean revisado) {
 		this.revisado = revisado;
 	}
 

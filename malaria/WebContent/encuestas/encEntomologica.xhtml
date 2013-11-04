@@ -155,7 +155,7 @@
 	<div style="float: left; width: 85px; margin-left: 10px;">
 		<h:outputLabel for="frmInp_CodCriaderoEnc" value="Codigo:" />
 		<h:inputText id="frmInp_CodCriaderoEnc" disabled="true" value="#{encuestaEntomologicaBean.frmInp_CodCriaderoEnc}" 
-		style="width: 85px; height: 44px; font-size:30px !important;" />
+		style="width: 85px; height: 44px; font-size:30px !important; text-align: center; vertical-align: middle;" />
 	</div>
 	
 	<div style="float: left; width: 210px; margin-bottom: 4px; margin-left: 20px;">
@@ -231,16 +231,20 @@
 				<h:outputText value="#{pesq.cuchPositivas}" />
 			</p:column>
 	
-			<p:column headerText="Larvas Jovenes" style="width:30px;text-align:center;" >
+			<p:column headerText="Larvas IyII" style="width:30px;text-align:center;" >
 				<h:outputText value="#{pesq.larvasJovenes}" />
 			</p:column>
 			
-			<p:column headerText="Larvas Adultas" style="width:30px;text-align:center;" >
+			<p:column headerText="Larvas IIIyIV" style="width:30px;text-align:center;" >
 				<h:outputText value="#{pesq.larvasAdultas}" />
 			</p:column>
 			
 			<p:column headerText="Pupas" style="width:30px;text-align:center;" >
 				<h:outputText value="#{pesq.pupas}" />
+			</p:column>
+
+			<p:column headerText="Revisado" style="width:30px;text-align:center;" >
+				<h:outputText value="#{pesq.revisado==false?'No':'Si'}" />
 			</p:column>
 					
 			<p:column style="width:40px;text-align:center;" >
@@ -497,9 +501,9 @@
 		</div>
 		<div style="width: 100px;">
 			<div style="margin-top: 5px; width: 100px;">	
-				<div style="width: 40px; float: left; margin-right: 10px;">
+				<div style="width: 30px; float: left; margin-right: 10px;">
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
-						styleClass="lblDefaultSmall" value="Jovenes:"/>
+						styleClass="lblDefaultSmall" value="IyII:"/>
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
 						value="#{encuestaEntomologicaBean.oSelPosInspeccion.larvasJovenes}"
 						style="font-weight:bold;">
@@ -507,7 +511,7 @@
 				</div>	
 				<div style="width: 40px; float: left; ">
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
-						styleClass="lblDefaultSmall" value="Adultas:"/>
+						styleClass="lblDefaultSmall" value="IIIyIV:"/>
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
 						value="#{encuestaEntomologicaBean.oSelPosInspeccion.larvasAdultas}"
 						style="font-weight:bold;">
@@ -539,7 +543,7 @@
 			<div style="margin-top: 5px; width: 100px;">	
 				<div style="width: 40px; float: left; margin-right: 10px;">
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
-						styleClass="lblDefaultSmall" value="Jovenes:"/>
+						styleClass="lblDefaultSmall" value="IyII:"/>
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
 						value="#{encuestaEntomologicaBean.oSelPosInspeccion.larvasJovenes  / ( encuestaEntomologicaBean.oSelPosInspeccion.cuchColectadas * 0.0055 )}"
 						style="font-weight:bold;">
@@ -548,7 +552,7 @@
 				</div>	
 				<div style="width: 40px; float: left; ">
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
-						styleClass="lblDefaultSmall" value="Adultas:"/>
+						styleClass="lblDefaultSmall" value="IIIyIV:"/>
 					<h:outputLabel rendered="#{not empty encuestaEntomologicaBean.oSelPosInspeccion}"
 						value="#{encuestaEntomologicaBean.oSelPosInspeccion.larvasAdultas  / ( encuestaEntomologicaBean.oSelPosInspeccion.cuchColectadas * 0.0055 )}"
 						style="font-weight:bold;">
@@ -624,7 +628,7 @@
 <div style="float: left; width: 105px; height: 140px; margin-left: 10px;">
 	<h:outputLabel for="frmInp_CodigoCriadero" value="Codigo:" />
 	<h:inputText id="frmInp_CodigoCriadero" value="#{encuestaEntomologicaBean.frmInp_CodigoCriadero}"
-		style="width: 85px; height: 48px; font-size:30px !important;" styleClass="lblDefaultSmall" />
+		style="width: 85px; height: 48px; font-size:30px !important; text-align: center; vertical-align: middle;" styleClass="lblDefaultSmall" />
 </div>
 
 <div style="float: left; width: 210px; height:70px; margin-right: 10px;" >
@@ -1111,8 +1115,14 @@
 	
 	<div  style="float: left; width: 250px; margin-left: 20px;">
 		<h:outputLabel for="frmInp_Pesq_Inspector" value="Inspector:" />
-		<h:inputText id="frmInp_Pesq_Inspector" value="#{encuestaEntomologicaBean.frmInp_Pesq_Inspector}" style="width: 310px"  />
+		<h:inputText id="frmInp_Pesq_Inspector" value="#{encuestaEntomologicaBean.frmInp_Pesq_Inspector}" style="width: 230px"  />
 	</div>	
+	
+	<div style="float: left; width: 10px; margin-left; 50px;">
+		<h:outputLabel for="frmChk_Pesq_Revisado" value="Revisada:" />
+		<h:selectBooleanCheckbox id="frmChk_Pesq_Revisado" value="#{encuestaEntomologicaBean.frmChk_Pesq_Revisado}"
+			title="Hacer clic para confirmar los datos ingresados de la pesquisa como revisados" />
+	</div>
 </div>
 
 
@@ -1120,7 +1130,7 @@
 
 <p:panel style="margin-top: 5px;">
 	<p:commandButton id="cmbAgregarPesquisa1" value="Agregar"  
-	process="@this,panelPesquisa" 
+	process="@this,panelPesquisa"
 	update="panelIntervencionEnc panelPosInspeccionEnc :frmEncEnto:dtPesquisas :frmEncEnto:grwMensaje"
 		actionListener="#{encuestaEntomologicaBean.agregarPesquisa}" />
 	<p:commandButton value="Cerrar" onclick="dlgPesquisa.hide();" />

@@ -184,6 +184,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private Double frmInp_Pesq_DensLarvAduEstaIIIyIV;
 	private Double frmInp_Pesq_DensPupas;
 	private String frmInp_Pesq_Observaciones;
+	private boolean frmChk_Pesq_Revisado;
 	
 	private List<CriaderosPesquisa> frmDt_ListaPesquisas = null;
 	
@@ -298,6 +299,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private boolean isCriaderoActive = false;
 	private boolean isEncuestaActive = false;
 	private boolean isEditPesquisa = false;
+	private boolean isPesquisaRevisada = false;
 	
 	public EncuestaEntomologicaBean() {
 		
@@ -1170,6 +1172,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return oResultado;			
 		}		
 		
+		
 		return oResultado;
 	}
 	
@@ -1189,6 +1192,11 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oSelPesquisa.setObservacion(frmInp_Pesq_Observaciones);
 		oSelPesquisa.setFechaNotificacion(frmCal_Pesq_FechaNotificacion);
 		oSelPesquisa.setInspector(frmInp_Pesq_Inspector);
+		oSelPesquisa.setRevisado(frmChk_Pesq_Revisado);
+		if( frmChk_Pesq_Revisado ){
+			oSelPesquisa.setFechaRevision(new Date());
+			oSelPesquisa.setUsuarioRevision(Utilidades.obtenerInfoSesion().getUsername());
+		}
 		
 		if( frmDt_ListaPesquisas == null ) frmDt_ListaPesquisas = new ArrayList<CriaderosPesquisa>();
 		if( isEditPesquisa == false ){
@@ -1213,6 +1221,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 	public void eliminarPesquisa(ActionEvent evt){
 		InfoResultado oResultado = null;
 		FacesMessage msg = null;
+		
+		if( oSelPesquisa.isRevisado() ){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Pesquisa con estado Revisada","No se podra eliminar la pesquisa");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		
 		try{
 
 			oResultado = null;
@@ -1258,6 +1273,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		oSelPesquisa = oPesquisa;
 		isEditPesquisa = true;
+		isPesquisaRevisada = oSelPesquisa.isRevisado();
 		
 		frmCal_Pesq_FechaInspeccion = oPesquisa.getFechaInspeccion();
 		frmInp_Pesq_SemanaEpidemiologica = oPesquisa.getSemanaEpidemiologica();
@@ -1271,6 +1287,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		frmInp_Pesq_Observaciones = oPesquisa.getObservacion();
 		frmCal_Pesq_FechaNotificacion = oPesquisa.getFechaNotificacion();
 		frmInp_Pesq_Inspector = oPesquisa.getInspector();
+		frmChk_Pesq_Revisado = oPesquisa.isRevisado();
 		
 		frmInp_Pesq_DensLarvJovEstaIyII = 
 			calcularDensidad( frmInp_Pesq_NumLarvJovEstaIyII, frmInp_Pesq_TotalCucharonadas);
@@ -1346,6 +1363,12 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		if( oSelPesquisa.getCriaderoPesquisaId() == 0 ){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "No es posible agregar intervenciones", "Debe guardar la pesquisa seleccionada");
+			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;			
+		}
+		
+		if( oSelPesquisa.isRevisado() ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Pesquisa con estado revisada", "No es posible modificar los datos de la intervención");
 			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;			
 		}
@@ -1479,6 +1502,24 @@ public class EncuestaEntomologicaBean implements Serializable {
 	 * 
 	 */
 	public void openModalPosInspeccion(ActionEvent evt){
+		
+		if( oSelPesquisa == null ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Debe seleccionar una Pesquisa", "");
+			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		
+		if( oSelPesquisa.getCriaderoPesquisaId() == 0 ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "No es posible agregar Pos Inspección", "Debe guardar la pesquisa seleccionada");
+			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;			
+		}
+		
+		if( oSelPesquisa.isRevisado() ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Pesquisa con estado revisada", "No es posible modificar los datos de la Pos Inspección");
+			if( msg != null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;			
+		}
 		
 		if( oSelIntervencion == null){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Debe seleccionar una Intervencion", "");
@@ -1864,7 +1905,6 @@ public class EncuestaEntomologicaBean implements Serializable {
 					oPesquisa.setCriadero(oCriaderoActual);
 					oPesquisa.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
 					oPesquisa.setFechaRegistro(new Date());
-					oPesquisa.setRevisado(false);
 					oResultado = srvPesquisa.guardarPesquisa(oPesquisa);
 					if( !oResultado.isOk() || oResultado.isExcepcion() ){
 						if( auxIdPesquisa == 0 ) oPesquisa.setCriaderoPesquisaId(0);
@@ -2746,6 +2786,24 @@ public class EncuestaEntomologicaBean implements Serializable {
 	public void setoSelPosInspeccion(CriaderosPosInspeccion oSelPosInspeccion) {
 		this.oSelPosInspeccion = oSelPosInspeccion;
 	}
+
+	public boolean getFrmChk_Pesq_Revisado() {
+		return frmChk_Pesq_Revisado;
+	}
+
+	public void setFrmChk_Pesq_Revisado(boolean frmChk_Pesq_Revisado) {
+		this.frmChk_Pesq_Revisado = frmChk_Pesq_Revisado;
+	}
+
+	public boolean isPesquisaRevisada() {
+		return isPesquisaRevisada;
+	}
+
+	public void setPesquisaRevisada(boolean isPesquisaRevisada) {
+		this.isPesquisaRevisada = isPesquisaRevisada;
+	}
+
+	
 	
 	
 	

@@ -224,6 +224,9 @@ public class PesquisaDA implements PesquisaServices {
     			oPesquisa.setPuntosMuestreados(pPesquisa.getPuntosMuestreados());
     			oPesquisa.setFechaRegistro(new Date());
     			oPesquisa.setUsuarioRegistro(Utilidades.obtenerInfoSesion().getUsername());
+    			oPesquisa.setRevisado(pPesquisa.isRevisado());
+    			oPesquisa.setFechaRevision(pPesquisa.getFechaRevision());
+    			oPesquisa.setUsuarioRevision(pPesquisa.getUsuarioRevision());
     			
             	strUpdate = "Guardar";
     		}else{
