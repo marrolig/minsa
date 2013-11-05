@@ -3,7 +3,6 @@ package ni.gob.minsa.malaria.modelo.encuesta;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 
 import java.math.BigDecimal;
