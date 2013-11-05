@@ -3,17 +3,18 @@
 // -----------------------------------------------
 package ni.gob.minsa.malaria.datos.estructura;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.eclipse.persistence.config.QueryHints;
-
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.JPAResourceBean;
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 import ni.gob.minsa.malaria.soporte.Mensajes;
+
+import org.eclipse.persistence.config.QueryHints;
 
 
 
@@ -149,7 +150,53 @@ public class UnidadDA implements ni.gob.minsa.malaria.servicios.estructura.Unida
             em.close();
         }
     }
-
+    
+    @SuppressWarnings("unchecked")
+	@Override
+	public List<Unidad> UnidadesActivasPorEntidadYCategoria(long pEntidadId,BigDecimal pCategoriaUnidad){
+    	 EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+         try{
+         	
+         	Query query = em.createNamedQuery("unidadesActivasPorEntidadYCategoria");
+         	query.setParameter("pEntidadId", pEntidadId);
+         	query.setParameter("pCategoriaUnidad", pCategoriaUnidad);
+         	
+         	query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+         	query.setHint(QueryHints.FETCH, "tu.categoriaUnidad");
+         	query.setHint(QueryHints.FETCH, "tu.entidadAdtva");
+         	query.setHint(QueryHints.FETCH, "tu.municipio");
+         	query.setHint(QueryHints.FETCH, "tu.regimen");
+         	query.setHint(QueryHints.FETCH, "tu.tipoUnidad");
+         	//retorna el resultado del query
+         	return(query.getResultList());
+         }finally{
+             em.close();
+         }
+	}
+    
+    @SuppressWarnings("unchecked")
+	@Override
+    public List<Unidad>UnidadesActivasPorPropiedad(String pPropiedad){
+    	if(pPropiedad==null || pPropiedad.trim().equals("")) return null;
+    	EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+         try{
+         	
+         	Query	query = em.createNamedQuery("UnidadesActivasPorPropiedad");
+         	query.setParameter("pPropiedad", pPropiedad);
+   
+         	query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+         	query.setHint(QueryHints.FETCH, "tu.categoriaUnidad");
+         	query.setHint(QueryHints.FETCH, "tu.entidadAdtva");
+         	query.setHint(QueryHints.FETCH, "tu.municipio");
+         	query.setHint(QueryHints.FETCH, "tu.regimen");
+         	query.setHint(QueryHints.FETCH, "tu.tipoUnidad");
+         	//retorna el resultado del query
+         	return(query.getResultList());
+         }finally{
+             em.close();
+         }
+    }
+    
 	@Override
 	public int ContarUnidadesPorMunicipio(long pMunicipioId, long pTipoUnidadId, String pNombre) {
         
@@ -232,5 +279,6 @@ public class UnidadDA implements ni.gob.minsa.malaria.servicios.estructura.Unida
             em.close();
         }		
 	}
+
 
 }

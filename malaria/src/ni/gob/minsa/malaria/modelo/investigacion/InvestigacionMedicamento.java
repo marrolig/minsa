@@ -21,8 +21,8 @@ public class InvestigacionMedicamento implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="INVESTIGACIONES_MEDICAMENTOS_INVESTIGACIONMEDICAMENTOID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGACIONES_MEDICAMENTOS_INVESTIGACIONMEDICAMENTOID_GENERATOR")
+	@SequenceGenerator(name="INV_MEDICAMENTOS_ID_GENERATOR", sequenceName="SIVE.INV_MEDICAMENTOS_SEQ",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_MEDICAMENTOS_ID_GENERATOR")
 	@Column(name="INVESTIGACION_MEDICAMENTO_ID", unique=true, nullable=false, precision=10)
 	private long investigacionMedicamentoId;
 

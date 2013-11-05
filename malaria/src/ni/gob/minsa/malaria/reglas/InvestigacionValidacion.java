@@ -12,14 +12,15 @@ import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMedicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
+import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
-import ni.gob.minsa.malaria.soporte.Utilidades;
 
 public class InvestigacionValidacion {
 	
 	public static InfoResultado validarInvestigacionMalaria(
 			InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
+			SintomaLugarInicio pSintomaLugarInicio,
 			List<InvestigacionMedicamento> pInvestigacionMedicamento,
 			InvestigacionLugar pInvestigacionLugar,
 			InvestigacionTransfusion pInvestigacionTransfusion,
@@ -49,6 +50,16 @@ public class InvestigacionValidacion {
 			oResultado.setMensaje("Debe indicar el resultado del diagnóstico por parte del laboratorio del CNDR");
 			return oResultado;
 		}
+		if(pInvestigacionMalaria.getFechaInfeccion()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar la fecha considerada como la más probable en que se produjo la infección");
+			return oResultado;
+		}
+		if(pInvestigacionMalaria.getFechaInfeccion().after(new Date())){
+			oResultado.setOk(false);
+			oResultado.setMensaje("La fecha más probable en que se produjo la infección no puede ser posterior a la fecha actual");
+			return oResultado;
+		}
 		if(pInvestigacionMalaria.getTratamientoCompleto()==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar indicar si el tratamiento antimalárico del presente caso ha sido completado o no");
@@ -67,9 +78,9 @@ public class InvestigacionValidacion {
 			 
 		}
 		if(pInvestigacionMalaria.getControlParasitario().intValue()==1){
-			if(pInvestigacionMalaria.getDiasPosterioresControl()==null){
+			if(pInvestigacionMalaria.getDiasPosterioresControl()==null || pInvestigacionMalaria.getDiasPosterioresControl().intValue() < 1){
 				oResultado.setOk(false);
-				oResultado.setMensaje("Si se efectuaron muestreos posteriores para el control parasitario, debe indicar el número de días posteriores al tratamiento en el que se efectuó");
+				oResultado.setMensaje("Si se efectuaron muestreos posteriores para el control parasitario, debe indicar el número de días posteriores al tratamiento en el que se efectuó. El valor debe ser mayor a 1");
 				return oResultado;
 			}
 			if(pInvestigacionMalaria.getResultadoControlPositivo()==null){
@@ -98,28 +109,34 @@ public class InvestigacionValidacion {
 		}
 		
 		if(pInvestigacionMalaria.getCondicionFinalVivo()!=null){
-			if(pInvestigacionMalaria.getCondicionFinalVivo().intValue()==0 && pInvestigacionMalaria.getFechaDefuncion()==null){
-				oResultado.setMensaje("Si la persona ha fallecido debe indicar la fache de defunción");
-				oResultado.setOk(false);
-				return oResultado;
-			}
-			if(pInvestigacionMalaria.getFechaDefuncion().after(new Date())){
-				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la actual");
-				oResultado.setOk(false);
-				return oResultado;
-			}
-			if(pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionMalaria.getMuestreoHematico().getFechaToma())){
-				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de toma de muestra");
-				oResultado.setOk(false);
-				return oResultado;
-			}
+			if(pInvestigacionMalaria.getCondicionFinalVivo().intValue()==0){
+				if(pInvestigacionMalaria.getFechaDefuncion()==null){
+					oResultado.setMensaje("Si la persona ha fallecido debe indicar la fache de defunción");
+					oResultado.setOk(false);
+					return oResultado;
+				}
+				if(pInvestigacionMalaria.getFechaDefuncion().after(new Date())){
+					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la actual");
+					oResultado.setOk(false);
+					return oResultado;
+				}
+
+				if (pInvestigacionMalaria.getFechaDefuncion().after(
+						pInvestigacionMalaria.getMuestreoHematico().getFechaToma())) {
+					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de toma de muestra");
+					oResultado.setOk(false);
+					return oResultado;
+				}
+
+			}	
 		}else{
 			oResultado.setMensaje("Debe indicar la condición final de la persona objeto de la investigación epidemiológica. Vivo o Fallecido");
 			oResultado.setOk(false);
 			return oResultado;
 		}
 		
-		if(pInvestigacionMalaria.getAutomedicacion().intValue()==1 && (pInvestigacionMalaria.getMedicamentosAutomedicacion()==null || pInvestigacionMalaria.getMedicamentosAutomedicacion().trim().equals(""))){
+		if(pInvestigacionMalaria.getAutomedicacion().intValue()==1 && (pInvestigacionMalaria.getMedicamentosAutomedicacion()==null || 
+				(pInvestigacionMalaria.getMedicamentosAutomedicacion() ==null || pInvestigacionMalaria.getMedicamentosAutomedicacion().trim().equals("")))){
 			oResultado.setMensaje("Si la persona se automedicó, debe ingresar la descripción de los medicamentos utilizados en la automedicación");
 			oResultado.setOk(false);
 			return oResultado;
@@ -143,18 +160,34 @@ public class InvestigacionValidacion {
 			if(oResultado.isOk()==false) return oResultado;
 		}
 		
-		//Validadon datos de investigacion asociados a lugares
-		if(pInvestigacionMalaria.getViajesZonaRiesgo().intValue()==1 && pInvestigacionLugar==null){
+		//Validanto datos donde iniciaron los síntomas
+		if(pInvestigacionMalaria.getSintomatico().intValue()==1 && pInvestigacionMalaria.getInfeccionResidencia().intValue()==0 && pSintomaLugarInicio==null){
 			oResultado.setOk(false);
-			oResultado.setMensaje("Si declara que la persona ha realizado viajes en los últimos 30 días a zonas maláricas, debe definir el lugar visitado");
+			oResultado.setMensaje("Si la persona es sintomática debe inidicar donde iniciaron los síntomas");
 			return oResultado;
-		}else if(pInvestigacionMalaria.getViajesZonaRiesgo().intValue()==1 && pInvestigacionLugar!=null){
+		}else if(pInvestigacionMalaria.getSintomatico().intValue()==1 && pSintomaLugarInicio!=null){
+			oResultado = validarSintomaLugarInicio(pSintomaLugarInicio);
+			if(oResultado.isOk()==false) return oResultado;
+		}
+		
+		//Validadon datos de investigacion asociados a lugares
+		if(pInvestigacionMalaria.getInfeccionResidencia().intValue()==0 && pInvestigacionLugar==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si declara que la persona ha realizado viajes en los últimos 30 días a zonas maláricas, debe definir los lugares visitados");
+			return oResultado;
+		}else{
 			oResultado = validarInvestigacionLugar(pInvestigacionLugar);
 			if(oResultado.isOk()==false) return oResultado;
 		}
 		
+		if(pInvestigacionMalaria.getViajesZonaRiesgo().intValue()==1 &&pInvestigacionMalaria.getUsoMosquitero()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si declara que la persona ha realizado viajes en los últimos 30 días a zonas maláricas, debe indicar si usó mosquitero o no");
+			return oResultado;
+		}
+		
 		//Validando datos de investigación asociados a investigación de transfusiones
-		if(pInvestigacionMalaria.getTransfusion().intValue()==0 && pInvestigacionTransfusion==null){
+		if(pInvestigacionMalaria.getTransfusion().intValue()==1 && pInvestigacionTransfusion==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Si la persona ha recibido una transfusión debe definir la información relacionada a investigación de transfusión");
 			return oResultado;
@@ -172,26 +205,26 @@ public class InvestigacionValidacion {
 		}
 		
 		//Validando datos vinculados a Investigación hospitalario
-		if(pInvestigacionHospitalario!=null){
-			if(pInvestigacionHospitalario.getFechaIngreso()!=null){
-				if(pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())){
-					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de ingreso a hospitalización");
-					oResultado.setOk(false);
-					return oResultado;
-				}
+		if (!(pInvestigacionHospitalario == null
+				|| pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionMalaria.getFechaDefuncion() == null)) {
+			if (pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())) {
+				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de ingreso a hospitalización");
+				oResultado.setOk(false);
+				return oResultado;
 			}
 		}
+		
 		//Validando datos vinculados a Investigación sintomas
 		if(pInvestigacionSintoma!=null){
-			if(pInvestigacionSintoma.getFechaInicioSintomas()!=null){
+			if(!(pInvestigacionSintoma.getFechaInicioSintomas()==null || pInvestigacionMalaria.getFechaDefuncion()==null)){
 				if(pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionSintoma.getFechaInicioSintomas())){
 					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de inicio de sintomas");
 					oResultado.setOk(false);
 					return oResultado;
 				}
 			}
-			if(pInvestigacionSintoma.getFechaInicioSintomas()!=null){
-				if(pInvestigacionSintoma.getInvestigacionMalaria().getInicioTratamiento().before(pInvestigacionSintoma.getFechaInicioSintomas())){
+			if(!(pInvestigacionSintoma.getFechaInicioSintomas()==null || pInvestigacionMalaria == null || pInvestigacionMalaria.getInicioTratamiento()==null)){
+				if(pInvestigacionMalaria.getInicioTratamiento().before(pInvestigacionSintoma.getFechaInicioSintomas())){
 					oResultado.setOk(false);
 					oResultado.setMensaje("La fecha de inicio del tratamiento no puede ser inferior a la fecha de inicio de los síntomas");
 					return oResultado;
@@ -260,10 +293,13 @@ public class InvestigacionValidacion {
 		if (pInvestigacionTransfusion==null) {
 			return oResultado;
 		}
-		if(pInvestigacionTransfusion.getFechaTransfusion().after(new Date())){
-			oResultado.setOk(false);
-			oResultado.setMensaje("La fecha de transfusión no puede ser posterior a la fecha actual");
-			return oResultado;
+		
+		if(pInvestigacionTransfusion.getFechaTransfusion()!=null){
+			if(pInvestigacionTransfusion.getFechaTransfusion().after(new Date())){
+				oResultado.setOk(false);
+				oResultado.setMensaje("La fecha de transfusión no puede ser posterior a la fecha actual");
+				return oResultado;
+			}
 		}
 		
 		oResultado.setOk(true);
@@ -278,7 +314,7 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
-		if(pInvestigacionHospitalario.getFechaIngreso() != null) {
+		if(!(pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionHospitalario.getInvestigacionMalaria().getFechaDefuncion()==null)) {
 			if (pInvestigacionHospitalario.getInvestigacionMalaria().getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())) {
 				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de ingreso a hospitalización");
 				oResultado.setOk(false);
@@ -309,19 +345,40 @@ public class InvestigacionValidacion {
 		if (pInvestigacionLugar==null) {
 			return oResultado;
 		}
-		if(pInvestigacionLugar.getInfeccionResidencia().intValue()!=1 && pInvestigacionLugar.getPais()==null){
-			oResultado.setOk(false);
-			oResultado.setMensaje("Si la infeccion no ocurre en el lugar de residencia de la persona, debe indicar el país donde se produjo la infección");
-			return oResultado;
-		}
-		
+
 		if(pInvestigacionLugar.getInfeccionResidencia().intValue()!=1){
-			if(pInvestigacionLugar.getPais().getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)==false && pInvestigacionLugar.getMunicipio()==null){
+			if(pInvestigacionLugar.getPais()==null && pInvestigacionLugar.getMunicipio()==null){
 				oResultado.setOk(false);
-				oResultado.setMensaje("Si la infeccion no ocurre en el lugar de residencia de la persona y el lugar donde se produces es a nivel nacional, debe indicar el municipio");
+				oResultado.setMensaje("Si la infección no ocurre en el lugar de residencia de la persona y el lugar donde se produce es a nivel nacional, debe indicar el municipio");
 				return oResultado;
 			}
 		}
+		oResultado.setOk(true);
+		return oResultado;
+	}
+	
+	public static InfoResultado validarSintomaLugarInicio(SintomaLugarInicio pSintomaLugarInicio){
+		InfoResultado oResultado = new InfoResultado();
+		oResultado.setOk(true);
+		
+		if (pSintomaLugarInicio==null) {
+			return oResultado;
+		}
+		
+		if(pSintomaLugarInicio.getInicioResidencia().intValue()==0){
+			if(pSintomaLugarInicio.getPais()==null &&( pSintomaLugarInicio.getMunicipio()==null || pSintomaLugarInicio.getMunicipio().getDivisionPoliticaId() < 1)){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona, debe indicar el municipio de ocurrencia");
+				return oResultado;
+			}
+			if(pSintomaLugarInicio.getEstadia()==null){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona y el lugar donde se produce es a nivel nacional, debe indicar los días de estadía");
+				return oResultado;
+			}
+		}
+		
+
 		oResultado.setOk(true);
 		return oResultado;
 	}
@@ -340,12 +397,28 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
+		if (pInvestigacionSintoma.getFechaInicioSintomas()==null) {
+			oResultado.setOk(false);
+			oResultado.setMensaje("La fecha de inicio de sintomas es requerida");
+			return oResultado;
+		}
+		
+		if (pInvestigacionSintoma.getFechaInicioSintomas().after(new Date())) {
+			oResultado.setOk(false);
+			oResultado.setMensaje("La fecha de inicio de inicio de sintomas no puede ser posterior a la fecha actual");
+			return oResultado;
+		}
+		
+		
 		if(pInvestigacionSintoma.getFechaInicioSintomas()!=null){
-			if(pInvestigacionSintoma.getInvestigacionMalaria().getInicioTratamiento().before(pInvestigacionSintoma.getFechaInicioSintomas())){
-				oResultado.setOk(false);
-				oResultado.setMensaje("La fecha de inicio del tratamiento no puede ser inferior a la fecha de inicio de los síntomas");
-				return oResultado;
+			if(!(pInvestigacionSintoma.getInvestigacionMalaria()==null || pInvestigacionSintoma.getInvestigacionMalaria().getInicioTratamiento()==null)){
+				if(pInvestigacionSintoma.getInvestigacionMalaria().getInicioTratamiento().before(pInvestigacionSintoma.getFechaInicioSintomas())){
+					oResultado.setOk(false);
+					oResultado.setMensaje("La fecha de inicio del tratamiento no puede ser inferior a la fecha de inicio de los síntomas");
+					return oResultado;
+				}
 			}
+			
 		}
 
 		if(pInvestigacionSintoma.getEstadoFebril()==null || pInvestigacionSintoma.getEstadoFebril().getCodigo().trim().equals("")){
@@ -353,17 +426,8 @@ public class InvestigacionValidacion {
 			oResultado.setMensaje("Debe indicar el estado febril del paciente.");
 			return oResultado;
 		}
-		if (pInvestigacionSintoma.getFechaInicioSintomas()==null) {
-			oResultado.setOk(false);
-			oResultado.setMensaje("La fecha de inicio de sintomas es requerida");
-			return oResultado;
-		}
-		if (pInvestigacionSintoma.getFechaInicioSintomas().after(new Date())) {
-			oResultado.setOk(false);
-			oResultado.setMensaje("La fecha de inicio de inicio de sintomas no puede ser posterior a la fecha actual");
-			return oResultado;
-		}
-		
+	
+	
 		oResultado.setOk(true);
 		return oResultado;
 	}
@@ -392,15 +456,11 @@ public class InvestigacionValidacion {
 		if (pLugarAnte==null) {
 			return oResultado;
 		}
-		if(pLugarAnte.getPais()==null || pLugarAnte.getPais().getPaisId() < 1){
-			oResultado.setOk(false);
-			oResultado.setMensaje("Debe indicar el país en el cual se presentaron síntomas ");
-			return oResultado;
-		}
-		if(pLugarAnte.getPais().getCodigoAlfados().equals(Utilidades.PAIS_CODIGO) && 
+
+		if(pLugarAnte.getPais()==null && 
 				(pLugarAnte.getMunicipio()==null || pLugarAnte.getMunicipio().getDivisionPoliticaId() < 1)){
 			oResultado.setOk(false);
-			oResultado.setMensaje("Si el lugar donde inician los síntomas es nacional, debe indicarse el municipio");
+			oResultado.setMensaje("Si el lugar visitado es nacional, debe indicar el municipio");
 			return oResultado;
 		}
 		if(pLugarAnte.getFechaUltima()==null){
@@ -435,17 +495,14 @@ public class InvestigacionValidacion {
 		if (pLugarOtro==null) {
 			return oResultado;
 		}
-		if(pLugarOtro.getPais()==null || pLugarOtro.getPais().getPaisId() < 1){
-			oResultado.setOk(false);
-			oResultado.setMensaje("Debe indicar el país en el cual se presentaron síntomas ");
-			return oResultado;
-		}
-		if(pLugarOtro.getPais().getCodigoAlfados().equals(Utilidades.PAIS_CODIGO) && 
+		
+		if(pLugarOtro.getPais()==null && 
 				(pLugarOtro.getMunicipio()==null || pLugarOtro.getMunicipio().getDivisionPoliticaId() < 1)){
 			oResultado.setOk(false);
-			oResultado.setMensaje("Si el lugar donde inician los síntomas es nacional, debe indicarse el municipio");
+			oResultado.setMensaje("Si el lugar donde se presentaron síntomas parecidos es nacional, debe indicar el municipio");
 			return oResultado;
 		}
+		
 		if(pLugarOtro.getMesInicio()==null || (pLugarOtro.getMesInicio().intValue() ==0)){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar el mes de inicio de los síntomas");

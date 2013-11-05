@@ -60,6 +60,19 @@ import java.util.Date;
 					"tu.tipoUnidad.tipoUnidadId=:pTipoUnidadId " +
 					"order by tu.codigo"),
 	@NamedQuery(
+			name="unidadesActivasPorEntidadYCategoria",
+			query="select tu from Unidad tu " +
+			"where tu.pasivo='0' and " +
+			"tu.entidadAdtva.entidadAdtvaId=:pEntidadId and " +
+			"tu.categoriaUnidad.codigo=:pCategoriaUnidad " +
+			"order by tu.codigo"),
+	@NamedQuery(
+			name="UnidadesActivasPorPropiedad",
+			query="select tu from Unidad tu where tu.unidadId in " +
+					" (select distinct pu.unidad.unidadId from PropiedadUnidad pu " +
+            		               "where pu.propiedad=:pPropiedad)"
+	),
+	@NamedQuery(
 			name="unidadesPorNombre",
 			query="select tu from Unidad tu " +
 					"where (:pEntidadAdtvaId=0 or tu.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +

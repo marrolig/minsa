@@ -26,8 +26,8 @@ public class InvestigacionLugar implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="INVESTIGACIONES_LUGARES_INVSMALARIALUGARID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGACIONES_LUGARES_INVSMALARIALUGARID_GENERATOR")
+	@SequenceGenerator(name="INV_LUGAR_ID_GENERATOR" ,sequenceName="SIVE.INV_LUG_SEQ",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_LUGAR_ID_GENERATOR")
 	@Column(name="INVSMALARIA_LUGAR_ID", unique=true, nullable=false, precision=10)
 	private long invsmalariaLugarId;
 
@@ -43,7 +43,7 @@ public class InvestigacionLugar implements Serializable {
 	private BigDecimal infeccionResidencia;
 
 	@OneToOne
-	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false,insertable=false,updatable=false)
 	private InvestigacionMalaria investigacionMalaria;
 
 	@ManyToOne

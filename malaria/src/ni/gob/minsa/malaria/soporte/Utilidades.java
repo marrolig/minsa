@@ -38,6 +38,8 @@ public class Utilidades {
 	
 	public static final String ES_PUESTO_NOTIFICACION="ePN";
 	public static final String DECLARA_MUESTREO_HEMATICO="dMxHem";
+	public static final BigDecimal ES_UNIDAD_HOSPITALIZACION=BigDecimal.valueOf(Long.parseLong("3"));
+	public static final String ES_UNIDAD_TRANSFUSIONAL="HTecM";
 	
 	// ----------------------------------------- Constructor
 	

@@ -1,6 +1,8 @@
 package ni.gob.minsa.malaria.datos.vigilancia;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -679,14 +681,14 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 			long pEntidadAdtvaId,
 			long pUnidadId,
 			int pAnioEpi,
-			boolean pSoloActivos,
+			boolean pActivos,
 			int pPaginaActual, 
 			int pTotalPorPagina, 
 			int pNumRegistros) {
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 		try {
 			Query query = null;
-			if(pSoloActivos==true){
+			if(pActivos==true){
 				query = em.createNamedQuery("MuestreoHematico.listarPositivosPorUnidadActivos");
 			}else{
 				query = em.createNamedQuery("MuestreoHematico.listarPositivosPorUnidadCerrados");
@@ -707,40 +709,87 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 	}
 
 	@Override
-	public int ContarPositivosPorUnidadActivos(
+	public int ContarPositivosPorUnidad(
 			long pEntidadAdtvaId,
 			long pUnidadId,
 			int pAnioEpi,
-			boolean pSoloActivos) {
+			boolean pActivos) {
 		 	EntityManager em = jpaResourceBean.getEMF().createEntityManager();
-	        int totalMuestras=0;
-	        Query query =null;
-	        if (pSoloActivos==true) {
-	        	query = em.createQuery("select count(tm) " +
+	        int totalMuestras=0; 
+	        try{
+	        	Query query =null;
+		        if (pActivos==true) {
+		        	query = em.createQuery("select count(tm) " +
+		        			" from MuestreoHematico tm " +
+		        			" where (tm.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and (tm.unidadNotificacion.unidadId=:pUnidadId or 0=:pUnidadId)) and " +
+		    				"  tm.muestreoHematicoId NOT IN( " +
+		    				"		select ti.muestreoHematico.muestreoHematicoId " +
+		    				"   	from InvestigacionMalaria ti " +
+		    				"   	where ti.casoCerrado=1 and ti.muestreoHematico.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and " +
+		    				"   	ti.muestreoHematico.añoEpidemiologico=:pAnioEpi" +
+		    				"   ) and "
+		    				+ "tm.diagnostico.resultado=1 and "
+		    				+ "tm.añoEpidemiologico = :pAnioEpi ");
+		        	
+		        } else {
+		        	 query = em.createQuery("select count(tm) from MuestreoHematico tm "
+		        			+ "where (tm.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and (tm.unidadNotificacion.unidadId=:pUnidadId or 0=:pUnidadId)) and " 
+		 					+ "tm.diagnostico.resultado=1 and "
+		 					+ "tm.investigacion.casoCerrado = 1 and " 
+		 					+ "tm.añoEpidemiologico = :pAnioEpi ");
+		        }
+		        query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
+		        query.setParameter("pUnidadId",pUnidadId);
+		    	query.setParameter("pAnioEpi", pAnioEpi);
+	            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+	        	totalMuestras = ((Long)query.getSingleResult()).intValue();
+	        }finally{
+	        	em.close();
+	        }
+	        
+	        return totalMuestras;       
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Integer> ListarAñosConPositivosPorUnidad(long pEntidadAdtvaId,long pUnidadId,boolean pActivos) {
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		List<Integer> años=null;
+		try{
+			Query query =null;
+			if (pActivos==true) {
+				query = em.createQuery("select tm.añoEpidemiologico " +
 	        			" from MuestreoHematico tm " +
 	        			" where (tm.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and (tm.unidadNotificacion.unidadId=:pUnidadId or 0=:pUnidadId)) and " +
 	    				"  tm.muestreoHematicoId NOT IN( " +
 	    				"		select ti.muestreoHematico.muestreoHematicoId " +
 	    				"   	from InvestigacionMalaria ti " +
-	    				"   	where ti.casoCerrado=1 and ti.muestreoHematico.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and " +
-	    				"   	ti.muestreoHematico.añoEpidemiologico=:pAnioEpi" +
+	    				"   	where ti.casoCerrado=1 and ti.muestreoHematico.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId " +
 	    				"   ) and "
-	    				+ "tm.diagnostico.resultado=1 and "
-	    				+ "tm.añoEpidemiologico = :pAnioEpi ");
-	        	
-	        } else {
-	        	 query = em.createQuery("select count(tm) from MuestreoHematico tm "
+	    				+ "tm.diagnostico.resultado=1  "
+	    				+ "order by tm.añoEpidemiologico asc ");
+			}else{
+				query = em.createQuery("select tm.añoEpidemiologico from MuestreoHematico tm "
 	        			+ "where (tm.entidadNotificacion.entidadAdtvaId=:pEntidadAdtvaId and (tm.unidadNotificacion.unidadId=:pUnidadId or 0=:pUnidadId)) and " 
 	 					+ "tm.diagnostico.resultado=1 and "
-	 					+ "tm.investigacion.casoCerrado = 1 and " 
-	 					+ "tm.añoEpidemiologico = :pAnioEpi ");
-	        }
-	        query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
-	        query.setParameter("pUnidadId",pUnidadId);
-	    	query.setParameter("pAnioEpi", pAnioEpi);
-            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        	totalMuestras = ((Long)query.getSingleResult()).intValue();
-	        return totalMuestras;       
+	 					+ "tm.investigacion.casoCerrado = 1 " 
+	 					+ "order by tm.añoEpidemiologico asc");
+			}
+			query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
+		    query.setParameter("pUnidadId",pUnidadId);
+			query.setMaxResults(1); 
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			List<Number> oResultado = (List<Number>)query.getResultList();
+			if(!(oResultado==null || oResultado.size()==0)){
+				años = new ArrayList<Integer>();
+				for(int i= oResultado.get(0).intValue();i<=Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date()));i++){
+					años.add(i);
+				}
+			}
+		}finally{
+			em.close();
+		}
+		return años;
 	}
-	
+
 }

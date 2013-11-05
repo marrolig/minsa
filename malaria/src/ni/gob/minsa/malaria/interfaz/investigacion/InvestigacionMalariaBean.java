@@ -2,7 +2,6 @@ package ni.gob.minsa.malaria.interfaz.investigacion;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,7 +14,6 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
@@ -24,8 +22,11 @@ import ni.gob.minsa.malaria.datos.estructura.EntidadAdtvaDA;
 import ni.gob.minsa.malaria.datos.estructura.UnidadDA;
 import ni.gob.minsa.malaria.datos.general.CatalogoElementoDA;
 import ni.gob.minsa.malaria.datos.investigacion.InvestigacionDA;
+import ni.gob.minsa.malaria.datos.investigacion.InvestigacionHospitalarioDA;
+import ni.gob.minsa.malaria.datos.investigacion.InvestigacionLugarDA;
 import ni.gob.minsa.malaria.datos.investigacion.InvestigacionMedicamentoDA;
 import ni.gob.minsa.malaria.datos.investigacion.InvestigacionSintomaDA;
+import ni.gob.minsa.malaria.datos.investigacion.InvestigacionTransfusionDA;
 import ni.gob.minsa.malaria.datos.investigacion.SintomaLugarAnteDA;
 import ni.gob.minsa.malaria.datos.investigacion.SintomaLugarInicioDA;
 import ni.gob.minsa.malaria.datos.investigacion.SintomaLugarOtroDA;
@@ -60,9 +61,12 @@ import ni.gob.minsa.malaria.reglas.Operacion;
 import ni.gob.minsa.malaria.servicios.estructura.EntidadAdtvaService;
 import ni.gob.minsa.malaria.servicios.estructura.UnidadService;
 import ni.gob.minsa.malaria.servicios.general.CatalogoElementoService;
+import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionHospitalarioService;
+import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionLugarService;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionMedicamentoService;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionService;
 import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionSintomaService;
+import ni.gob.minsa.malaria.servicios.investigacion.InvestigacionTransfusionService;
 import ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarAnteService;
 import ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarInicioService;
 import ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarOtroService;
@@ -97,6 +101,23 @@ private static final long serialVersionUID = 1L;
 	private int capaActiva;
 	
 	// -------------------------------------------------------------
+	// Modo
+	// 
+	// El atributo modo indica si se mostraran los muestreos sin o con  
+	// M10 sin cerrar y por tanto es la variable que gestionará el bloqueo 
+	// y peticiones desde el interfaz al bean.
+	//
+	// Valores:
+	// 0 : Se podrán buscar muestreos sin investigación o con una 
+	//      investigación sin cerrar. En este modo se podrá agregar 
+	//      o editar una investigación según corresponda.
+	//     
+	// 1 : Se podrán buscar muestreos con investigaciones cerradas
+	//	   para consultar su información exclusivamente.	
+	// -------------------------------------------------------------
+	private int modo=0;
+	
+	// -------------------------------------------------------------
 	// Entidad Administrativa
 	//
 	// Objetos vinculados a las entidades administrativas 
@@ -127,6 +148,7 @@ private static final long serialVersionUID = 1L;
 	
 	//atributos vinculados a investigacion de malaria M10.
 	private InvestigacionMalaria investigacionMalariaSelected;
+	private long investigacionMalariaSelectedId;
 	private String numeroCaso;
 	private BigDecimal longitud;
 	private BigDecimal latitud;
@@ -140,9 +162,9 @@ private static final long serialVersionUID = 1L;
 	private long diagnosticoCndrSelectedId;
 	
 	//atributos vinculados a investigacion de sintomas.
-	private BigDecimal esSintomatico=BigDecimal.valueOf(0);
+	private BigDecimal esSintomatico=BigDecimal.valueOf(Long.parseLong("0"));
 	private Date fechaInicioSintoma;
-	private BigDecimal sintomaInicio=BigDecimal.valueOf(1);
+	private BigDecimal sintomaInicio=BigDecimal.valueOf(Long.parseLong("1"));
 	private List<EstadoFebril> estadosFebriles;
 	private long estadoFebrilSelectedId;
 	private InvestigacionSintoma investigacionSintomaSelected;
@@ -165,9 +187,9 @@ private static final long serialVersionUID = 1L;
 	private long muniLugInicioSelectedId;
 	private Comunidad comuLugInicioSelected;
 	private BigDecimal estadiaLugar;
-	private BigDecimal personaConSintomaLugar=BigDecimal.valueOf(0);
-	private BigDecimal usaMosquitero=BigDecimal.valueOf(-2);
-	private BigDecimal viajeZonaRiesgo=BigDecimal.valueOf(0);
+	private BigDecimal personaConSintomaLugar=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal viajeZonaRiesgo=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal usaMosquitero;
 	
 	private Date fechaUltimaLugAnte;
 	private BigDecimal estadiaLugAnte;
@@ -180,7 +202,7 @@ private static final long serialVersionUID = 1L;
 	private DivisionPolitica muniLugAnteSelected;
 	private long muniLugAnteSelectedId;
 	private Comunidad comuLugAnteSelected;
-	private BigDecimal personaSintomaLugAnte=BigDecimal.valueOf(0);
+	private BigDecimal personaSintomaLugAnte=BigDecimal.valueOf(Long.parseLong("0"));
 	
 	private Date fechaUltimaLugOtro;
 	private BigDecimal estadiaLugOtro;
@@ -193,9 +215,9 @@ private static final long serialVersionUID = 1L;
 	private DivisionPolitica muniLugOtroSelected;
 	private long muniLugOtroSelectedId;
 	private Comunidad comuLugOtroSelected;
-	private BigDecimal autoMedicacionLugOtro=BigDecimal.valueOf(0);
-	private BigDecimal diagPositivoLugOtro=BigDecimal.valueOf(0);
-	private BigDecimal tratamientoCompletoLugOtro=BigDecimal.valueOf(0);
+	private BigDecimal autoMedicacionLugOtro=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal diagPositivoLugOtro=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal tratamientoCompletoLugOtro=BigDecimal.valueOf(Long.parseLong("0"));
 	
 	//atributos vinculados a antecedentes de transfusión.
 	BigDecimal antTransfusion=BigDecimal.valueOf(0);
@@ -207,7 +229,7 @@ private static final long serialVersionUID = 1L;
 	private long unidadTransfusionSelectedId;
 	
 	//atributos vinculados a manejo clínico -Investigación Hospitalaria	-
-	private BigDecimal manejoClinico=BigDecimal.valueOf(0);
+	private BigDecimal manejoClinico=BigDecimal.valueOf(Long.parseLong("0"));
 	private Date inicioTratamientoMClinico;
 	private Date finTratamientoMClinico;
 	private List<Medicamento> medicamentosAntiMalaricos;
@@ -216,7 +238,7 @@ private static final long serialVersionUID = 1L;
 	private long medicamentoSelectedId;
 	private List<EntidadAdtva> entidadesMClinico;
 	private EntidadAdtva entidadMClinicoSelected;
-	private long entidadNClinicoSelectedId;
+	private long entidadMClinicoSelectedId;
 	private List<Unidad> unidadesMClinico;
 	private Unidad unidadMClinicoSelected;
 	private long unidadMClinicoSelectedId;
@@ -225,20 +247,20 @@ private static final long serialVersionUID = 1L;
 	private BigDecimal diasEstanciaMClinico;
 	private BigDecimal convivientesTratadosMClinico;
 	private BigDecimal colateralesTratadosMClinico;
-	private BigDecimal tratamientoCompletoMClinico=BigDecimal.valueOf(0);
-	private BigDecimal tratamientoSupervisadoMClinico=BigDecimal.valueOf(0);
-	private BigDecimal controlParasitarioMClinico=BigDecimal.valueOf(0);
+	private BigDecimal tratamientoCompletoMClinico=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal tratamientoSupervisadoMClinico=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal controlParasitarioMClinico=BigDecimal.valueOf(Long.parseLong("0"));
 	private BigDecimal numDiasPosterioresMClinico;
 	private BigDecimal resultControlPositivoMClinico;
-	private BigDecimal condicionFinalMClinico=BigDecimal.valueOf(1);
+	private BigDecimal condicionFinalMClinico=BigDecimal.valueOf(Long.parseLong("1"));
 	private Date fechaDefuncionMClinico;
-	private BigDecimal automedicacionMClinico=BigDecimal.valueOf(0);
+	private BigDecimal automedicacionMClinico=BigDecimal.valueOf(Long.parseLong("0"));
 	private String medicamentosAutomedicacionMClinico;
 	
 	//Atributos vinculados al resultado de la investigacion
 		
 	//Investigación Lugares
-	private BigDecimal infeccionEnResidenciaRInv=BigDecimal.valueOf(1);
+	private BigDecimal infeccionEnResidenciaRInv=BigDecimal.valueOf(Long.parseLong("1"));
 	private Pais paisRInvSelected;
 	private long paisRInvSelectedId;
 	private List<DivisionPolitica> deptsSintomasRInv;
@@ -266,8 +288,8 @@ private static final long serialVersionUID = 1L;
 	private String observaciones;
 	private String responsableInvest;
 	private String epidemiologo;
-	private BigDecimal nivelAutorizacion=BigDecimal.valueOf(0);
-	private BigDecimal casoCerrado=BigDecimal.valueOf(0);
+	private BigDecimal nivelAutorizacion=BigDecimal.valueOf(Long.parseLong("0"));
+	private BigDecimal casoCerrado=BigDecimal.valueOf(Long.parseLong("0"));
 	private Date fechaCierre;
 	
 	// ----------------------------------------------------------
@@ -295,6 +317,7 @@ private static final long serialVersionUID = 1L;
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<TipoRecurrencia, Integer> tipoRecurrenciaService=new CatalogoElementoDA(TipoRecurrencia.class,"TipoRecurrencia");
 	
+	
 	private static MuestreoHematicoService muestreoHematicoService = new MuestreoHematicoDA();
 	private static InvestigacionService investigacionService = new InvestigacionDA();
 	private static InvestigacionMedicamentoService investigacionMedicamentoService = new InvestigacionMedicamentoDA();
@@ -302,6 +325,10 @@ private static final long serialVersionUID = 1L;
 	private static SintomaLugarAnteService sintomaLugarAnteService  = new SintomaLugarAnteDA();
 	private static SintomaLugarOtroService sintomaLugarOtroService = new SintomaLugarOtroDA();
 	private static SintomaLugarInicioService sintomaLugarInicioService = new SintomaLugarInicioDA();
+	private static InvestigacionTransfusionService investigacionTransfusion = new InvestigacionTransfusionDA();
+	private static InvestigacionHospitalarioService investigacionHospitalario = new InvestigacionHospitalarioDA();
+	private static InvestigacionLugarService investigacionLugarService = new InvestigacionLugarDA();
+	
 	
 	/**************************************************
 	 * Constructor
@@ -313,6 +340,31 @@ private static final long serialVersionUID = 1L;
 	/**************************************************
 	 * Eventos
 	 **************************************************/
+	
+	
+	public void onModoSelected(){
+		this.aniosEpidemiologicos = new LinkedList<SelectItem>();
+		Integer anioActual = Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date()));
+		this.anioEpiSelected = anioActual;
+		
+		if (this.modo == 0) {
+			for (int i = 0; i < 3; i++) {
+				this.aniosEpidemiologicos.add(new SelectItem(anioActual,anioActual.toString()));
+				anioActual -= 1;
+			}
+		}else{
+			if(!(this.entidadSelectedId>0&& this.unidadSelectedId >0)){
+				return;
+			}
+			List<Integer> oAños = muestreoHematicoService.ListarAñosConPositivosPorUnidad(this.entidadSelectedId,this.unidadSelectedId,(this.modo==0 ? true : false));
+			if(oAños!=null){
+				for(Integer año:oAños){
+					this.aniosEpidemiologicos.add(new SelectItem(año,año.toString()));
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Evento que se ejecuta cuando el usuario selecciona un muestreo hemático
 	 * de la grilla.  Traslada la M10 asociada al objeto seleccionado 
@@ -321,45 +373,229 @@ private static final long serialVersionUID = 1L;
 	public void onMuestreoHematicoSelected(SelectEvent iEvento) { 
 		this.muestreoHematicoSelectedId = this.muestreoHematicoSelected.getMuestreoHematicoId();
 		
-		InfoResultado oResInvestigacionSel=investigacionService.EncontrarPorMuestreoHematico(this.muestreoHematicoSelectedId);
-		if (oResInvestigacionSel.isExcepcion()) {
-			FacesMessage msg = Mensajes.enviarMensaje(oResInvestigacionSel);
+		InfoResultado oInfoResultado=investigacionService.EncontrarPorMuestreoHematico(this.muestreoHematicoSelectedId);
+		if (oInfoResultado.isExcepcion()) {
+			FacesMessage msg = Mensajes.enviarMensaje(oInfoResultado);
 			if (msg!=null)
 				FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
 		this.capaActiva=2;
-		this.investigacionMalariaSelected=(InvestigacionMalaria)oResInvestigacionSel.getObjeto();
+		this.investigacionMalariaSelected=(InvestigacionMalaria)oInfoResultado.getObjeto();
+		this.investigacionMalariaSelectedId=this.investigacionMalariaSelected!=null ? this.investigacionMalariaSelected.getInvestigacionMalariaId() : 0;
 		iniciarCapa2();
 		//Si no se encuentra una Investigación para la E2 seleccionada, quiere decir que estamos agregando una nueva M10; 
 		//de no ser nulo quiere decir que estamos editando una M10. 
 		if (this.investigacionMalariaSelected != null) {
+			
+			this.numeroCaso=this.investigacionMalariaSelected.getNumeroCaso();
+			this.longitud = this.investigacionMalariaSelected.getLongitudVivienda();
+			this.latitud = this.investigacionMalariaSelected.getLatitudVivienda();
+			this.esSintomatico = this.investigacionMalariaSelected.getSintomatico();
+			
 			if (this.investigacionMalariaSelected.getConfirmacionEntidad() != null) {
 				this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos(this.investigacionMalariaSelected.getConfirmacionEntidad().getCodigo());
 				this.diagnosticoEntidadSelectedId = this.investigacionMalariaSelected.getConfirmacionEntidad().getCatalogoId();
-
-			} else {
+			} else{
 				this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
 			}
-			
 			if (this.investigacionMalariaSelected.getConfirmacionCndr() != null) {
 				this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos(this.investigacionMalariaSelected.getConfirmacionCndr().getCodigo());
 				this.diagnosticoCndrSelectedId = this.investigacionMalariaSelected.getConfirmacionCndr().getCatalogoId();
-			} else {
+			} else{
 				this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
 			}
-			this.longitud = this.investigacionMalariaSelected.getLongitudVivienda();
-			this.latitud = this.investigacionMalariaSelected.getLatitudVivienda();
 			
-		} else {
-			this.numeroCaso="";
-			if(this.muestreoHematicoSelected.getVivienda()!=null){
-				this.longitud = this.muestreoHematicoSelected.getVivienda().getLongitud();
-				this.latitud = this.muestreoHematicoSelected.getVivienda().getLatitud();
+			// Valores asociados a investigación de sintomas
+			if (this.esSintomatico.intValue() == 1) {
+				 oInfoResultado = investigacionSintomaService.EncontrarPorInvestigacionMalaria(this.investigacionMalariaSelected.getInvestigacionMalariaId());
+				if (oInfoResultado.isOk()) {
+					this.investigacionSintomaSelected = (InvestigacionSintoma) oInfoResultado.getObjeto();
+					this.investigacionSintomaSelectedId = this.investigacionSintomaSelected.getInvestigacionSintomaId();
+					this.fechaInicioSintoma = this.investigacionSintomaSelected.getFechaInicioSintomas();
+					if (this.investigacionSintomaSelected.getEstadoFebril() != null) {
+						this.estadosFebriles = estadoFebrilService.ListarActivos(this.investigacionSintomaSelected.getEstadoFebril().getCodigo());
+						this.estadoFebrilSelectedId = this.investigacionSintomaSelected.getEstadoFebril().getCatalogoId();
+					}
+					this.personaConSintomaLugar = this.investigacionSintomaSelected.getPersonasSintomas();
+					obtenerSintomasLugaresAntes();
+					obtenerSintomasLugaresOtros();
+				}
+			}
+			if(this.estadosFebriles==null){
+				this.estadosFebriles = estadoFebrilService.ListarActivos();
+			}
+			
+			//Si es sintomático y los sintomas inician en un lugar diferente al lugar de resisencia,
+			//se obtienen los valores asociados a al luger de inicio
+			if (this.esSintomatico.intValue() == 1 && this.investigacionSintomaSelected != null) {
+				if (this.investigacionSintomaSelected.getInicioResidencia().intValue() == 0) {
+					this.sintomaInicio = this.investigacionSintomaSelected.getInicioResidencia();
+					 oInfoResultado = sintomaLugarInicioService.EncontrarPorInvestigacionSintoma(
+							this.investigacionSintomaSelected.getInvestigacionSintomaId());
+					if (oInfoResultado.isOk()) {
+						SintomaLugarInicio oLugInicio = (SintomaLugarInicio) oInfoResultado.getObjeto();
+						this.sintomaInicio = oLugInicio.getInicioResidencia();
+						if(oLugInicio.getPais()!=null){
+							this.paisLugInicioSelected = oLugInicio.getPais();
+							this.paisLugInicioSelectedId = oLugInicio.getPais().getPaisId();
+						}else{
+							InfoResultado oResultado = paisService.Encontrar(Utilidades.PAIS_CODIGO);
+							Pais oPais = (Pais) oResultado.getObjeto();
+							this.paisLugInicioSelected = oPais;
+							this.paisLugInicioSelectedId = oPais.getPaisId();
+							this.deptsLugsInicios = divisionPoliticaService.DepartamentosActivos();
+							if(oLugInicio.getMunicipio()!=null){
+								this.deptLugInicioSelected = oLugInicio.getMunicipio().getDepartamento();
+								this.deptLugInicioSelectedId = oLugInicio.getMunicipio().getDepartamento().getDivisionPoliticaId();
+								this.munisLugsInicios = divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
+								this.muniLugInicioSelected = oLugInicio.getMunicipio();
+								this.muniLugInicioSelectedId = oLugInicio.getMunicipio().getDivisionPoliticaId();
+								this.comuLugInicioSelected = oLugInicio.getComunidad();
+							}
+						}
+					}
+				}
+			}
+			
+			this.viajeZonaRiesgo = this.investigacionMalariaSelected.getViajesZonaRiesgo();
+			if(this.viajeZonaRiesgo.intValue()==1){
+				this.usaMosquitero = this.investigacionMalariaSelected.getUsoMosquitero();
+			}
+			//se obtienen los valores asociados a antecedentes transfusionales
+			this.antTransfusion = this.investigacionMalariaSelected.getTransfusion();
+			if(this.antTransfusion.intValue()==1){
+				 oInfoResultado = investigacionTransfusion.EncontrarPorInvestigacionMalaria(
+						this.investigacionMalariaSelected.getInvestigacionMalariaId());
+				if(oInfoResultado.isOk()){
+					InvestigacionTransfusion oTransfusion = (InvestigacionTransfusion) oInfoResultado.getObjeto();
+					if(oTransfusion.getPais()!=null){
+						this.paisTransfusionSelected = oTransfusion.getPais();
+						this.paisTransfusionSelectedId = oTransfusion.getPais().getPaisId();
+					}else{
+						InfoResultado oResultado = paisService.Encontrar(Utilidades.PAIS_CODIGO);
+						Pais oPais = (Pais) oResultado.getObjeto();
+						this.paisTransfusionSelected = oPais;
+						this.paisTransfusionSelectedId = oPais.getPaisId();
+						this.unidadesTransfusion = unidadService.UnidadesActivasPorPropiedad(Utilidades.ES_UNIDAD_TRANSFUSIONAL);
+						if(oTransfusion.getUnidad()!=null){
+							this.unidadTransfusionSelected = oTransfusion.getUnidad();
+							this.unidadTransfusionSelectedId = oTransfusion.getUnidad().getUnidadId();
+						}
+					}
+				}
+			}
+			
+			this.manejoClinico=this.investigacionMalariaSelected.getManejoClinico();
+			this.inicioTratamientoMClinico=this.investigacionMalariaSelected.getInicioTratamiento();
+			this.finTratamientoMClinico= this.investigacionMalariaSelected.getFinTratamiento();
+			
+			// Valores asociados a investigación hospitalaria y ambulatoria
+			if(this.manejoClinico.intValue()==1){
+				 oInfoResultado = investigacionHospitalario.EncontrarPorInvestigacionMalaria(
+						this.investigacionMalariaSelected.getInvestigacionMalariaId());
+				if(oInfoResultado.isOk()){
+					InvestigacionHospitalario oHospitalario = (InvestigacionHospitalario) oInfoResultado.getObjeto();
+					this.numeroExpedienteMClinico = oHospitalario.getExpediente();
+					this.fechaIngresoMClinico = oHospitalario.getFechaIngreso();
+					this.diasEstanciaMClinico = oHospitalario.getDiasEstancia();
+					this.unidadesMClinico = unidadService.UnidadesActivasPorEntidadYCategoria(this.entidadMClinicoSelectedId,
+							Utilidades.ES_UNIDAD_HOSPITALIZACION);
+					if(oHospitalario.getUnidad()!=null){
+						this.unidadMClinicoSelected = oHospitalario.getUnidad();
+						this.unidadMClinicoSelectedId = oHospitalario.getUnidad().getUnidadId();
+					}
+				}
+			}
+			
+			this.convivientesTratadosMClinico = this.investigacionMalariaSelected.getConvivientesTratados();
+			this.colateralesTratadosMClinico = this.investigacionMalariaSelected.getColateralesTratados();
+			this.tratamientoSupervisadoMClinico = this.investigacionMalariaSelected.getTratamientoSupervisado();
+			this.tratamientoCompletoMClinico = this.investigacionMalariaSelected.getTratamientoCompleto();
+			this.controlParasitarioMClinico = this.investigacionMalariaSelected.getControlParasitario();
+			if(this.controlParasitarioMClinico.intValue()==1){
+				this.numDiasPosterioresMClinico=this.investigacionMalariaSelected.getDiasPosterioresControl();
+				this.resultControlPositivoMClinico=this.investigacionMalariaSelected.getResultadoControlPositivo();
+			}
+			
+			//Resultado de investigación
+			this.condicionFinalMClinico=this.investigacionMalariaSelected.getCondicionFinalVivo();
+			if(this.condicionFinalMClinico.intValue()==0){
+				this.fechaDefuncionMClinico=this.investigacionMalariaSelected.getFechaDefuncion();
+			}
+			this.automedicacionMClinico=this.investigacionMalariaSelected.getAutomedicacion();
+			if(this.automedicacionMClinico.intValue()==1){
+				this.medicamentosAutomedicacionMClinico=this.investigacionMalariaSelected.getMedicamentosAutomedicacion();
+			}
+			this.fechaInfeccionRInv=this.investigacionMalariaSelected.getFechaInfeccion();
+			this.infeccionEnResidenciaRInv=this.investigacionMalariaSelected.getInfeccionResidencia();
+			if(this.infeccionEnResidenciaRInv.intValue()==0 && this.investigacionSintomaSelected!=null){
+				 oInfoResultado= investigacionLugarService.EncontrarPorInvestigacionMalaria(
+						this.investigacionSintomaSelected.getInvestigacionSintomaId());
+				if(oInfoResultado.isOk()){
+					InvestigacionLugar oLugar = (InvestigacionLugar) oInfoResultado.getObjeto();
+					this.infeccionEnResidenciaRInv = oLugar.getInfeccionResidencia();
+					if(oLugar.getPais()!=null){
+						this.paisRInvSelected = oLugar.getPais();
+						this.paisRInvSelectedId = oLugar.getPais().getPaisId();
+					}else{
+						InfoResultado oResultado = paisService.Encontrar(Utilidades.PAIS_CODIGO);
+						Pais oPais = (Pais) oResultado.getObjeto();
+						this.paisRInvSelected = oPais;
+						this.paisRInvSelectedId = oPais.getPaisId();
+						this.deptsSintomasRInv = divisionPoliticaService.DepartamentosActivos();
+						if(oLugar.getMunicipio()!=null){
+							this.deptRInvSelected = oLugar.getMunicipio().getDepartamento();
+							this.deptRInvSelectedId = oLugar.getMunicipio().getDepartamento().getDivisionPoliticaId();
+							this.munisSintomasRInv= divisionPoliticaService.MunicipiosActivos(this.deptLugInicioSelectedId);
+							this.muniRInvSelected = oLugar.getMunicipio();
+							this.muniRInvSelectedId = oLugar.getMunicipio().getDivisionPoliticaId();
+							this.comuRInvSelected = oLugar.getComunidad();
+						}
+					}		
+				}
+			}
+			if (this.investigacionMalariaSelected.getClasificacionClinica() != null) {
+				this.clasificsClinicasRInv = clasificacionClinicaService.ListarActivos(this.investigacionMalariaSelected.getClasificacionClinica().getCodigo());
+				this.clasifClinicaRInvSelected=this.investigacionMalariaSelected.getClasificacionClinica();
+				this.clasifClinicaRInvSelectedId=this.investigacionMalariaSelected.getClasificacionClinica().getCatalogoId();
 			}else{
-				this.longitud=null;
-				this.latitud=null;
-			}	
+				this.clasificsClinicasRInv = clasificacionClinicaService.ListarActivos();
+			}
+			if (this.investigacionMalariaSelected.getTipoRecurrencia() != null) {
+				this.tiposInfeccionesRInv = tipoRecurrenciaService.ListarActivos(this.investigacionMalariaSelected.getTipoRecurrencia().getCodigo());
+				this.tipoInfeccionRInvSelected=this.investigacionMalariaSelected.getTipoRecurrencia();
+				this.tipoInfeccionRInvSelectedId=this.investigacionMalariaSelected.getTipoRecurrencia().getCatalogoId();
+			}else{
+				this.tiposInfeccionesRInv = tipoRecurrenciaService.ListarActivos();
+			}
+			if (this.investigacionMalariaSelected.getTipoComplicacion() != null) {
+				this.tiposComplicacionesRInv = tipoComplicacionService.ListarActivos(this.investigacionMalariaSelected.getTipoComplicacion().getCodigo());
+				this.tipoComplicacionRInvSelected=this.investigacionMalariaSelected.getTipoComplicacion();
+				this.tipoComplicacionRInvSelectedId=this.investigacionMalariaSelected.getTipoComplicacion().getCatalogoId();
+			}else{
+				this.tiposComplicacionesRInv = tipoComplicacionService.ListarActivos();
+			}
+			if (this.investigacionMalariaSelected.getClasificacionCaso() != null) {
+				this.clasificacionesCasosRInv = clasificacionCasoService.ListarActivos(this.investigacionMalariaSelected.getClasificacionCaso().getCodigo());
+				this.clasificacionCasoRInvSelected =this.investigacionMalariaSelected.getClasificacionCaso();
+				this.clasificacionCasoRInvSelectedId =this.investigacionMalariaSelected.getClasificacionCaso().getCatalogoId();
+			}else{
+				this.clasificacionesCasosRInv = clasificacionCasoService.ListarActivos();
+			}
+			this.observaciones=this.investigacionMalariaSelected.getObservaciones();
+			this.nivelAutorizacion=this.investigacionMalariaSelected.getNivelAutorizacion();
+			this.responsableInvest=this.investigacionMalariaSelected.getResponsable();
+			this.epidemiologo=this.investigacionMalariaSelected.getEpidemiologo();
+			
+			this.casoCerrado=this.investigacionMalariaSelected.getCasoCerrado();
+			this.fechaCierre=this.investigacionMalariaSelected.getFechaCierreCaso();
+		}else{
+			if(this.muestreoHematicoSelected.getVivienda()!=null){
+				this.longitud = this.muestreoHematicoSelected.getVivienda().getLatitud();
+				this.latitud = this.muestreoHematicoSelected.getVivienda().getLatitud();
+				this.fechaInicioSintoma=this.muestreoHematicoSelected.getInicioSintomas();
+			}
 		}
 	}
 	
@@ -405,15 +641,15 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	public void onViajeZonaRiesgoSelected(){
-		this.usaMosquitero=BigDecimal.valueOf(-2);
+		this.usaMosquitero=null;
 	}
 	
 	public void onAntTransfusionSelected(){
 		this.fechaTransfusion=null;
 		this.paisTransfusionSelected=null;
 		this.paisTransfusionSelectedId=0;
-		this.unidadSelected=null;
-		this.unidadSelectedId=0;
+		this.unidadTransfusionSelected=null;
+		this.unidadTransfusionSelectedId=0;
 		if(this.antTransfusion.intValue()==1){
 			InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
 			if(oResultado.isOk()){
@@ -423,7 +659,6 @@ private static final long serialVersionUID = 1L;
 				Pais oPais=(Pais)oResultado.getObjeto();
 				this.paisTransfusionSelected=oPais;
 				this.paisTransfusionSelectedId=oPais.getPaisId();
-				this.unidadesTransfusion=null;
 			}
 		}
 	}
@@ -431,7 +666,7 @@ private static final long serialVersionUID = 1L;
 	public void onManejoClinicoSelected(){
 		if(this.manejoClinico.intValue()==0){
 			this.entidadMClinicoSelected=null;
-			this.entidadNClinicoSelectedId=0;
+			this.entidadMClinicoSelectedId=0;
 			this.unidadesMClinico=null;
 			this.unidadMClinicoSelected=null;
 			this.unidadMClinicoSelectedId=0;
@@ -522,7 +757,7 @@ private static final long serialVersionUID = 1L;
 
 		this.unidadSelected=null;
 		this.unidadSelectedId=0;
-
+		
 		// se filtran únicamente las unidades de salud a las cuales tiene autorización el
 		// usuario y que hayan sido declaradas como puestos de notificación activas y aquellas
 		// unidades, que no siendo puesto de notificación, tienen declarada la característica
@@ -533,9 +768,20 @@ private static final long serialVersionUID = 1L;
 
 		if ((this.unidades!=null) && (this.unidades.size()>0)) {
 			this.unidadSelectedId=this.unidades.get(0).getUnidadId();
-			this.unidadSelected=this.unidades.get(0);
+			this.unidadSelected=this.unidades.get(0);	
 		}
+		onModoSelected();
 	}
+	
+	public void obtenerUnidadesHospitalizacion(){
+		this.unidadMClinicoSelected=null;
+		this.unidadMClinicoSelectedId=0;
+		
+		// se filtran únicamente las unidades de salud cuya categoría corresponda a hospitalización
+		this.unidadesMClinico = unidadService.UnidadesActivasPorEntidadYCategoria(this.entidadMClinicoSelectedId,
+				Utilidades.ES_UNIDAD_HOSPITALIZACION);
+	}
+	
 	
 	public void cambiarUnidad() {
 		
@@ -552,6 +798,22 @@ private static final long serialVersionUID = 1L;
 		Unidad oUnidad=(Unidad)oResultado.getObjeto();
 		this.unidadSelected=oUnidad;
 		this.unidadSelectedId=oUnidad.getUnidadId();
+		onModoSelected();
+	}
+	
+	public void onAceptarUnidadHosp(){
+		if(this.unidadMClinicoSelectedId==0){
+			return;
+		}
+		InfoResultado oResultado=unidadService.Encontrar(this.unidadMClinicoSelectedId);
+		if (!oResultado.isOk()) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(oResultado));
+			return;
+		}
+
+		Unidad oUnidad=(Unidad)oResultado.getObjeto();
+		this.unidadMClinicoSelected=oUnidad;
+		this.unidadMClinicoSelectedId=oUnidad.getUnidadId();
 	}
 	
 	public void cambiarUnidadTransfusion(){
@@ -646,7 +908,6 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	public void cambiarPaisTransfusion(){
-		this.unidadesTransfusion=null;
 		this.unidadTransfusionSelected=null;
 		this.unidadTransfusionSelectedId=0;
 		
@@ -663,7 +924,7 @@ private static final long serialVersionUID = 1L;
 				paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false){
 			return;
 		}
-		this.unidadesTransfusion = null;
+		
 	}
 	
 	public void cambiarPaisRInv(){
@@ -853,6 +1114,17 @@ private static final long serialVersionUID = 1L;
 		this.muniRInvSelectedId=oMuni.getDivisionPoliticaId();
 	}
 	
+	public void agregarMedicamentos(){
+		this.medicamentoSelected=null;
+		this.medicamentoSelectedId=0;
+	}
+	
+	public void agregarUnidadHosp(){
+		this.entidadMClinicoSelected=null;
+		this.entidadMClinicoSelectedId=0;
+		this.unidadesMClinico=null;
+	}
+	
 	public void agregarSintomaLugarAnte(){
 		this.fechaUltimaLugAnte=null;
 		this.estadiaLugAnte=null;
@@ -908,12 +1180,12 @@ private static final long serialVersionUID = 1L;
 	public void onAceptarMedicamentoAntiMalarico(){
 		InfoResultado oResultado = new InfoResultado();
 		
-		if(this.medicamentosAntiMalaricos==null){
-			this.medicamentosAntiMalaricos = new ArrayList<Medicamento>();
+		if(this.investigacionesMedicamentos==null){
+			this.investigacionesMedicamentos = new ArrayList<InvestigacionMedicamento>();
 		}
 		
-		for(Medicamento oMedicamento : this.medicamentosAntiMalaricos){
-			if(oMedicamento.getCatalogoId()==this.medicamentoSelected.getCatalogoId()){
+		for(InvestigacionMedicamento oInvestigacion : this.investigacionesMedicamentos){
+			if(oInvestigacion.getMedicamento().getCatalogoId()==this.medicamentoSelected.getCatalogoId()){
 				oResultado.setMensaje(Mensajes.REGISTRO_DUPLICADO);
 				oResultado.setOk(false);
 			}
@@ -924,23 +1196,37 @@ private static final long serialVersionUID = 1L;
 				FacesContext.getCurrentInstance().addMessage(null, msg);
 			}	
 		}else{
-			this.medicamentosAntiMalaricos.add(this.medicamentoSelected);
+			InvestigacionMedicamento oInvestigacion = new InvestigacionMedicamento();
+			oInvestigacion.setMedicamento(this.medicamentoSelected);
+			oInvestigacion.setUsuarioRegistro(this.infoSesion.getUsername());
+			oInvestigacion.setFechaRegistro(Calendar.getInstance().getTime());
+			this.investigacionesMedicamentos.add(oInvestigacion);
 			this.medicamentosEnLista="";
-			for(int i=0;i <= this.medicamentosAntiMalaricos.size();i++){
-				if(i <= this.medicamentosAntiMalaricos.size()){
-					this.medicamentosEnLista+=this.medicamentosAntiMalaricos.get(i).getValor() + ", ";
+			for(int i=0;i <= this.investigacionesMedicamentos.size();i++){
+				if(i <= this.investigacionesMedicamentos.size()){
+					if(i==0){
+						this.medicamentosEnLista+=this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
+					}else{
+						this.medicamentosEnLista+=  ", " + this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
+					}
 				}else{
-					this.medicamentosEnLista+=this.medicamentosAntiMalaricos.get(i).getValor();
+					this.medicamentosEnLista+=this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
 				}
 			}
 		}	
+		this.medicamentoSelected=null;
+		this.medicamentoSelectedId=0;
 	}
 	
 	public void guardarSintomaLugarAnte(){
 		RequestContext oContext = RequestContext.getCurrentInstance(); 
 		InfoResultado oResultado = new InfoResultado();
 		SintomaLugarAnte oSintomaLugar = new SintomaLugarAnte();
-		oSintomaLugar.setPais(this.paisLugAnteSelected);
+		if (this.paisLugAnteSelected != null) {
+			if (!this.paisLugAnteSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+				oSintomaLugar.setPais(this.paisLugAnteSelected);
+			}
+		}
 		oSintomaLugar.setMunicipio(this.muniLugAnteSelected);
 		oSintomaLugar.setComunidad(this.comuLugAnteSelected);
 		oSintomaLugar.setFechaUltima(this.fechaUltimaLugAnte);
@@ -980,7 +1266,11 @@ private static final long serialVersionUID = 1L;
 		RequestContext oContext = RequestContext.getCurrentInstance(); 
 		InfoResultado oResultado = new InfoResultado();
 		SintomaLugarOtro oSintomaLugar = new SintomaLugarOtro();
-		oSintomaLugar.setPais(this.paisLugOtroSelected);
+		if (this.paisLugOtroSelected != null) {
+			if (!this.paisLugOtroSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+				oSintomaLugar.setPais(this.paisLugOtroSelected);
+			}
+		}
 		oSintomaLugar.setMunicipio(this.muniLugOtroSelected);
 		oSintomaLugar.setComunidad(this.comuLugOtroSelected);
 		oSintomaLugar.setEstadia(estadiaLugOtro);
@@ -1037,11 +1327,10 @@ private static final long serialVersionUID = 1L;
 		InvestigacionTransfusion oInvestigacionTransfusion=null;
 		InvestigacionHospitalario oInvestigacionHospitalario=null;
 		
-		
 		oInvestigacion.setMuestreoHematico(this.muestreoHematicoSelected);
 		oInvestigacion.setNumeroCaso(this.numeroCaso);
 		oInvestigacion.setLatitudVivienda(this.latitud);
-		oInvestigacion.setLatitudVivienda(this.latitud);
+		oInvestigacion.setLongitudVivienda(this.longitud);
 		oInvestigacion.setConfirmacionEntidad((ConfirmacionDiagnostico) confirmacionDiagnosticoService.Encontrar(this.diagnosticoEntidadSelectedId).getObjeto());
 		oInvestigacion.setConfirmacionCndr((ConfirmacionDiagnostico) confirmacionDiagnosticoService.Encontrar(this.diagnosticoCndrSelectedId).getObjeto());
 		oInvestigacion.setSintomatico(this.esSintomatico);
@@ -1060,7 +1349,11 @@ private static final long serialVersionUID = 1L;
 			if(this.sintomaInicio.intValue()==0){
 				oSintomaLugarInicio = new SintomaLugarInicio();
 				oSintomaLugarInicio.setInicioResidencia(this.sintomaInicio);
-				oSintomaLugarInicio.setPais(this.paisLugInicioSelected);
+				if (this.paisLugInicioSelected != null) {
+					if (!this.paisLugInicioSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+						oSintomaLugarInicio.setPais(this.paisLugInicioSelected);
+					}
+				}
 				oSintomaLugarInicio.setMunicipio(this.muniLugInicioSelected);
 				oSintomaLugarInicio.setComunidad(this.comuLugInicioSelected);
 				oSintomaLugarInicio.setEstadia(this.estadiaLugar);
@@ -1076,7 +1369,11 @@ private static final long serialVersionUID = 1L;
 		if(this.antTransfusion.intValue()==1){
 			oInvestigacionTransfusion = new InvestigacionTransfusion();
 			oInvestigacionTransfusion.setTransfusion(this.antTransfusion);
-			oInvestigacionTransfusion.setPais(this.paisTransfusionSelected);
+			if (this.paisTransfusionSelected != null) {
+				if (!this.paisTransfusionSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+					oInvestigacionTransfusion.setPais(this.paisTransfusionSelected);
+				}
+			}
 			oInvestigacionTransfusion.setUnidad(this.unidadTransfusionSelected);
 			if(this.unidadTransfusionSelected!=null){
 				oInvestigacionTransfusion.setMunicipio(this.unidadTransfusionSelected.getMunicipio());
@@ -1120,7 +1417,11 @@ private static final long serialVersionUID = 1L;
 		if(this.infeccionEnResidenciaRInv.intValue()==0){
 			oInvestigacionLugar = new InvestigacionLugar();
 			oInvestigacionLugar.setInfeccionResidencia(this.infeccionEnResidenciaRInv);
-			oInvestigacionLugar.setPais(this.paisRInvSelected);
+			if (this.paisRInvSelected != null) {
+				if (!this.paisRInvSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+					oInvestigacionLugar.setPais(this.paisRInvSelected);
+				}
+			}
 			oInvestigacionLugar.setMunicipio(this.muniRInvSelected);
 			oInvestigacionLugar.setComunidad(this.comuRInvSelected);
 			
@@ -1141,18 +1442,6 @@ private static final long serialVersionUID = 1L;
 		}
 		
 		if (this.investigacionMalariaSelected!=null) {
-			if(oSintomaLugarInicio!=null){
-				oSintomaLugarInicio.setUsuarioRegistro(this.infoSesion.getUsername());
-				oSintomaLugarInicio.setFechaRegistro(Calendar.getInstance().getTime());
-			}
-			if(oInvestigacionLugar!=null){
-				oInvestigacionLugar.setUsuarioRegistro(this.infoSesion.getUsername());
-				oInvestigacionLugar.setFechaRegistro(Calendar.getInstance().getTime());
-			}
-			if(oInvestigacionHospitalario!=null){
-				oInvestigacionHospitalario.setUsuarioRegistro(this.infoSesion.getUsername());
-				oInvestigacionHospitalario.setFechaRegistro(Calendar.getInstance().getTime());
-			}
 			oInvestigacion.setInvestigacionMalariaId(this.investigacionMalariaSelected.getInvestigacionMalariaId());
 			oResultado=investigacionService.Guardar(
 					oInvestigacion,
@@ -1166,6 +1455,18 @@ private static final long serialVersionUID = 1L;
 					oInvestigacionHospitalario
 			);
 		} else {
+			if(oSintomaLugarInicio!=null){
+				oSintomaLugarInicio.setUsuarioRegistro(this.infoSesion.getUsername());
+				oSintomaLugarInicio.setFechaRegistro(Calendar.getInstance().getTime());
+			}
+			if(oInvestigacionLugar!=null){
+				oInvestigacionLugar.setUsuarioRegistro(this.infoSesion.getUsername());
+				oInvestigacionLugar.setFechaRegistro(Calendar.getInstance().getTime());
+			}
+			if(oInvestigacionHospitalario!=null){
+				oInvestigacionHospitalario.setUsuarioRegistro(this.infoSesion.getUsername());
+				oInvestigacionHospitalario.setFechaRegistro(Calendar.getInstance().getTime());
+			}
 			oResultado=investigacionService.Agregar(
 					oInvestigacion,
 					oInvestigacionSintoma,
@@ -1189,6 +1490,28 @@ private static final long serialVersionUID = 1L;
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
 			
+	}
+	
+	public void eliminar() {
+		if (this.investigacionMalariaSelected == null || this.investigacionMalariaSelected.getInvestigacionMalariaId()==0) {
+			return;
+		}
+
+		InfoResultado oResultado = new InfoResultado();
+		oResultado = investigacionService.Eliminar( this.investigacionMalariaSelected.getInvestigacionMalariaId());
+
+		if (oResultado.isOk()) {
+			this.capaActiva=1;
+			iniciarCapa1();
+			iniciarCapa2();
+			oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
+		}
+
+		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+		if (msg != null) {
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+	
 	}
 	
 	public void eliminarSintomaLugarAnte(){
@@ -1253,7 +1576,12 @@ private static final long serialVersionUID = 1L;
 	
 	public void onEliminarMedicamentoAntiMalarico(){
 		this.medicamentosEnLista="";
-		this.medicamentosAntiMalaricos=null;
+		this.investigacionesMedicamentos=null;
+	}
+	
+	public void onQuitarUnidadHosp(){
+		this.unidadMClinicoSelected=null;
+		this.unidadMClinicoSelectedId=0;
 	}
 	
 	public void regresarCapa1() {
@@ -1268,6 +1596,7 @@ private static final long serialVersionUID = 1L;
 	
 	private void init(){
 		this.capaActiva=1;
+		this.modo=0;
 		this.infoSesion=Utilidades.obtenerInfoSesion();
 		this.entidades= new ArrayList<EntidadAdtva>();
 		this.unidades= new ArrayList<Unidad>();
@@ -1305,7 +1634,13 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private void iniciarCapa2(){
-		this.esSintomatico=BigDecimal.valueOf(0);
+		this.numeroCaso="";
+		this.longitud=null;
+		this.latitud=null;
+		this.esSintomatico=BigDecimal.valueOf(Long.parseLong("0"));
+		this.estadoFebrilSelectedId=0;
+		this.viajeZonaRiesgo=BigDecimal.valueOf(Long.parseLong("0"));
+		this.usaMosquitero=null;
 		this.fechaInicioSintoma=null;
 		this.sintomasLugaresAntes=null;
 		this.sintomasLugaresOtros=null;
@@ -1322,7 +1657,7 @@ private static final long serialVersionUID = 1L;
 		this.sintomasLugaresOtros=null;
 		
 		//Atributos vinculados a Investigación de transfuciones
-		this.antTransfusion=BigDecimal.valueOf(0);
+		this.antTransfusion=BigDecimal.valueOf(Long.parseLong("0"));
 		this.fechaTransfusion=null;
 		this.paisTransfusionSelected=null;
 		this.paisTransfusionSelectedId=0;
@@ -1332,13 +1667,13 @@ private static final long serialVersionUID = 1L;
 		
 		
 		//Atributos vinculados a manejo clínico - Investigación Hospitalaria-
-		this.manejoClinico=BigDecimal.valueOf(0);
+		this.manejoClinico=BigDecimal.valueOf(Long.parseLong("0"));
 		this.inicioTratamientoMClinico=null;
 		this.finTratamientoMClinico=null;
 		this.medicamentoSelected=null;
 		this.medicamentoSelectedId=0;
 		this.entidadMClinicoSelected=null;
-		this.entidadNClinicoSelectedId=0;
+		this.entidadMClinicoSelectedId=0;
 		this.unidadesMClinico=null;
 		this.unidadMClinicoSelected=null;
 		this.unidadMClinicoSelectedId=0;
@@ -1347,18 +1682,18 @@ private static final long serialVersionUID = 1L;
 		this.diasEstanciaMClinico=null;
 		this.convivientesTratadosMClinico=null;
 		this.colateralesTratadosMClinico=null;
-		this.tratamientoCompletoMClinico=BigDecimal.valueOf(0);
-		this.tratamientoSupervisadoMClinico=BigDecimal.valueOf(0);
-		this.controlParasitarioMClinico=BigDecimal.valueOf(0);
+		this.tratamientoCompletoMClinico=BigDecimal.valueOf(Long.parseLong("0"));
+		this.tratamientoSupervisadoMClinico=BigDecimal.valueOf(Long.parseLong("0"));
+		this.controlParasitarioMClinico=BigDecimal.valueOf(Long.parseLong("0"));
 		this.numDiasPosterioresMClinico=null;
 		this.resultControlPositivoMClinico=null;
-		this.condicionFinalMClinico=BigDecimal.valueOf(1);
+		this.condicionFinalMClinico=BigDecimal.valueOf(Long.parseLong("1"));
 		this.fechaDefuncionMClinico=null;
-		this.automedicacionMClinico=BigDecimal.valueOf(0);
+		this.automedicacionMClinico=BigDecimal.valueOf(Long.parseLong("0"));
 		this.medicamentosAutomedicacionMClinico=null;
 		
 		//Atributos vinculados al resultado de la investigacion
-		this.infeccionEnResidenciaRInv=BigDecimal.valueOf(1);
+		this.infeccionEnResidenciaRInv=BigDecimal.valueOf(Long.parseLong("1"));
 		this.paisRInvSelected=null;
 		this.paisRInvSelectedId=0;
 		this.deptsSintomasRInv=null;
@@ -1383,15 +1718,19 @@ private static final long serialVersionUID = 1L;
 		this.observaciones="";
 		this.responsableInvest="";
 		this.epidemiologo="";
-		this.nivelAutorizacion=BigDecimal.valueOf(0);
-		this.casoCerrado=BigDecimal.valueOf(0);
+		this.nivelAutorizacion=BigDecimal.valueOf(Long.parseLong("0"));
+		this.casoCerrado=BigDecimal.valueOf(Long.parseLong("0"));
 		this.fechaCierre=null;
 		
+		this.entidadesMClinico = entidadService.EntidadesAdtvasActivas();
+		this.unidadesTransfusion = unidadService.UnidadesActivasPorPropiedad(Utilidades.ES_UNIDAD_TRANSFUSIONAL);
 		this.tiposInfeccionesRInv = tipoRecurrenciaService.ListarActivos();
+		this.estadosFebriles = estadoFebrilService.ListarActivos();
 		this.diagnosticosEntidad = confirmacionDiagnosticoService.ListarActivos();
 		this.diagnosticosCndr = confirmacionDiagnosticoService.ListarActivos();
 		this.medicamentosAntiMalaricos = medicamentoService.ListarActivos();
 		this.clasificsClinicasRInv = clasificacionClinicaService.ListarActivos();
+		this.tiposInfeccionesRInv = tipoRecurrenciaService.ListarActivos();
 		this.tiposComplicacionesRInv = tipoComplicacionService.ListarActivos();
 		this.clasificacionesCasosRInv=clasificacionCasoService.ListarActivos();
 	}
@@ -1416,16 +1755,17 @@ private static final long serialVersionUID = 1L;
 				List<MuestreoHematico> oMuestreoHematicoList=null;
 				numMuestreos=0;
 				
-				numMuestreos = muestreoHematicoService.ContarPositivosPorUnidadActivos(entidadSelectedId,unidadSelectedId, anioEpiSelected , true);
-				oMuestreoHematicoList = muestreoHematicoService.ListarPositivosPorUnidad(entidadSelectedId,unidadSelectedId,  anioEpiSelected, true, 
-						 first, pageSize, numMuestreos);
+				numMuestreos = muestreoHematicoService.ContarPositivosPorUnidad(entidadSelectedId,unidadSelectedId,
+						anioEpiSelected , (modo==0 ? true : false));
+				oMuestreoHematicoList = muestreoHematicoService.ListarPositivosPorUnidad(entidadSelectedId,unidadSelectedId,  
+						anioEpiSelected, (modo==0 ? true : false),  first, pageSize, numMuestreos);
 				this.setRowCount(numMuestreos);
 				return oMuestreoHematicoList;
 			}
 		};		
 	}
 	
-	private void obtenerInvestigacionMedicamentos(){
+	public void obtenerInvestigacionMedicamentos(){
 		this.investigacionesMedicamentos = null;
 		if(this.investigacionMalariaSelected==null || this.investigacionMalariaSelected.getInvestigacionMalariaId() < 1){
 			return;
@@ -1433,7 +1773,19 @@ private static final long serialVersionUID = 1L;
 		
 		this.investigacionesMedicamentos = investigacionMedicamentoService.
 			MedicamentosPorInvestigacion(this.investigacionMalariaSelected.getInvestigacionMalariaId());
-		
+		if(this.investigacionesMedicamentos!=null){
+			for(int i=0;i <= this.investigacionesMedicamentos.size();i++){
+				if(i <= this.investigacionesMedicamentos.size()){
+					if(i==0){
+						this.medicamentosEnLista+=this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
+					}else{
+						this.medicamentosEnLista+=  ", " + this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
+					}
+				}else{
+					this.medicamentosEnLista+=this.investigacionesMedicamentos.get(i).getMedicamento().getValor();
+				}
+			}
+		}
 	}
 	
 	private void obtenerSintomasLugaresAntes(){
@@ -1460,6 +1812,14 @@ private static final long serialVersionUID = 1L;
 	
 	public long getEntidadSelectedId() {
 		return entidadSelectedId;
+	}
+
+	public int getModo() {
+		return modo;
+	}
+
+	public void setModo(int modo) {
+		this.modo = modo;
 	}
 
 	public int getCapaActiva() {
@@ -1550,6 +1910,15 @@ private static final long serialVersionUID = 1L;
 	public void setInvestigacionMalariaSelected(
 			InvestigacionMalaria investigacionMalariaSelected) {
 		this.investigacionMalariaSelected = investigacionMalariaSelected;
+	}
+	
+	public long getInvestigacionMalariaSelectedId() {
+		return investigacionMalariaSelectedId;
+	}
+
+	public void setInvestigacionMalariaSelectedId(
+			long investigacionMalariaSelectedId) {
+		this.investigacionMalariaSelectedId = investigacionMalariaSelectedId;
 	}
 
 	public String getNumeroCaso() {
@@ -2101,12 +2470,12 @@ private static final long serialVersionUID = 1L;
 		this.entidadMClinicoSelected = entidadMClinicoSelected;
 	}
 
-	public long getEntidadNClinicoSelectedId() {
-		return entidadNClinicoSelectedId;
+	public long getEntidadMClinicoSelectedId() {
+		return entidadMClinicoSelectedId;
 	}
 
-	public void setEntidadNClinicoSelectedId(long entidadNClinicoSelectedId) {
-		this.entidadNClinicoSelectedId = entidadNClinicoSelectedId;
+	public void setEntidadMClinicoSelectedId(long entidadMClinicoSelectedId) {
+		this.entidadMClinicoSelectedId = entidadMClinicoSelectedId;
 	}
 
 	public Unidad getUnidadMClinicoSelected() {

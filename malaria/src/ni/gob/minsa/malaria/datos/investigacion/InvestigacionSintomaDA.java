@@ -106,7 +106,7 @@ public class InvestigacionSintomaDA implements InvestigacionSintomaService {
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oInvetigacionSintoma.get(1));
+    			oResultado.setObjeto((Object)oInvetigacionSintoma.get(0));
     			return oResultado;
     		}
     	}

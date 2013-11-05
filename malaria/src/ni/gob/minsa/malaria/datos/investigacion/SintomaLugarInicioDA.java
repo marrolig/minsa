@@ -1,5 +1,7 @@
 package ni.gob.minsa.malaria.datos.investigacion;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
@@ -76,6 +78,7 @@ public class SintomaLugarInicioDA implements SintomaLugarInicioService{
 	 * (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarInicioService#EncontrarPorInvestigacionSintoma(long)
 	 */
+	 @SuppressWarnings("unchecked")
 	@Override
 	public InfoResultado EncontrarPorInvestigacionSintoma(
 			long pInvestigacionSintomaId) {
@@ -84,8 +87,10 @@ public class SintomaLugarInicioDA implements SintomaLugarInicioService{
     	try{
     		Query query = oEM.createNamedQuery("SintomaLugarInicio.encontrarPorInvestigacionSintoma");
             query.setParameter("pInvestigacionSintomaId", pInvestigacionSintomaId);
+            query.setMaxResults(1);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            SintomaLugarInicio oSintomaLugarInicio = (SintomaLugarInicio)query.getSingleResult();
+           
+			List<SintomaLugarInicio> oSintomaLugarInicio = (List<SintomaLugarInicio>)query.getResultList();
             
     		if (oSintomaLugarInicio==null ) {
     			oResultado.setMensaje(Mensajes.ENCONTRAR_REGISTRO_NO_EXISTE);
@@ -96,7 +101,7 @@ public class SintomaLugarInicioDA implements SintomaLugarInicioService{
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oSintomaLugarInicio);
+    			oResultado.setObjeto((Object)oSintomaLugarInicio.get(0));
     			return oResultado;
     		}
     	}

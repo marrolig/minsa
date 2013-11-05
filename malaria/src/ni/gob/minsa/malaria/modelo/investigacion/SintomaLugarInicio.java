@@ -26,8 +26,8 @@ public class SintomaLugarInicio implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="SINTOMAS_LUGARES_INICIO_SINTOMALUGARINICIOID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="SINTOMAS_LUGARES_INICIO_SINTOMALUGARINICIOID_GENERATOR")
+	@SequenceGenerator(name="INV_LUGINICIO_ID_GENERATOR", sequenceName="SIVE.INV_LUGINICIO_SINTOMAS_SEQ",allocationSize=1 )
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_LUGINICIO_ID_GENERATOR")
 	@Column(name="SINTOMA_LUGAR_INICIO_ID", unique=true, nullable=false, precision=10)
 	private long sintomaLugarInicioId;
 

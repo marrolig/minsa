@@ -26,8 +26,8 @@ public class InvestigacionTransfusion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="INVESTIGACIONES_TRANSFUSIONES_INVESTIGACIONTRANSFUSIONID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGACIONES_TRANSFUSIONES_INVESTIGACIONTRANSFUSIONID_GENERATOR")
+	@SequenceGenerator(name="INV_TRANSFUSIONES_ID_GENERATOR", sequenceName="SIVE.INV_TRANSFUSIONES_SEQ",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_TRANSFUSIONES_ID_GENERATOR")
 	@Column(name="INVESTIGACION_TRANSFUSION_ID", unique=true, nullable=false, precision=10)
 	private long investigacionTransfusionId;
 

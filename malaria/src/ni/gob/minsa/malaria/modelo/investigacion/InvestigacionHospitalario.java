@@ -25,8 +25,8 @@ public class InvestigacionHospitalario implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="INVESTIGACIONES_HOSPITALARIOS_INVESTIGACIONHOSPITALARIOID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGACIONES_HOSPITALARIOS_INVESTIGACIONHOSPITALARIOID_GENERATOR")
+	@SequenceGenerator(name="INV_MALARIA_HOSP_ID_GENERATOR" , sequenceName="SIVE.INV_HOSP_SEQ",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_MALARIA_HOSP_ID_GENERATOR")
 	@Column(name="INVESTIGACION_HOSPITALARIO_ID", unique=true, nullable=false, precision=10)
 	private long investigacionHospitalarioId;
 

@@ -23,8 +23,8 @@ public class InvestigacionSintoma implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="INVESTIGACIONES_SINTOMAS_INVESTIGACIONSINTOMAID_GENERATOR" )
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INVESTIGACIONES_SINTOMAS_INVESTIGACIONSINTOMAID_GENERATOR")
+	@SequenceGenerator(name="INV_SINTOMAS_ID_GENERATOR", sequenceName="SIVE.INV_SINTOMAS_SEQ",allocationSize=1)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="INV_SINTOMAS_ID_GENERATOR")
 	@Column(name="INVESTIGACION_SINTOMA_ID", unique=true, nullable=false, precision=10)
 	private long investigacionSintomaId;
 

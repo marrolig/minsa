@@ -93,9 +93,9 @@ public class InvestigacionTransfusionDA implements InvestigacionTransfusionServi
             query.setParameter("pInvestigacionMalariaId", pInvestigacionMalariaId);
             query.setMaxResults(1);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            List<InvestigacionTransfusion> oInvestigacionLugar = (List<InvestigacionTransfusion>)query.getResultList();
+            List<InvestigacionTransfusion> oInvestigacionTransfusion = (List<InvestigacionTransfusion>)query.getResultList();
             
-    		if (oInvestigacionLugar==null || oInvestigacionLugar.size() < 1) {
+    		if (oInvestigacionTransfusion==null || oInvestigacionTransfusion.size() < 1) {
     			oResultado.setMensaje(Mensajes.ENCONTRAR_REGISTRO_NO_EXISTE);
     			oResultado.setOk(false);
     			oResultado.setFilasAfectadas(0);
@@ -104,7 +104,7 @@ public class InvestigacionTransfusionDA implements InvestigacionTransfusionServi
     		else {
     			oResultado.setFilasAfectadas(1);
     			oResultado.setOk(true);
-    			oResultado.setObjeto((Object)oInvestigacionLugar.get(0));
+    			oResultado.setObjeto((Object)oInvestigacionTransfusion.get(0));
     			return oResultado;
     		}
     	}

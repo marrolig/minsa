@@ -226,6 +226,11 @@ public class Operacion {
 					oUnidades.add(oUnidad);
 				}
 			}
+			if (pPropiedad.contains(Utilidades.ES_UNIDAD_TRANSFUSIONAL)) {
+				if (propiedadUnidadService.TienePropiedad(oUnidad.getUnidadId(), Utilidades.ES_UNIDAD_TRANSFUSIONAL)) {
+					oUnidades.add(oUnidad);
+				}
+			}
 		}
 		
 		return oUnidades;

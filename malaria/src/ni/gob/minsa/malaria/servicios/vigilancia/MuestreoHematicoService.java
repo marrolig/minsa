@@ -95,7 +95,7 @@ public interface MuestreoHematicoService {
 	 * @param pUnidadId Identificador de la unidad
 	 * @param pAnioEpi Anio epidemiológico en el cual se tomó la muestra.
 	 * @param pMesEpi Mes epidemiológico en el cual se tomó la muetra.
-	 * @param pSoloActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
+	 * @param pActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
 	 * o bien con una M10 sin cerrar.
 	 * @return Lista de {@link MuestreoHematico}
 	 */
@@ -103,7 +103,7 @@ public interface MuestreoHematicoService {
 			long pEntidadAdtvaId,
 			long pUnidadId,
 			int pAnioEpi,
-			boolean pSoloActivos,
+			boolean pActivos,
 			int pPaginaActual, 
 			int pTotalPorPagina, 
 			int pNumRegistros);
@@ -112,15 +112,24 @@ public interface MuestreoHematicoService {
 	 * @param pUnidadId Identificador de la unidad
 	 * @param pAnioEpi Anio epidemiológico en el cual se tomó la muestra.
 	 * @param pMesEpi Mes epidemiológico en el cual se tomó la muetra.
-	 * @param pSoloActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
+	 * @param pActivos <code>true</code> incluye únicamente las muestras hemáticas sin una M10 asociada,
 	 * o bien con una M10 sin cerrar.
 	 * @return Entero con el número de objetos {@link MuestreoHematico}.
 	 */
-	public int ContarPositivosPorUnidadActivos(
+	public int ContarPositivosPorUnidad(
 			long pEntidadAdtvaId,
 			long pUnidadId,
 			int pAnioEpi,
-			boolean pSoloActivos);
+			boolean pActivos);
+	
+	/**
+	 * @param pUnidadId Identificador de la unidad
+	 * @param pActivos <code>true</code> incluye únicamente los años con muestras hemáticas sin una M10 asociada,
+	 * o bien con una M10 sin cerrar.
+	 * @return Lista de años con muestreos hemáticos
+	 */
+	public List<Integer> ListarAñosConPositivosPorUnidad(long pEntidadAdtvaId,long pUnidadId,boolean pActivos);
+	
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante
 	 * la clave y número de lámina.  Retorna <code>null</code>

@@ -1,5 +1,6 @@
 package ni.gob.minsa.malaria.servicios.estructura;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
@@ -44,11 +45,40 @@ public interface UnidadService {
 	 * @return Lista de Unidades
 	 */
 	public List<Unidad> UnidadesActivasPorEntidadYTipo(long pEntidadId,long pTipoUnidadId);
-
-	public int ContarUnidadesPorMunicipio(long pMunicipioId,long pTipoUnidadId, String pNombre);
 	
+	/**
+	 * 
+	 * @param pEntidadId Identificador de la Entidad Administrativa
+	 * @param pTipoUnidadI
+	 * @return Lista de Unidades
+	 */
+	public List<Unidad>UnidadesActivasPorEntidadYCategoria(long pEntidadId,BigDecimal pCategoriaUnidad);
+	/**
+	 * 
+	 * @param pMunicipioId
+	 * @param pTipoUnidadId
+	 * @param pNombre
+	 * @return
+	 */
+	public int ContarUnidadesPorMunicipio(long pMunicipioId,long pTipoUnidadId, String pNombre);
+	/**
+	 * 
+	 * @param pMunicipioId
+	 * @param pTipoUnidadId
+	 * @param pNombre
+	 * @param pPaginaActual
+	 * @param pTotalPorPagina
+	 * @param pNumRegistros
+	 * @return
+	 */
 	public List<Unidad> UnidadesPorMunicipio(long pMunicipioId, long pTipoUnidadId, String pNombre, int pPaginaActual, int pTotalPorPagina, int pNumRegistros);
-
+	
+	/**
+	 * 
+	 * @param pCategoria
+	 * @return
+	 */
+	public List<Unidad> UnidadesActivasPorPropiedad(String pPropiedad);
 	/**
 	 * Retorna una lista de unidades de salud que contienen la literal especificada
 	 * en <code>pNombre</code>.  La búsqueda se puede tamizar en base a la entidad

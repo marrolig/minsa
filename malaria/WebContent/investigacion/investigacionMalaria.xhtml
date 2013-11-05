@@ -48,14 +48,31 @@
 					</p:ajaxStatus>
 					
 					<p:panel id="panControl" styleClass="panDefault">
-
+						
+						
+						 <h:outputLabel for="cboModo" styleClass="lblDefault" 
+							   value="Situación:" 
+							   style="position:absolute; left:10px; top:35px; width:100px;"/>
+							 <h:selectOneMenu id="cboModo" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:60px;top:35px;width:145px;"
+						 		value="#{investigacionMalariaBean.modo}"
+						 		disabled="#{investigacionMalariaBean.capaActiva==2}">
+						 				<f:selectItem itemValue="0" itemLabel="Pendiente de Cierre" />
+										<f:selectItem itemValue="1" itemLabel="Cerrado"/>
+									<p:ajax event="change" process="cboModo"
+									onstart="statusDialog.show();"
+									oncomplete="statusDialog.hide();"
+									update="panControl grdMuestreos grwMensaje"
+									listener="#{investigacionMalariaBean.onModoSelected}" />
+						</h:selectOneMenu>
+						
 						<h:outputLabel for="cboEntidad" styleClass="lblDefault"
-							value="Entidad Administrativa:"
-							style="position:absolute; left:20px; top:35px;" />
+							value="Entidad:"
+							style="position:absolute; left:215px; top:35px;" />
 						<h:selectOneMenu id="cboEntidad"
 							disabled="#{investigacionMalariaBean.capaActiva==2}"
 							styleClass="txtDefault cboDefault"
-							style="position:absolute; left:145px;top:35px;width:170px;"
+							style="position:absolute; left:260px;top:35px;width:170px;"
 							value="#{investigacionMalariaBean.entidadSelectedId}">
 							<f:selectItems value="#{investigacionMalariaBean.entidades}"
 								var="entidad" itemValue="#{entidad.entidadAdtvaId}"
@@ -63,15 +80,15 @@
 							<p:ajax event="change" process="cboEntidad"
 								onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
 								listener="#{investigacionMalariaBean.obtenerUnidades}"
-								update="panControl,grdMuestreos,grwMensaje" />
+								update="panControl grdMuestreos grwMensaje" />
 						</h:selectOneMenu>
 
 						<h:outputLabel for="cboUnidad" styleClass="lblDefault"
-							value="Unidad de Salud que realizó muestreo hemático:"
-							style="position:absolute; left:325px; top:35px;" />
+							value="Unidad:"
+							style="position:absolute; left:440px; top:35px;" />
 						<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault"
 							disabled="#{investigacionMalariaBean.capaActiva==2}"
-							style="position:absolute; left:565px;top:35px;width:250px;"
+							style="position:absolute; left:480px;top:35px;width:300px;"
 							value="#{investigacionMalariaBean.unidadSelectedId}">
 							<f:selectItem itemValue="0" itemLabel=" " />
 							<f:selectItems var="unidad" itemValue="#{unidad.unidadId}"
@@ -80,15 +97,15 @@
 							<p:ajax event="change" process="cboUnidad,cboAnioEpi"
 								onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
 								listener="#{investigacionMalariaBean.cambiarUnidad}"
-								update="grdMuestreos,grwMensaje" />
+								update="panControl grdMuestreos grwMensaje" />
 						</h:selectOneMenu>
 						
 						<h:outputText value="Año epidemiológico:" styleClass="lblDefault"
-								style="position:absolute; left:830px; top:35px;"  />
+								style="position:absolute; left:790px; top:35px;"  />
 							<h:selectOneMenu id="cboAnioEpi"
 								disabled="#{investigacionMalariaBean.capaActiva==2}"
 								styleClass="txtDefault cboDefault"
-								style="position:absolute; left:930px;top:35px;width:60px;"
+								style="position:absolute; left:890px;top:35px;width:60px;"
 								value="#{investigacionMalariaBean.anioEpiSelected}">
 								<f:selectItem itemValue="0" itemLabel=" " />
 								<f:selectItems 
@@ -347,7 +364,7 @@
 									update="panInvEpi,panInvLugInicio,panInvLugOtros,panInvLugAntes,grwMensaje" />
 							</h:selectOneMenu>
 						 	
-							<h:outputLabel for="txtEstadoFebril" styleClass="lblDefaultSmall" 
+							<h:outputLabel for="cboEstadoFebril" styleClass="lblDefaultSmall" 
 							   value="Estado Febril:" 
 							   style="position:absolute; left:200px; top:8px;"/>
 							<h:selectOneMenu id="cboEstadoFebril" styleClass="txtDefault cboDefault"  
@@ -368,10 +385,41 @@
 							 style="position:absolute; left:420px; top:23px; width:105px;"
 							 styleClass="txtDefault iniSintoma"
 							 value="#{investigacionMalariaBean.fechaInicioSintoma}" 
-							 disabled="#{investigacionMalariaBean.esSintomatico==0}"/>
-							<script type="text/javascript">
-									jQuery('.iniSintoma').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-							</script> 
+							 disabled="#{investigacionMalariaBean.esSintomatico==0}">
+							 <f:convertDateTime pattern="dd/MM/yyyy"/>
+								 <script type="text/javascript">
+										jQuery('.iniSintoma').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+								</script> 
+							 </h:inputText>
+							
+							<h:outputLabel for="cboViajeZonaRiesgo" styleClass="lblDefaultSmall" 
+							   value="Viajes en últimos 30 días a Zona de Riesgo?" 
+							   style="position:absolute; left:540px; top:8px;"/>
+							 <h:selectOneMenu id="cboViajeZonaRiesgo" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:540px;top:23px;width:180px;"
+						 		value="#{investigacionMalariaBean.viajeZonaRiesgo}">
+						 			<f:selectItem itemValue="0" itemLabel="No" /> 
+									<f:selectItem itemValue="1" itemLabel="Si" />
+									<f:selectItem itemValue="-1" itemLabel="No Sabe" />
+									<p:ajax event="change" process="cboViajeZonaRiesgo"
+									onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+									listener="#{investigacionMalariaBean.onViajeZonaRiesgoSelected}"
+									update="cboUsaMosquitero" />
+							</h:selectOneMenu>
+							
+							<h:outputLabel for="cboUsaMosquitero" styleClass="lblDefaultSmall" 
+							   value="Usó Mosquitero:" 
+							   style="position:absolute; left:735px; top:8px;"/>
+							 <h:selectOneMenu id="cboUsaMosquitero" styleClass="txtDefault cboDefault"  
+						 		style="position:absolute; left:735px;top:23px;width:150px;"
+						 		value="#{investigacionMalariaBean.usaMosquitero}"
+						 		disabled="#{investigacionMalariaBean.viajeZonaRiesgo==0}">
+						 			<f:selectItem itemValue=" " itemLabel=" "/>
+						 			<f:selectItem itemValue="0" itemLabel="No" /> 
+									<f:selectItem itemValue="1" itemLabel="Si" />
+									<f:selectItem itemValue="-1" itemLabel="No sabe" />
+							</h:selectOneMenu>
+								
 						</p:panel>
 						
 						<p:panel id="panInvLugInicio"
@@ -485,38 +533,8 @@
 					</p:panel>
 					
 						<p:panel id="panInvLugAntes"
-						 	 style="position:absolute; top:405px; left:5px; height:175px; width:960px;" 
+						 	 style="position:absolute; top:405px; left:5px; height:130px; width:960px;" 
 						 	 styleClass="panDetail">
-						 
-						 	<h:outputLabel for="cboViajeZonaRiesgo" styleClass="lblDefaultSmall" 
-							   value="Viajes en últimos 30 días a Zona de Riesgo?" 
-							   style="position:absolute; left:10px; top:8px;"/>
-							 <h:selectOneMenu id="cboViajeZonaRiesgo" styleClass="txtDefault cboDefault"  
-						 		style="position:absolute; left:10px;top:23px;width:180px;"
-						 		value="#{investigacionMalariaBean.viajeZonaRiesgo}"
-						 		disabled="#{investigacionMalariaBean.esSintomatico==0}">
-						 			<f:selectItem itemValue="0" itemLabel="No" /> 
-									<f:selectItem itemValue="1" itemLabel="Si" />
-									<p:ajax event="change" process="cboViajeZonaRiesgo"
-									onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
-									listener="#{investigacionMalariaBean.onViajeZonaRiesgoSelected}"
-									update="panInvLugAntes" />
-							</h:selectOneMenu>
-							
-							<h:outputLabel for="cboUsaMosquitero" styleClass="lblDefaultSmall" 
-							   value="Usó Mosquitero:" 
-							   style="position:absolute; left:210px; top:8px;"/>
-							 <h:selectOneMenu id="cboUsaMosquitero" styleClass="txtDefault cboDefault"  
-						 		style="position:absolute; left:210px;top:23px;width:150px;"
-						 		value="#{investigacionMalariaBean.usaMosquitero}"
-						 		disabled="#{investigacionMalariaBean.esSintomatico==0 or investigacionMalariaBean.viajeZonaRiesgo==-2 or investigacionMalariaBean.viajeZonaRiesgo==0}">
-						 			<f:selectItem  itemValue="-2" itemLabel=" "/>
-						 			<f:selectItem itemValue="0" itemLabel="No" /> 
-									<f:selectItem itemValue="1" itemLabel="Si" />
-									<f:selectItem itemValue="-1" itemLabel="No sabe" />
-							</h:selectOneMenu>
-							
-							<div style="position:absolute; top:50px;left:10px;">
 								<p:dataTable id="grdSintomaLugarAnte" var="lugarAnte"
 										rowKey="#{lugarAnte.sintomaLugarAnteSelectedId}"
 										styleClass="panDetail"
@@ -572,7 +590,7 @@
 									</p:dataTable>
 									<h:panelGroup id="panFooterLugAnteList" class="dtFooter"
 									 style="position: absolute; width:942px; height:20px;">
-											 	<h:outputLink rendered="#{!(investigacionMalariaBean.esSintomatico==0 or investigacionMalariaBean.viajeZonaRiesgo==-2 or investigacionMalariaBean.viajeZonaRiesgo==0)}"
+											 	<h:outputLink rendered="#{!(investigacionMalariaBean.esSintomatico==0)}"
 											 				  value="javascript:void(0)" 
 											 				  style="position:relative; top:3px; padding-top:1px;padding-bottom:1px;padding-left:10px;padding-right:10px;" 
 											 				  styleClass="navDelLink">
@@ -584,8 +602,7 @@
 											 		</p:ajax>
 											 	</h:outputLink>
 									</h:panelGroup>
-								</div>
-							</p:panel>
+						</p:panel>
 							
 						<p:panel id="panInvLugOtros"
 						 	 style="position:absolute; top:595px; left:5px; height:130px; width:960px;" 
@@ -768,9 +785,9 @@
 								
 								<h:outputLabel for="txtInicioTratMClinico" styleClass="lblDefaultSmall" 
 								   value="Inicio de Tratamiento:" 
-								   style="position:absolute; left:135px; top:8px;"/>
+								   style="position:absolute; left:125px; top:8px;"/>
 								 <h:inputText id="txtInicioTratMClinico" 
-								 style="position:absolute; left:135px; top:23px; width:100px;"
+								 style="position:absolute; left:125px; top:23px; width:85px;"
 								 styleClass="txtDefault inicioTratMClinico" 
 								 value="#{investigacionMalariaBean.inicioTratamientoMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
@@ -781,9 +798,9 @@
 								
 								<h:outputLabel for="txtFinTratamientoMClinico" styleClass="lblDefaultSmall" 
 								   value="Fin de Tratamiento:" 
-								   style="position:absolute; left:255px; top:8px;"/>
+								   style="position:absolute; left:225px; top:8px;"/>
 								 <h:inputText id="txtFinTratamientoMClinico" 
-								 style="position:absolute; left:255px; top:23px; width:100px;"
+								 style="position:absolute; left:225px; top:23px; width:85px;"
 								 styleClass="txtDefault finTratamientoMClinico" 
 								 value="#{investigacionMalariaBean.finTratamientoMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
@@ -794,54 +811,63 @@
 								
 								<h:outputLabel for="txtMedicamentosAntiMalarico" styleClass="lblDefaultSmall" 
 								   value="Medicamento Antimalárico Utilizado en el Tratatamiento:" 
-								   style="position:absolute; left:380px; top:8px;"/>
+								   style="position:absolute; left:325px; top:8px;"/>
 								<h:inputText id="txtMedicamentosAntiMalarico"
 									disabled="true" 
-								 	style="position:absolute; left:380px; top:23px; width:525px;"
-								 	styleClass="txtDefault"/>
+									value="#{investigacionMalariaBean.medicamentosEnLista}"
+								 	style="position:absolute; left:325px; top:23px; width:330px;"
+								 	styleClass="txtDefault">
+									 	<h:outputLink id="btnEliminarMedicamento"
+												  value="javascript:void(0)" 
+												  style="position:absolute; top:25px; left:645px;z-index:1001">
+											<h:graphicImage value="/images/delete.gif" 
+											width="15" height="15" style="right:0px; border:0px;"  />
+											<p:ajax event="click"
+											process="@this"
+													listener="#{investigacionMalariaBean.onEliminarMedicamentoAntiMalarico}"
+													update="txtMedicamentosAntiMalarico btnEliminarMedicamento"/>
+										</h:outputLink>	
+								 	</h:inputText>
 								 	
-								 	<h:outputLink id="quitarMedicamentos"
-											  value="javascript:void(0)" 
-											  style="position:absolute; top:24px; left:915px;">
-										<h:graphicImage value="/images/delete.gif" 
-										width="15" height="15" style="right:0px; border:0px;"  />
-										<p:ajax process="@this"
-												update="txtUnidadMClinico quitarUnidad"/>
-									</h:outputLink>	
-								 	
-									<h:outputLink onclick="dlgListaMedicamentos.show()"
-											  value="javascript:void(0)" 
-											  style="position:absolute; top:23px; left:932px;">
+									<h:outputLink value="javascript:void(0)" 
+											  style="position:absolute; top:23px; left:664px;">
 										<h:graphicImage value="/images/BusquedaOn.png" width="18" height="18" style="right:0px; border:0px;"  />
-										
+										<p:ajax process="@this"
+												event="click"
+												listener="#{investigacionMalariaBean.agregarMedicamentos}"
+												update="grdMedicamento"
+												oncomplete="dlgListaMedicamentos.show()"/>
 									</h:outputLink>
 									
 								<h:outputLabel for="txtUnidadMClinico" styleClass="lblDefaultSmall" 
 								   value="Unidad de Hospitalización:" 
-								   style="position:absolute; left:10px; top:50px;"/>
+								   style="position:absolute; left:687px; top:8px;"/>
 								<h:inputText id="txtUnidadMClinico"
 									disabled="true" 
-								 	style="position:absolute; left:10px; top:65px; width:305px;"
+								 	style="position:absolute; left:687px; top:23px; width:248px;"
 								 	styleClass="txtDefault"
 								 	value="#{investigacionMalariaBean.unidadMClinicoSelected.nombre}"/>
-								
-								
-								<h:outputLink id="quitarUnidad"
-											  disabled="#{investigacionMalariaBean.manejoClinico==0 ||investigacionMalariaBean.unidadMClinicoSelected ==null }"
+							
+								<h:outputLink id="btnQuitarUnidadHosp"
+											  disabled="#{investigacionMalariaBean.manejoClinico==0 ||investigacionMalariaBean.unidadMClinicoSelected ==null}"
 											  value="javascript:void(0)" 
-											  style="position:absolute; top:66px; left:325px;">
-									<h:graphicImage value="#{investigacionMalariaBean.manejoClinico==0 ||investigacionMalariaBean.unidadMClinicoSelected ==null ? '/images/delete-hover.gif' :'/images/delete.gif'}" 
+											  style="position:absolute; top:25px; left:924px;z-index:1001">
+									<h:graphicImage value="/images/delete.gif" 
 									width="15" height="15" style="right:0px; border:0px;"  />
-									<p:ajax process="@this"
-											update="txtUnidadMClinico quitarUnidad"/>
-								</h:outputLink>	
-								 	
-								<h:outputLink onclick="dlgListaUnidadHospt.show()"
-									 		disabled="#{investigacionMalariaBean.manejoClinico==0}"
+									<p:ajax event="click"
+											process="@this"
+											update="txtUnidadMClinico btnQuitarUnidadHosp"
+											listener="#{investigacionMalariaBean.onQuitarUnidadHosp}"/>
+								</h:outputLink>					 	
+								<h:outputLink disabled="#{investigacionMalariaBean.manejoClinico==0}"
 											 value="javascript:void(0)" 
-											 style="position:absolute; top:65px; left:343px;">
+											 style="position:absolute; top:23px; left:945px;z-index:1001">
 									<h:graphicImage value="#{investigacionMalariaBean.manejoClinico==0 ? '/images/BusquedaOff.png' : '/images/BusquedaOn.png'}"
 									 width="18" height="18" style="right:0px; border:0px;"  />
+									 <p:ajax event="click"
+									 		listener="#{investigacionMalariaBean.agregarUnidadHosp}"
+									 		update="panUnidadHosp panButtonUnidadHosp"
+									 		oncomplete="dlgUnidadHosp.show();"/>
 								</h:outputLink>
 								
 								<h:outputLabel for="txtNumExpMClinico" styleClass="lblDefaultSmall" 
@@ -1242,10 +1268,17 @@
 								 style="position:absolute; top:407px; width:990px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 							
 								<p:commandButton id="btnGuardar" value="Guardar" 
+											     disabled="#{investigacionMalariaBean.modo==1}"
 												 styleClass="btnDefault" style="font-size:11px;"  
 												 update="grwMensaje" 
-												 process="@this" />
+												 process="@this capa2" 
+												 actionListener="#{investigacionMalariaBean.guardar}"/>
 								
+								<p:commandButton id="btnEliminar" value="Eliminar" 
+								 				 disabled="#{investigacionMalariaBean.investigacionMalariaSelectedId==0 or investigacionMalariaBean.modo==1}"
+												 styleClass="btnDefault" style="font-size:11px;"  
+												 onclick="dlgEliminar.show(); return false;"/>
+												 
 								<p:commandButton id="btnRegresar" value="Regresar"
 								 onstart="statusDialog.show()" 
 								 oncomplete="statusDialog.hide();"
@@ -1261,22 +1294,129 @@
 						</p:panel>
 						
 						
-						
-						<!-- Modal para asociar una Unidad de Hospitalización  -->
-					  <p:dialog id="dlgListaUnidadHospt" header="Lista de Unidades"
+					<!-- Modal para confirmar la eliminación de la Investigacion M10 -->
+					<p:confirmDialog message="Desea eliminar el lugar vistado?"
+							modal="true" 
+							header="Aviso" 
+							severity="alert" 
+							widgetVar="dlgEliminar">
+						<p:commandButton id="btnSiEliminar" value="Si"  
+										 process="btnSiEliminar" ajax="true"
+										 styleClass="btnDefault" style="font-size:11px;" 
+										 update="capa1 capa2 grwMensaje"
+										 actionListener="#{investigacionMalariaBean.eliminar}"  
+										 oncomplete="dlgEliminar.hide()">
+						</p:commandButton>
+						<p:commandButton value="No" onclick="dlgEliminar.hide()"
+										 style="font-size:11px;" styleClass="btnDefault" 
+										 type="button" /> 
+					</p:confirmDialog>
+					
+					<!-- Modal para asociar una Unidad de Hospitalización  -->
+					 <p:dialog id="dlgUnidadHosp" header="Lista de Unidades"
 					  modal="true" 
-					  widgetVar="dlgListaUnidadHospt" height="300" width="605"
+					  widgetVar="dlgUnidadHosp" height="140" width="310"
 					  resizable="false">
-					 	
+					 		<p:panel id="panUnidadHosp" 
+					 		style="position:absolute; width:280px;height:90px;top:10px;left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;"
+							 styleClass="panButton">
+					 			<h:outputLabel for="cboEntidadHosp" styleClass="lblDefault"
+								value="Entidad Administrativa:"
+									style="position:absolute; left:10px; top:8px;" />
+								<h:selectOneMenu id="cboEntidadHosp"
+									styleClass="txtDefault cboDefault"
+									style="position:absolute; left:10px;top:23px;width:250px;"
+									value="#{investigacionMalariaBean.entidadMClinicoSelectedId}">
+									<f:selectItem itemValue="0" itemLabel=" " />
+									<f:selectItems value="#{investigacionMalariaBean.entidadesMClinico}"
+										var="entidad" itemValue="#{entidad.entidadAdtvaId}"
+										itemLabel="#{entidad.nombre}" />
+									<p:ajax event="change" process="cboEntidadHosp"
+										onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+										listener="#{investigacionMalariaBean.obtenerUnidadesHospitalizacion}"
+										update="cboUnidadHosp,panButtonUnidadHosp,grwMensaje" />
+								</h:selectOneMenu>
+		
+								<h:outputLabel for="cboUnidadHosp" styleClass="lblDefault"
+									value="Unidad de Salud:"
+									style="position:absolute; left:10px; top:50px;" />
+								<h:selectOneMenu id="cboUnidadHosp" styleClass="txtDefault cboDefault"
+									style="position:absolute; left:10px;top:65px;width:250px;"
+									value="#{investigacionMalariaBean.unidadMClinicoSelectedId}">
+									<f:selectItem itemValue="0" itemLabel=" " />
+									<f:selectItems var="unidad" itemValue="#{unidad.unidadId}"
+										itemLabel="#{unidad.nombre}"
+										value="#{investigacionMalariaBean.unidadesMClinico}" />
+									<p:ajax event="change" process="cboUnidadHosp"
+										onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+										listener="#{investigacionMalariaBean.onAceptarUnidadHosp}"
+										update="panButtonUnidadHosp,grwMensaje" />
+								</h:selectOneMenu>
+					 		</p:panel>
+						 	
+						 	<p:panel id="panButtonUnidadHosp" 
+							 style="position:absolute; width:280px; top:105px;left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;"
+							 styleClass="panButton">
+								<p:commandButton id="btnAceptarUnidadHosp"
+									value="Aceptar"
+									disabled="#{investigacionMalariaBean.unidadMClinicoSelectedId==0}"
+									process="@this" ajax="true" 
+									styleClass="btnDefault" style="font-size:11px;"
+									update="frmInvest:txtUnidadMClinico btnQuitarUnidadHosp grwMensaje "
+									oncomplete="dlgUnidadHosp.hide();"
+									actionListener="#{investigacionMalariaBean.onAceptarUnidadHosp}">
+								</p:commandButton>
+	
+								<p:commandButton value="Cancelar"
+									onclick="dlgUnidadHosp.hide()" style="font-size:11px;"
+									type="button" styleClass="btnDefault" />
+							</p:panel>
+					 		
 					  </p:dialog>	
 						
 					  <!-- Modal para asociar medicamentos antimaláricos  -->
 					  <p:dialog id="dlgListaMedicamentos" header="Lista de Medicamentos Antimaláricos"
 					  modal="true" 
-					  widgetVar="dlgListaMedicamentos" height="300" width="605"
+					  height="350" width="605"
+					  widgetVar="dlgListaMedicamentos" 
 					  resizable="false">
-					 
-					  </p:dialog>	
+						<div style="position:absolute;top:8px;left:10px;">
+							<p:dataTable id="grdMedicamento" var="medicamento"
+								rowKey="#{medicamento.catalogoId}"
+								selection="#{investigacionMalariaBean.medicamentoSelected}" selectionMode="single"
+								styleClass="panDetail"
+								emptyMessage="No hay medicamentos antimaláricos que mostrar"
+								style="width:575px;"
+								value="#{investigacionMalariaBean.medicamentosAntiMalaricos}"
+								scrollable="true"
+								scrollHeight="250">
+								<p:ajax event="rowSelect" process="@this"
+									update=":frmInvest:btnAceptarMedicamento,:frmInvest:grwMensaje" />
+	
+								<p:column headerText="Medicamento"
+									style="text-align:left;width:120px !important">
+									<h:outputText value="#{medicamento.valor}" />
+								</p:column>
+							</p:dataTable>
+						</div>
+						<p:panel id="panButtonNuevoMedicamento" 
+						 style="position:absolute; width:575px; top:290px;left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;"
+						 styleClass="panButton">
+							<p:commandButton id="btnAceptarMedicamento"
+								value="Aceptar"
+								disabled="#{investigacionMalariaBean.medicamentoSelected==null}"
+								process="@this" ajax="true" 
+								styleClass="btnDefault" style="font-size:11px;"
+								update="txtMedicamentosAntiMalarico grdMedicamento grwMensaje "
+								oncomplete="dlgListaMedicamentos.hide();"
+								actionListener="#{investigacionMalariaBean.onAceptarMedicamentoAntiMalarico}">
+							</p:commandButton>
+
+							<p:commandButton value="Cancelar"
+								onclick="dlgListaMedicamentos.hide()" style="font-size:11px;"
+								type="button" styleClass="btnDefault" />
+						</p:panel>
+					</p:dialog>	
 					  
 					<!-- Modal para confirmar eliminación de lugares donde se presentaron síntomas parecidos -->
 					<p:confirmDialog message="Desea eliminar el lugar vistado?"
@@ -1296,7 +1436,6 @@
 										 type="button" /> 
 					</p:confirmDialog>
 					
-				
 					<!-- Modal para agregar un lugar visitado en los últimos 30 días-->
 					<p:dialog id="dlgNuevoSintomaLugOtro" modal="true"
 						widgetVar="dlgNuevoSintomaLugOtro" closable="false" head=""
