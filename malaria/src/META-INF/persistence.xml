@@ -73,6 +73,8 @@
 		<class>ni.gob.minsa.malaria.modelo.encuesta.MovimientoAgua</class>
 		<class>ni.gob.minsa.malaria.modelo.encuesta.TiposCriaderos</class>
 		<class>ni.gob.minsa.malaria.modelo.encuesta.TurbidezAgua</class>
+		<class>ni.gob.minsa.malaria.modelo.rociado.ChecklistMalaria</class>
+		<class>ni.gob.minsa.malaria.modelo.rociado.RociadosMalaria</class>
 		<properties>
 			<property name="eclipselink.logging.level" value="FINEST"/>
 			<property name="eclipselink.logging.timestamp" value="true"/>
