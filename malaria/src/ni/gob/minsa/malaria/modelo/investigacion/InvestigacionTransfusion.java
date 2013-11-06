@@ -35,8 +35,12 @@ public class InvestigacionTransfusion implements Serializable {
 	@Column(name="FECHA_TRANSFUSION")
 	private Date fechaTransfusion;
 
-    @OneToOne
-	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+  
+	 @OneToOne( optional = false,targetEntity=InvestigacionMalaria.class)
+	 @JoinColumns({  
+           @JoinColumn(name = "INVESTIGACION_MALARIA", referencedColumnName = "INVESTIGACION_MALARIA_ID",nullable=false),  
+           @JoinColumn(name = "TRANSFUSION", referencedColumnName = "SINTOMATICO",nullable=false) 
+     }) 
 	private InvestigacionMalaria investigacionMalaria;
 
     @ManyToOne
@@ -47,7 +51,7 @@ public class InvestigacionTransfusion implements Serializable {
 	@JoinColumn(name="PAIS", referencedColumnName="CODIGO_ALFADOS")
 	private Pais pais;
 
-	@Column(nullable=false, precision=1)
+	@Column(name="TRANSFUSION",nullable=false, precision=1,insertable=false, updatable=false )
 	private BigDecimal transfusion;
 
 	@ManyToOne

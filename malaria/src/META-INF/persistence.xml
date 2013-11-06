@@ -67,12 +67,6 @@
 	    <class>ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte</class>
 	    <class>ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio</class>
 	    <class>ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.ClasificacionCaso</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.ClasificacionClinica</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.ConfirmacionDiagnostico</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.Medicamento</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.TipoComplicacion</class>
-		<class>ni.gob.minsa.malaria.modelo.investigacion.TipoRecurrencia</class>
 		<properties>
 			<property name="eclipselink.logging.level" value="FINEST"/>
 			<property name="eclipselink.logging.timestamp" value="true"/>

@@ -33,8 +33,7 @@ public class InvestigacionMedicamentoDA implements
     
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<InvestigacionMedicamento> MedicamentosPorInvestigacion(
-			long pInvestigacionMalariaId) {
+	public List<InvestigacionMedicamento> EncontrarPorInvestigacionMalaria(	long pInvestigacionMalariaId) {
 		EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
 	    try{
 	    	Query query = oEM.createNamedQuery("InvestigacionMedicamento.listar");

@@ -85,4 +85,26 @@ public class InvestigacionMedicamento implements Serializable {
 		this.investigacionMalaria = investigacionMalaria;
 	}
 	
+
+    @Override
+    public boolean equals(final Object pObject) {
+    	
+    	if(pObject==null){
+    		return  false;
+        }
+        if (!(pObject instanceof InvestigacionMedicamento)){
+        	return false;
+        }
+        InvestigacionMedicamento oInvMedicamento = (InvestigacionMedicamento) pObject;
+        if((oInvMedicamento.getMedicamento()==null || oInvMedicamento.getInvestigacionesMalaria()==null) ||
+        		(this.getMedicamento()==null || this.getInvestigacionesMalaria()==null)){
+        	return false;
+        }
+        if ((this.getMedicamento().getCodigo().equals(oInvMedicamento.getMedicamento().getCodigo())) &&
+        		(this.getInvestigacionesMalaria().getInvestigacionMalariaId() == oInvMedicamento.getInvestigacionesMalaria().getInvestigacionMalariaId())){
+        	return true;
+         }
+        
+        return false;
+    }
 }

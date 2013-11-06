@@ -44,11 +44,15 @@ public class InvestigacionHospitalario implements Serializable {
 	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
 	private Date fechaRegistro;
 
-    @OneToOne
-	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
+
+    @OneToOne( optional = false,targetEntity=InvestigacionMalaria.class)
+	@JoinColumns({  
+           @JoinColumn(name = "INVESTIGACION_MALARIA", referencedColumnName = "INVESTIGACION_MALARIA_ID",nullable=false),  
+           @JoinColumn(name = "MANEJO_CLINICO", referencedColumnName = "SINTOMATICO",nullable=false) 
+    }) 
 	private InvestigacionMalaria investigacionMalaria;
 
-	@Column(name="MANEJO_CLINICO", nullable=false, precision=1)
+	@Column(name="MANEJO_CLINICO", nullable=false, precision=1,insertable=false, updatable=false)
 	private BigDecimal manejoClinico;
 
 	@ManyToOne

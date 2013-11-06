@@ -1,7 +1,5 @@
 package ni.gob.minsa.malaria.modelo.investigacion;
 
-import java.io.Serializable;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
@@ -21,7 +19,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="EFebr")
 @Cache(alwaysRefresh=true,disableHits=true)
-public class EstadoFebril extends Catalogo implements Serializable {
+public class EstadoFebril extends Catalogo  {
 	private static final long serialVersionUID = 1L;
 	
 	public EstadoFebril(){

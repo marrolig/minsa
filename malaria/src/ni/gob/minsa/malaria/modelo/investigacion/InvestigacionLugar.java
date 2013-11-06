@@ -43,7 +43,7 @@ public class InvestigacionLugar implements Serializable {
 	private BigDecimal infeccionResidencia;
 
 	@OneToOne
-	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false,insertable=false,updatable=false)
+	@JoinColumn(name="INVESTIGACION_MALARIA", referencedColumnName="INVESTIGACION_MALARIA_ID",nullable=false)
 	private InvestigacionMalaria investigacionMalaria;
 
 	@ManyToOne

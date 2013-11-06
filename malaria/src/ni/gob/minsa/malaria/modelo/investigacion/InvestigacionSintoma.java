@@ -39,7 +39,7 @@ public class InvestigacionSintoma implements Serializable {
 	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1)
 	private BigDecimal inicioResidencia;
 
-	@OneToOne( optional = false,targetEntity=InvestigacionMalaria.class)
+	 @OneToOne( optional = false,targetEntity=InvestigacionMalaria.class)
 	 @JoinColumns( {  
            @JoinColumn(name = "INVESTIGACION_MALARIA", referencedColumnName = "INVESTIGACION_MALARIA_ID",nullable=false),  
            @JoinColumn(name = "SINTOMATICO", referencedColumnName = "SINTOMATICO",nullable=false) 

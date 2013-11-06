@@ -1,6 +1,5 @@
 package ni.gob.minsa.malaria.modelo.investigacion;
 
-import java.io.Serializable;
 import javax.persistence.*;
 
 import org.eclipse.persistence.annotations.Cache;
@@ -13,11 +12,12 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  * confirmación diagnóstica bajo el código 
  * CDIAG
  */
+
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value="IMDIAG")
 @Cache(alwaysRefresh=true,disableHits=true)
-public class ConfirmacionDiagnostico extends Catalogo implements Serializable {
+public class ConfirmacionDiagnostico extends Catalogo {
 
 	private static final long serialVersionUID = 1L;
 

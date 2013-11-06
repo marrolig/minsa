@@ -433,6 +433,7 @@
 						 		style="position:absolute; left:10px;top:23px;width:185px;"
 						 		value="#{investigacionMalariaBean.sintomaInicio}"
 						 		disabled="#{investigacionMalariaBean.esSintomatico==0}">
+						 			<f:selectItem itemValue=" " itemLabel=" " /> 
 						 			<f:selectItem itemValue="0" itemLabel="Otra Localidad" /> 
 									<f:selectItem itemValue="1" itemLabel="Lugar de Residencia Actual" />
 									<f:selectItem itemValue="-1" itemLabel="No sabe" />
@@ -1270,7 +1271,7 @@
 								<p:commandButton id="btnGuardar" value="Guardar" 
 											     disabled="#{investigacionMalariaBean.modo==1}"
 												 styleClass="btnDefault" style="font-size:11px;"  
-												 update="grwMensaje" 
+												 update="capa2 grwMensaje" 
 												 process="@this capa2" 
 												 actionListener="#{investigacionMalariaBean.guardar}"/>
 								

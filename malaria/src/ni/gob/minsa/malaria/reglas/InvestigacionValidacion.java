@@ -88,6 +88,16 @@ public class InvestigacionValidacion {
 				oResultado.setMensaje("Si se efectuaron muestreos posteriores para el control parasitario, debe indicar si el control parasitario fue negativo o no");
 				return oResultado;
 			}
+			if(pInvestigacionMalaria.getDiasPosterioresControl()==null){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Si se efectuaron muestreos posteriores para el control parasitario, debe indicar el número de días posteriores");
+				return oResultado;
+			}
+			if(pInvestigacionMalaria.getDiasPosterioresControl()==null){
+				oResultado.setOk(false);
+				oResultado.setMensaje("El número de días posteriores al tratamiento en el que se efectuó el último control parasitario no puede ser menor a uno");
+				return oResultado;
+			}
 		}
 		
 		if(pInvestigacionMalaria.getInicioTratamiento()==null && pInvestigacionMalaria.getFinTratamiento()!=null){
@@ -144,7 +154,7 @@ public class InvestigacionValidacion {
 		
 		//Validando datos de investigación asociados a investigación de medicamentos
 		if(pInvestigacionMedicamento!=null){
-			for(int i=0;oResultado.isOk()==false || pInvestigacionMedicamento.size() <=i;i++){
+			for(int i=0;oResultado.isOk()==false && pInvestigacionMedicamento.size() <i;i++){
 				oResultado = validarInvestigacionMedicamento(pInvestigacionMedicamento.get(0));
 			}
 			if(oResultado.isOk()==false) return oResultado;
@@ -195,7 +205,7 @@ public class InvestigacionValidacion {
 			oResultado = validarInvestigacionTransfusion(pInvestigacionTransfusion);
 			if(oResultado.isOk()==false) return oResultado;
 		}
-		if(pInvestigacionMalaria.getManejoClinico().intValue()==1 && pInvestigacionTransfusion==null){
+		if(pInvestigacionMalaria.getManejoClinico().intValue()==1 && pInvestigacionHospitalario==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Si se indica que hubo manejo clínico terapéutico, se debe definir la información relacionada a investigación hospitalaria");
 			return oResultado;
@@ -302,6 +312,20 @@ public class InvestigacionValidacion {
 			}
 		}
 		
+		if (pInvestigacionTransfusion.getPais() == null && pInvestigacionTransfusion.getMunicipio() == null
+				&& pInvestigacionTransfusion.getUnidad()==null) {
+			oResultado.setOk(false);
+			oResultado
+					.setMensaje("Debe de indicar el país donde ocurre la transfusión");
+			return oResultado;
+		}
+		
+		if (pInvestigacionTransfusion.getPais() == null && pInvestigacionTransfusion.getMunicipio() == null) {
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si la transfusión ocurre a nivel nacional, debe indicar el municipio");
+			return oResultado;
+		}
+
 		oResultado.setOk(true);
 		return oResultado;
 	}
@@ -314,9 +338,9 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
-		if(!(pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionHospitalario.getInvestigacionMalaria().getFechaDefuncion()==null)) {
+		if(!(pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionHospitalario.getFechaIngreso().after(new Date()))) {
 			if (pInvestigacionHospitalario.getInvestigacionMalaria().getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())) {
-				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de ingreso a hospitalización");
+				oResultado.setMensaje("La fecha en la cual ingreso a la unidad de salud para el manejo clínico hospitalario no puede ser posterior a la fecha actual");
 				oResultado.setOk(false);
 				return oResultado;
 			}
@@ -328,12 +352,28 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
+		if(pInvestigacionHospitalario.getExpediente()==null){
+			oResultado.setMensaje("La número de expediente en la unidad de hospitalización es requerido");
+			oResultado.setOk(false);
+			return oResultado;
+		}
+		
 		if(pInvestigacionHospitalario.getMunicipio()==null){
 			oResultado.setMensaje("El municipio en el que se encuentra la unidad de hospitalización es requerida");
 			oResultado.setOk(false);
 			return oResultado;
 		}
 		
+		if(pInvestigacionHospitalario.getDiasEstancia()==null){
+			oResultado.setMensaje("Debe indicar el número de días de estancia en la unidad de hospitalización");
+			oResultado.setOk(false);
+			return oResultado;
+		}
+		if(pInvestigacionHospitalario.getDiasEstancia().intValue() < 1){
+			oResultado.setMensaje("Si el paciente ha sido hospitalizado, el número de días no puede ser menor a uno.");
+			oResultado.setOk(false);
+			return oResultado;
+		}
 		oResultado.setOk(true);
 		return oResultado;
 	}
@@ -378,7 +418,6 @@ public class InvestigacionValidacion {
 			}
 		}
 		
-
 		oResultado.setOk(true);
 		return oResultado;
 	}
@@ -513,9 +552,19 @@ public class InvestigacionValidacion {
 			oResultado.setMensaje("Debe indicar el año de inicio de los síntomas");
 			return oResultado;
 		}
-		if(pLugarOtro.getEstadia()==null){
+		if(pLugarOtro.getAñoInicio().intValue()< 1991){
+			oResultado.setOk(false);
+			oResultado.setMensaje("El año de inicio de los síntomas no puede ser menor a 1990");
+			return oResultado;
+		}
+		if(pLugarOtro.getEstadia()==null ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar el número de días de permanencia en el lugar visitado");
+			return oResultado;
+		}
+		if(pLugarOtro.getEstadia().intValue() < 1){
+			oResultado.setOk(false);
+			oResultado.setMensaje("El número de días de estadía en el lugar donde se presentaron los síntomas no puede ser menor a uno");
 			return oResultado;
 		}
 		if(pLugarOtro.getDiagnosticoPositivo()==null){

@@ -26,7 +26,7 @@ public interface InvestigacionMedicamentoService {
      * @param pInvestigacionMalariaId Identificador de la investigación de malaria
      * @return Una lista de objetos {@link InvestigacionMedicamento}
      */
-	public List<InvestigacionMedicamento> MedicamentosPorInvestigacion(long pInvestigacionMalariaId);
+	public List<InvestigacionMedicamento> EncontrarPorInvestigacionMalaria(long pInvestigacionMalariaId);
 
 
     /**
