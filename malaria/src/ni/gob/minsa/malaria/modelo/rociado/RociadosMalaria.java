@@ -31,32 +31,32 @@ public class RociadosMalaria implements Serializable {
 	private String boquilla;
 
 	@Column(nullable=false, precision=3, scale=1)
-	private BigDecimal carga;
+	private Float carga;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal cerradas;
+	private Short cerradas;
 
 	@Column(precision=2)
-	private BigDecimal ciclo;
+	private Short ciclo;
 
 	@ManyToOne
 	@JoinColumn(name="COMUNIDAD",referencedColumnName="CODIGO",nullable=false)
 	private Comunidad comunidad;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal construccion;
+	private Short construccion;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal control;
+	private Short control;
 
 	@Column(name="DESALOJO_ADECUADO", nullable=false, precision=4)
-	private BigDecimal desalojoAdecuado;
+	private Short desalojoAdecuado;
 
 	@Column(name="DESALOJO_INADECUADO", nullable=false, precision=4)
-	private BigDecimal desalojoInadecuado;
+	private Short desalojoInadecuado;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal enfermos;
+	private Short enfermos;
 
 	@ManyToOne
 	@JoinColumn(name="ENTIDAD_ADTVA", nullable=false)
@@ -71,13 +71,13 @@ public class RociadosMalaria implements Serializable {
 	private Date fecha;
 
 	@Column(nullable=false, precision=6, scale=2)
-	private BigDecimal formulacion;
+	private Float formulacion;
 
 	@Column(name="HAB_NO_ROCIADAS", nullable=false, precision=4)
-	private BigDecimal habNoRociadas;
+	private Short habNoRociadas;
 
 	@Column(name="HAB_ROCIADAS", nullable=false, precision=4)
-	private BigDecimal habRociadas;
+	private Short habRociadas;
 
 	@ManyToOne
 	@JoinColumn(name="INSECTICIDA",referencedColumnName="CODIGO",nullable=false)
@@ -88,10 +88,10 @@ public class RociadosMalaria implements Serializable {
 	private DivisionPolitica municipio;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal otros;
+	private Short otros;
 
 	@Column(nullable=false, precision=4)
-	private BigDecimal renuentes;
+	private Short renuentes;
 
 	@Column(length=50)
 	private String rociador;
@@ -101,19 +101,33 @@ public class RociadosMalaria implements Serializable {
 	private Sector sector;
 
 	@Column(name="TOTAL_CARGAS", nullable=false, precision=6, scale=1)
-	private BigDecimal totalCargas;
+	private Float totalCargas;
 
 	@Column(name="VIVIENDAS_PROGRAMADAS", nullable=false, precision=4)
-	private BigDecimal viviendasProgramadas;
+	private Short viviendasProgramadas;
 
 	@Column(name="VIVIENDAS_ROCIADAS", nullable=false, precision=4)
-	private BigDecimal viviendasRociadas;
+	private Short viviendasRociadas;
+	
+    @Temporal( TemporalType.DATE)
+	@Column(nullable=false)
+	private Date fechaRegistro;
+	
+    @Column(name="USUARIO_REGISTRO",length=60)
+	private String usuarioRegistro;
+	
+	@Column(name="HABITANTES_PROTEGIDOS",nullable=false,precision=4)
+	private Short habitantesProtegidos;
+	
+	
+	@Column(name="TOTAL_UTILIZADAS", nullable=false, precision=6, scale=1)
+	private Float totalUtilizadas; 
 
     public RociadosMalaria() {
     }
 
 	public long getRociadoId() {
-		return this.rociadoId;
+		return rociadoId;
 	}
 
 	public void setRociadoId(long rociadoId) {
@@ -121,87 +135,87 @@ public class RociadosMalaria implements Serializable {
 	}
 
 	public String getBoquilla() {
-		return this.boquilla;
+		return boquilla;
 	}
 
 	public void setBoquilla(String boquilla) {
 		this.boquilla = boquilla;
 	}
 
-	public BigDecimal getCarga() {
-		return this.carga;
+	public Float getCarga() {
+		return carga;
 	}
 
-	public void setCarga(BigDecimal carga) {
+	public void setCarga(Float carga) {
 		this.carga = carga;
 	}
 
-	public BigDecimal getCerradas() {
-		return this.cerradas;
+	public Short getCerradas() {
+		return cerradas;
 	}
 
-	public void setCerradas(BigDecimal cerradas) {
+	public void setCerradas(Short cerradas) {
 		this.cerradas = cerradas;
 	}
 
-	public BigDecimal getCiclo() {
-		return this.ciclo;
+	public Short getCiclo() {
+		return ciclo;
 	}
 
-	public void setCiclo(BigDecimal ciclo) {
+	public void setCiclo(Short ciclo) {
 		this.ciclo = ciclo;
 	}
 
 	public Comunidad getComunidad() {
-		return this.comunidad;
+		return comunidad;
 	}
 
 	public void setComunidad(Comunidad comunidad) {
 		this.comunidad = comunidad;
 	}
 
-	public BigDecimal getConstruccion() {
-		return this.construccion;
+	public Short getConstruccion() {
+		return construccion;
 	}
 
-	public void setConstruccion(BigDecimal construccion) {
+	public void setConstruccion(Short construccion) {
 		this.construccion = construccion;
 	}
 
-	public BigDecimal getControl() {
-		return this.control;
+	public Short getControl() {
+		return control;
 	}
 
-	public void setControl(BigDecimal control) {
+	public void setControl(Short control) {
 		this.control = control;
 	}
 
-	public BigDecimal getDesalojoAdecuado() {
-		return this.desalojoAdecuado;
+	public Short getDesalojoAdecuado() {
+		return desalojoAdecuado;
 	}
 
-	public void setDesalojoAdecuado(BigDecimal desalojoAdecuado) {
+	public void setDesalojoAdecuado(Short desalojoAdecuado) {
 		this.desalojoAdecuado = desalojoAdecuado;
 	}
 
-	public BigDecimal getDesalojoInadecuado() {
-		return this.desalojoInadecuado;
+	public Short getDesalojoInadecuado() {
+		return desalojoInadecuado;
 	}
 
-	public void setDesalojoInadecuado(BigDecimal desalojoInadecuado) {
+	public void setDesalojoInadecuado(Short desalojoInadecuado) {
 		this.desalojoInadecuado = desalojoInadecuado;
 	}
 
-	public BigDecimal getEnfermos() {
-		return this.enfermos;
+	public Short getEnfermos() {
+		return enfermos;
 	}
 
-	public void setEnfermos(BigDecimal enfermos) {
+	public void setEnfermos(Short enfermos) {
 		this.enfermos = enfermos;
 	}
 
 	public EntidadAdtva getSilais() {
-		return this.silais;
+		return silais;
 	}
 
 	public void setSilais(EntidadAdtva silais) {
@@ -209,7 +223,7 @@ public class RociadosMalaria implements Serializable {
 	}
 
 	public EquiposMalaria getEquipo() {
-		return this.equipo;
+		return equipo;
 	}
 
 	public void setEquipo(EquiposMalaria equipo) {
@@ -217,39 +231,39 @@ public class RociadosMalaria implements Serializable {
 	}
 
 	public Date getFecha() {
-		return this.fecha;
+		return fecha;
 	}
 
 	public void setFecha(Date fecha) {
 		this.fecha = fecha;
 	}
 
-	public BigDecimal getFormulacion() {
-		return this.formulacion;
+	public Float getFormulacion() {
+		return formulacion;
 	}
 
-	public void setFormulacion(BigDecimal formulacion) {
+	public void setFormulacion(Float formulacion) {
 		this.formulacion = formulacion;
 	}
 
-	public BigDecimal getHabNoRociadas() {
-		return this.habNoRociadas;
+	public Short getHabNoRociadas() {
+		return habNoRociadas;
 	}
 
-	public void setHabNoRociadas(BigDecimal habNoRociadas) {
+	public void setHabNoRociadas(Short habNoRociadas) {
 		this.habNoRociadas = habNoRociadas;
 	}
 
-	public BigDecimal getHabRociadas() {
-		return this.habRociadas;
+	public Short getHabRociadas() {
+		return habRociadas;
 	}
 
-	public void setHabRociadas(BigDecimal habRociadas) {
+	public void setHabRociadas(Short habRociadas) {
 		this.habRociadas = habRociadas;
 	}
 
 	public InsecticidasMalaria getInsecticida() {
-		return this.insecticida;
+		return insecticida;
 	}
 
 	public void setInsecticida(InsecticidasMalaria insecticida) {
@@ -257,31 +271,31 @@ public class RociadosMalaria implements Serializable {
 	}
 
 	public DivisionPolitica getMunicipio() {
-		return this.municipio;
+		return municipio;
 	}
 
 	public void setMunicipio(DivisionPolitica municipio) {
 		this.municipio = municipio;
 	}
 
-	public BigDecimal getOtros() {
-		return this.otros;
+	public Short getOtros() {
+		return otros;
 	}
 
-	public void setOtros(BigDecimal otros) {
+	public void setOtros(Short otros) {
 		this.otros = otros;
 	}
 
-	public BigDecimal getRenuentes() {
-		return this.renuentes;
+	public Short getRenuentes() {
+		return renuentes;
 	}
 
-	public void setRenuentes(BigDecimal renuentes) {
+	public void setRenuentes(Short renuentes) {
 		this.renuentes = renuentes;
 	}
 
 	public String getRociador() {
-		return this.rociador;
+		return rociador;
 	}
 
 	public void setRociador(String rociador) {
@@ -289,35 +303,69 @@ public class RociadosMalaria implements Serializable {
 	}
 
 	public Sector getSector() {
-		return this.sector;
+		return sector;
 	}
 
 	public void setSector(Sector sector) {
 		this.sector = sector;
 	}
 
-	public BigDecimal getTotalCargas() {
-		return this.totalCargas;
+	public Float getTotalCargas() {
+		return totalCargas;
 	}
 
-	public void setTotalCargas(BigDecimal totalCargas) {
+	public void setTotalCargas(Float totalCargas) {
 		this.totalCargas = totalCargas;
 	}
 
-	public BigDecimal getViviendasProgramadas() {
-		return this.viviendasProgramadas;
+	public Short getViviendasProgramadas() {
+		return viviendasProgramadas;
 	}
 
-	public void setViviendasProgramadas(BigDecimal viviendasProgramadas) {
+	public void setViviendasProgramadas(Short viviendasProgramadas) {
 		this.viviendasProgramadas = viviendasProgramadas;
 	}
 
-	public BigDecimal getViviendasRociadas() {
-		return this.viviendasRociadas;
+	public Short getViviendasRociadas() {
+		return viviendasRociadas;
 	}
 
-	public void setViviendasRociadas(BigDecimal viviendasRociadas) {
+	public void setViviendasRociadas(Short viviendasRociadas) {
 		this.viviendasRociadas = viviendasRociadas;
 	}
+
+	public Date getFechaRegistro() {
+		return fechaRegistro;
+	}
+
+	public void setFechaRegistro(Date fechaRegistro) {
+		this.fechaRegistro = fechaRegistro;
+	}
+
+	public String getUsuarioRegistro() {
+		return usuarioRegistro;
+	}
+
+	public void setUsuarioRegistro(String usuarioRegistro) {
+		this.usuarioRegistro = usuarioRegistro;
+	}
+
+	public Short getHabitantesProtegidos() {
+		return habitantesProtegidos;
+	}
+
+	public void setHabitantesProtegidos(Short habitantesProtegidos) {
+		this.habitantesProtegidos = habitantesProtegidos;
+	}
+
+	public Float getTotalUtilizadas() {
+		return totalUtilizadas;
+	}
+
+	public void setTotalUtilizadas(Float totalUtilizadas) {
+		this.totalUtilizadas = totalUtilizadas;
+	}
+
+    
 	
 }
