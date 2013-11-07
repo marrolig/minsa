@@ -1,6 +1,6 @@
 package ni.gob.minsa.malaria.datos.investigacion;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.persistence.EntityExistsException;
@@ -23,7 +23,6 @@ import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMedicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma;
 import ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion;
-import ni.gob.minsa.malaria.modelo.investigacion.Medicamento;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio;
 import ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro;
@@ -215,7 +214,6 @@ public class InvestigacionDA implements InvestigacionService {
 	 * (non-Javadoc)
 	 * @see ni.gob.minsa.malaria.servicios.investigacion.InvestigacionService#Guardar(ni.gob.minsa.malaria.modelo.investigacion.InvestigacionMalaria, ni.gob.minsa.malaria.modelo.investigacion.InvestigacionSintoma, ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarInicio, ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte, ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarOtro, ni.gob.minsa.malaria.modelo.investigacion.InvestigacionLugar, ni.gob.minsa.malaria.modelo.investigacion.InvestigacionTransfusion, ni.gob.minsa.malaria.modelo.investigacion.InvestigacionHospitalario)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public InfoResultado Guardar(InvestigacionMalaria pInvestigacionMalaria,
 			InvestigacionSintoma pInvestigacionSintoma,
@@ -248,7 +246,7 @@ public class InvestigacionDA implements InvestigacionService {
 		InvestigacionMedicamentoService oInvMedicamentoService = new InvestigacionMedicamentoDA();
 	
 		InvestigacionSintoma oDetachedInvSintoma=null;
-		SintomaLugarInicio oDetachedSintomaLugarInicio=null;
+		SintomaLugarInicio oLugarInicioSintomaDetached=null;
 		InvestigacionHospitalario oInvHospitalarioDetached=null;
 		InvestigacionLugar oInvLugarDetached=null;
 		InvestigacionTransfusion oInvTransfusionDetached=null;
@@ -263,7 +261,7 @@ public class InvestigacionDA implements InvestigacionService {
 		if(oDetachedInvSintoma!=null){
 			oResultado = oSintomaLugInicioService.EncontrarPorInvestigacionSintoma(oDetachedInvSintoma.getInvestigacionSintomaId());
 			if(oResultado!=null){
-				oDetachedSintomaLugarInicio = (SintomaLugarInicio)oResultado.getObjeto();
+				oLugarInicioSintomaDetached = (SintomaLugarInicio)oResultado.getObjeto();
 			}
 			oSintomaLugAnteDetached=oSintomaLugAnteService.SintomasLugarAntePorInvestigacionSintomas(oDetachedInvSintoma.getInvestigacionSintomaId());
 			oSintomaLugOtroDetached=oSintomaLugOtroService.SintomasLugarOtroPorInvestigacionSintomas(oDetachedInvSintoma.getInvestigacionSintomaId());
@@ -290,7 +288,174 @@ public class InvestigacionDA implements InvestigacionService {
     	try{
     		InvestigacionMalaria oDetachedInvestigacion = (InvestigacionMalaria) oEM.find(InvestigacionMalaria.class, pInvestigacionMalaria.getInvestigacionMalariaId());
     		InvestigacionMalaria oInvestigacion=oEM.merge(oDetachedInvestigacion);
+    		InvestigacionSintoma oInvestigacionSintoma=null;
+    		if(oDetachedInvSintoma!=null){
+            	oInvestigacionSintoma = oEM.merge((InvestigacionSintoma)oEM.find(InvestigacionSintoma.class, oDetachedInvSintoma.getInvestigacionSintomaId()));
+            }
     		
+    		//Se guardan o eliminan los valores asociados a investigación de sintomas
+            if(pInvestigacionMalaria.getSintomatico().intValue()==1){
+            	oInvestigacion.setSintomatico(pInvestigacionMalaria.getSintomatico());
+            	oEM.flush();
+            	if(oDetachedInvSintoma!=null){
+            		oInvestigacionSintoma.setFechaInicioSintomas(pInvestigacionSintoma.getFechaInicioSintomas());
+        			oInvestigacionSintoma.setSintomatico(pInvestigacionMalaria.getSintomatico());
+        			oInvestigacionSintoma.setEstadoFebril(pInvestigacionSintoma.getEstadoFebril()!=null ?(EstadoFebril) oEM.find(EstadoFebril.class,pInvestigacionSintoma.getEstadoFebril().getCatalogoId()):null);
+        			oInvestigacionSintoma.setPersonasSintomas(pInvestigacionSintoma.getPersonasSintomas());
+        			oInvestigacionSintoma.setInicioResidencia(pInvestigacionSintoma.getInicioResidencia());
+        			oEM.flush();
+            	}else{
+            		pInvestigacionSintoma.setInvestigacionMalaria(oInvestigacion);
+            		oEM.persist(pInvestigacionSintoma);
+            	}
+            }else if(oDetachedInvSintoma!=null){
+            	oEM.remove((InvestigacionSintoma) oEM.find(InvestigacionSintoma.class, oDetachedInvSintoma.getInvestigacionSintomaId()));
+            	oEM.flush();
+            }
+            
+           //Se guardan o eliminan los valores asociados a investigación de sintomas Lugar Inicio, Otros y Antes
+			if (pInvestigacionSintoma!=null && pInvestigacionMalaria.getSintomatico().intValue() == 1) {
+                if(pInvestigacionSintoma.getInicioResidencia().intValue()==0){
+                	if(oLugarInicioSintomaDetached!=null){
+                		SintomaLugarInicio oSintomaLugarInicio = oEM.merge((SintomaLugarInicio) oEM.find(SintomaLugarInicio.class,oLugarInicioSintomaDetached.getSintomaLugarInicioId()));
+                		oSintomaLugarInicio.setInicioResidencia(pInvestigacionSintoma.getInicioResidencia());
+        				oSintomaLugarInicio.setPais(pSintomaLugarInicio.getPais()!=null ? (Pais) oEM.find(Pais.class, pSintomaLugarInicio.getPais().getPaisId()):null);
+        				oSintomaLugarInicio.setMunicipio(pSintomaLugarInicio.getMunicipio()!=null ? (DivisionPolitica) oEM.find(DivisionPolitica.class,pSintomaLugarInicio.getMunicipio().getDivisionPoliticaId()):null);
+        				oSintomaLugarInicio.setComunidad(pSintomaLugarInicio.getComunidad()!=null ? (Comunidad) oEM.find(Comunidad.class, pSintomaLugarInicio.getComunidad().getComunidadId()):null);
+        				oSintomaLugarInicio.setEstadia(pSintomaLugarInicio.getEstadia());
+                	}else{
+                		pSintomaLugarInicio.setInvestigacionSintoma(oInvestigacionSintoma!=null ? oInvestigacionSintoma : pInvestigacionSintoma);
+                		oEM.persist(pSintomaLugarInicio);
+                	}
+                }else if(oLugarInicioSintomaDetached!=null){
+                	oEM.remove((SintomaLugarInicio) oEM.find(SintomaLugarInicio.class, oLugarInicioSintomaDetached.getSintomaLugarInicioId()));
+                	oEM.flush();
+                }	
+                if(!(oSintomaLugAnteDetached==null || oSintomaLugAnteDetached.size()==0)){
+                	for(SintomaLugarAnte oSintoma:oSintomaLugAnteDetached){
+                		oEM.remove((SintomaLugarAnte) oEM.find(SintomaLugarAnte.class, oSintoma.getSintomaLugarAntesId()));
+                		oEM.flush();
+                	}
+                }
+				if (pSintomaLugarAnte != null) {
+					for (SintomaLugarAnte oLugarAnte : pSintomaLugarAnte) {
+						oLugarAnte.setSintomaLugarAntesId(0);
+						oLugarAnte.setInvestigacionesSintoma(oInvestigacionSintoma!=null ? oInvestigacionSintoma : pInvestigacionSintoma);
+						oEM.persist(oLugarAnte);
+					}
+				}
+				
+				if (!(oSintomaLugOtroDetached == null || oSintomaLugOtroDetached.size() == 0)) {
+					for (SintomaLugarOtro oSintoma : oSintomaLugOtroDetached) {
+						oEM.remove((SintomaLugarOtro) oEM.find(SintomaLugarOtro.class, oSintoma.getSintomaLugarOtroId()));
+						oEM.flush();
+					}
+				}
+				if (pSintomaLugarOtro != null) {
+					for (SintomaLugarOtro oLugarOtro : pSintomaLugarOtro) {
+						oLugarOtro.setSintomaLugarOtroId(0);
+						oLugarOtro.setInvestigacionesSintoma(oInvestigacionSintoma!=null ? oInvestigacionSintoma : pInvestigacionSintoma);
+						oEM.persist(oLugarOtro);
+						oEM.flush();
+					}
+				}
+
+			}
+
+           //Se guardan o eliminan los antecedentes transfusionales, se guardarán los valores asociados.
+           
+            if(pInvestigacionMalaria.getTransfusion().intValue()==1){
+            	oInvestigacion.setTransfusion(pInvestigacionMalaria.getTransfusion());
+            	oEM.flush();
+            	if(oInvTransfusionDetached!=null){
+            		InvestigacionTransfusion oInvTransfusion= oEM.merge((InvestigacionTransfusion)oEM.find(InvestigacionTransfusion.class, oInvTransfusionDetached.getInvestigacionTransfusionId()));
+            		oInvTransfusion.setTransfusion(pInvestigacionMalaria.getTransfusion());
+            		oInvTransfusion.setFechaTransfusion(pInvestigacionTransfusion.getFechaTransfusion());
+                	oInvTransfusion.setPais(pInvestigacionTransfusion.getPais()!=null ? (Pais) oEM.find(Pais.class, pInvestigacionTransfusion.getPais().getPaisId()):null);
+                	oInvTransfusion.setUnidad(pInvestigacionTransfusion.getUnidad()!=null ? (Unidad) oEM.find(Unidad.class, pInvestigacionTransfusion.getUnidad().getUnidadId()):null);
+            	}else{
+            		pInvestigacionTransfusion.setInvestigacionMalaria(oInvestigacion);
+            		oEM.persist(pInvestigacionTransfusion);
+            	}
+            }else if(oInvTransfusionDetached!=null){
+            	oEM.remove((InvestigacionTransfusion)oEM.find(InvestigacionTransfusion.class, oInvTransfusionDetached.getInvestigacionTransfusionId()));
+            	oEM.flush();
+            }
+            
+        	//Se guardan o eliminan los datos asociados al manejo clínico.
+            if(pInvestigacionMalaria.getManejoClinico().intValue()==1){
+            	oInvestigacion.setManejoClinico(pInvestigacionMalaria.getManejoClinico());
+            	oEM.flush();
+            	if(oInvHospitalarioDetached!=null){
+            	    InvestigacionHospitalario oInvHospitalario = oEM.merge((InvestigacionHospitalario)oEM.find(InvestigacionHospitalario.class, oInvHospitalarioDetached.getInvestigacionHospitalarioId()));
+                	oInvHospitalario.setManejoClinico(pInvestigacionMalaria.getManejoClinico());
+                	oInvHospitalario.setUnidad(pInvestigacionHospitalario.getUnidad()!=null ? (Unidad) oEM.find(Unidad.class,pInvestigacionHospitalario.getUnidad().getUnidadId()):null);
+                	oInvHospitalario.setExpediente(pInvestigacionHospitalario.getExpediente());
+                	oInvHospitalario.setFechaIngreso(pInvestigacionHospitalario.getFechaIngreso());
+                	oInvHospitalario.setDiasEstancia(pInvestigacionHospitalario.getDiasEstancia());
+        			if(oInvHospitalario.getUnidad()!=null){
+        				oInvHospitalario.setMunicipio(pInvestigacionHospitalario.getMunicipio()!=null ? (DivisionPolitica) oEM.find(DivisionPolitica.class,pInvestigacionHospitalario.getMunicipio().getDivisionPoliticaId()):null);
+        			}
+            	}else{
+    				pInvestigacionHospitalario.setInvestigacionMalaria(oInvestigacion);
+    				oEM.persist(pInvestigacionHospitalario);
+    			}
+            }else if(oInvHospitalarioDetached!=null){
+            	oEM.remove((InvestigacionHospitalario)oEM.find(InvestigacionHospitalario.class, oInvHospitalarioDetached.getInvestigacionHospitalarioId()));
+            	oEM.flush();
+            }
+            
+            //Se guardar on eliminan los datos asociados a investigación de lugares
+            if(pInvestigacionMalaria.getInfeccionResidencia().intValue()==0){
+            	oInvestigacion.setInfeccionResidencia(pInvestigacionMalaria.getInfeccionResidencia());
+            	oEM.flush();
+            	if(oInvLugarDetached!=null){
+            		InvestigacionLugar oInvLugar = oEM.merge((InvestigacionLugar)oEM.find(InvestigacionLugar.class, oInvLugarDetached.getInvsmalariaLugarId()));
+            		oInvLugar.setInfeccionResidencia(pInvestigacionLugar.getInfeccionResidencia());
+                	oInvLugar.setPais(pInvestigacionLugar.getPais()!=null ? oEM.find(Pais.class, pInvestigacionLugar.getPais().getPaisId()):null);
+                	oInvLugar.setMunicipio(pInvestigacionLugar.getMunicipio()!=null ? oEM.find(DivisionPolitica.class, pInvestigacionLugar.getMunicipio().getDivisionPoliticaId()):null);
+                	oInvLugar.setComunidad(pInvestigacionLugar.getComunidad()!=null ? oEM.find(Comunidad.class, pInvestigacionLugar.getComunidad().getComunidadId()):null);
+            	}else{
+            		pInvestigacionLugar.setInvestigacionMalaria(pInvestigacionMalaria);
+            		oEM.persist(pInvestigacionLugar);
+            	}
+            }else if(oInvLugarDetached!=null){
+            	oEM.remove((InvestigacionLugar)oEM.find(InvestigacionLugar.class, oInvLugarDetached.getInvsmalariaLugarId()));
+            	oEM.flush();
+            }
+            
+           //Se guardan o eliminan los valores asociados a investigación de medicamentos
+			if (!(pInvestigacionMedicamento== null||pInvestigacionMedicamento.size()==0)) {
+				if((oMedicamentoDetached==null || oMedicamentoDetached.size()==0) && !(pInvestigacionMedicamento==null || pInvestigacionMedicamento.size()==0) ){
+					for (InvestigacionMedicamento oMedicamento : pInvestigacionMedicamento) {
+						oMedicamento.setInvestigacionMedicamentoId(0);
+						oMedicamento.setInvestigacionesMalaria(oInvestigacion);
+						oEM.persist(oMedicamento);
+					}
+				}else{
+					for (InvestigacionMedicamento oInvMedicamento : pInvestigacionMedicamento) {
+						oInvMedicamento.setInvestigacionMedicamentoId(0);
+						oInvMedicamento.setInvestigacionesMalaria((InvestigacionMalaria) oEM.find(InvestigacionMalaria.class, pInvestigacionMalaria.getInvestigacionMalariaId()));
+						if(!oMedicamentoDetached.contains(oInvMedicamento)){
+							oEM.persist(oInvMedicamento);
+						}
+					}	
+					for (InvestigacionMedicamento oInvMedicamento : oMedicamentoDetached) {
+						if(!pInvestigacionMedicamento.contains(oInvMedicamento)){
+							oEM.remove((InvestigacionMedicamento) oEM.find(InvestigacionMedicamento.class,oInvMedicamento.getInvestigacionMedicamentoId()));
+						}
+					}
+				}
+				
+			}else if (!(oMedicamentoDetached == null || oMedicamentoDetached.size() == 0)){
+				for (InvestigacionMedicamento oInvMedicamento : oMedicamentoDetached) {
+					oEM.remove((InvestigacionMedicamento) oEM.find(
+							InvestigacionMedicamento.class,
+							oInvMedicamento.getInvestigacionMedicamentoId()));
+				}
+			}
+			
+			//Se guardan los valores de Investigación de Malaria
     		oInvestigacion.setNumeroCaso(pInvestigacionMalaria.getNumeroCaso());
     		oInvestigacion.setLatitudVivienda(pInvestigacionMalaria.getLatitudVivienda());
     		oInvestigacion.setLongitudVivienda(pInvestigacionMalaria.getLongitudVivienda());
@@ -303,6 +468,7 @@ public class InvestigacionDA implements InvestigacionService {
     		}else{
     			oInvestigacion.setUsoMosquitero(pInvestigacionMalaria.getUsoMosquitero());
     		}
+    		oInvestigacion.setTransfusion(pInvestigacionMalaria.getTransfusion());
     		oInvestigacion.setManejoClinico(pInvestigacionMalaria.getManejoClinico());
     		oInvestigacion.setInicioTratamiento(pInvestigacionMalaria.getInicioTratamiento());
     		oInvestigacion.setFinTratamiento(pInvestigacionMalaria.getFinTratamiento());
@@ -350,169 +516,6 @@ public class InvestigacionDA implements InvestigacionService {
     			oInvestigacion.setFechaCierreCaso(null);
     		}
     		
-    		//Se guardan o eliminan los valores asociados a investigación de sintomas
-    		InvestigacionSintoma oInvestigacionSintoma=null;
-            if(oDetachedInvSintoma!=null){
-            	oInvestigacionSintoma = oEM.merge((InvestigacionSintoma)oEM.find(InvestigacionSintoma.class, oDetachedInvSintoma.getInvestigacionSintomaId()));
-            }
-            
-            if(oInvestigacion.getSintomatico().intValue()==1){
-            	if(oInvestigacionSintoma!=null){
-            		oInvestigacionSintoma.setFechaInicioSintomas(pInvestigacionSintoma.getFechaInicioSintomas());
-        			oInvestigacionSintoma.setSintomatico(pInvestigacionSintoma.getSintomatico());
-        			oInvestigacionSintoma.setEstadoFebril(pInvestigacionSintoma.getEstadoFebril()!=null ?(EstadoFebril) oEM.find(EstadoFebril.class,pInvestigacionSintoma.getEstadoFebril().getCatalogoId()):null);
-        			oInvestigacionSintoma.setPersonasSintomas(pInvestigacionSintoma.getPersonasSintomas());
-        			oInvestigacionSintoma.setInicioResidencia(pInvestigacionSintoma.getInicioResidencia());
-            	}else{
-            		pInvestigacionSintoma.setInvestigacionMalaria(oInvestigacion);
-            		oEM.persist(pInvestigacionSintoma);
-            	}
-            }else if(oInvestigacionSintoma!=null){
-            	oEM.remove(oInvestigacionSintoma);
-            }
-            
-           //Se guardan o eliminan los valores asociados a investigación de sintomas Lugar Inicio, Otros y Antes
-			if (oInvestigacionSintoma!=null && oInvestigacion.getSintomatico().intValue() == 1) {
-				
-				SintomaLugarInicio oSintomaLugarInicio=null;
-				if(oDetachedSintomaLugarInicio!=null){
-	                	oSintomaLugarInicio = oEM.merge((SintomaLugarInicio) oEM.find(SintomaLugarInicio.class,oDetachedSintomaLugarInicio.getSintomaLugarInicioId()));
-	              }
-                if(oInvestigacionSintoma.getInicioResidencia().intValue()==0){
-                	if(oSintomaLugarInicio!=null){
-                		oSintomaLugarInicio.setInicioResidencia(pSintomaLugarInicio.getInicioResidencia());
-        				oSintomaLugarInicio.setPais(pSintomaLugarInicio.getPais()!=null ? (Pais) oEM.find(Pais.class, pSintomaLugarInicio.getPais().getPaisId()):null);
-        				oSintomaLugarInicio.setMunicipio(pSintomaLugarInicio.getMunicipio()!=null ? (DivisionPolitica) oEM.find(DivisionPolitica.class,pSintomaLugarInicio.getMunicipio().getDivisionPoliticaId()):null);
-        				oSintomaLugarInicio.setComunidad(pSintomaLugarInicio.getComunidad()!=null ? (Comunidad) oEM.find(Comunidad.class, pSintomaLugarInicio.getComunidad().getComunidadId()):null);
-        				oSintomaLugarInicio.setEstadia(pSintomaLugarInicio.getEstadia());
-                	}else{
-                		pSintomaLugarInicio.setInvestigacionSintoma(oInvestigacionSintoma);
-                		oEM.persist(oInvestigacionSintoma);
-                	}
-                }else if(oSintomaLugarInicio!=null){
-                	oEM.remove(oSintomaLugarInicio);
-                }	
-				
-                if(!(oSintomaLugAnteDetached==null || oSintomaLugAnteDetached.size()==0)){
-                	for(SintomaLugarAnte oSintoma:oSintomaLugAnteDetached){
-                		oEM.remove((SintomaLugarAnte) oEM.find(SintomaLugarAnte.class, oSintoma.getSintomaLugarAntesId()));
-                	}
-                }
-				if (pSintomaLugarAnte != null) {
-					for (SintomaLugarAnte oLugarAnte : pSintomaLugarAnte) {
-						oLugarAnte.setSintomaLugarAntesId(0);
-						oLugarAnte.setInvestigacionesSintoma(oInvestigacionSintoma);
-						oEM.persist(oLugarAnte);
-					}
-				}
-				
-				if (!(oSintomaLugOtroDetached == null || oSintomaLugOtroDetached.size() == 0)) {
-					for (SintomaLugarOtro oSintoma : oSintomaLugOtroDetached) {
-						oEM.remove((SintomaLugarOtro) oEM.find(SintomaLugarOtro.class, oSintoma.getSintomaLugarOtroId()));
-					}
-				}
-				if (pSintomaLugarOtro != null) {
-					for (SintomaLugarOtro oLugarOtro : pSintomaLugarOtro) {
-						oLugarOtro.setSintomaLugarOtroId(0);
-						oLugarOtro.setInvestigacionesSintoma(oInvestigacionSintoma);
-						oEM.persist(oLugarOtro);
-					}
-				}
-
-			}
-
-           //Se guardan o eliminan los antecedentes transfusionales, se guardarán los valores asociados.
-            InvestigacionTransfusion oInvTransfusion=null;
-            if(oInvTransfusionDetached!=null){
-            	oInvTransfusion = oEM.merge((InvestigacionTransfusion)oEM.find(InvestigacionTransfusion.class, oInvTransfusionDetached.getInvestigacionTransfusionId()));
-            }
-            if(oInvestigacion.getTransfusion().intValue()==1){
-            	if(oInvTransfusion!=null){
-            		oInvTransfusion.setTransfusion(pInvestigacionTransfusion.getTransfusion());
-            		oInvTransfusion.setFechaTransfusion(pInvestigacionTransfusion.getFechaTransfusion());
-                	oInvTransfusion.setPais(pInvestigacionTransfusion.getPais()!=null ? (Pais) oEM.find(Pais.class, pInvestigacionTransfusion.getPais().getPaisId()):null);
-                	oInvTransfusion.setUnidad(pInvestigacionTransfusion.getUnidad()!=null ? (Unidad) oEM.find(Unidad.class, pInvestigacionTransfusion.getUnidad().getUnidadId()):null);
-            	}else{
-            		pInvestigacionTransfusion.setInvestigacionMalaria(oInvestigacion);
-            		oEM.persist(pInvestigacionTransfusion);
-            	}
-            }else if(oInvTransfusion!=null){
-            	oEM.remove(oInvTransfusion);
-            }
-            
-        	//Se guardan o eliminan los datos asociados al manejo clínico.
-            InvestigacionHospitalario oInvHospitalario=null;
-            if(oInvHospitalarioDetached!=null){
-            	oInvHospitalario = oEM.merge((InvestigacionHospitalario)oEM.find(InvestigacionHospitalario.class, oInvHospitalarioDetached.getInvestigacionHospitalarioId()));
-            }
-            if(oInvestigacion.getManejoClinico().intValue()==1){
-            	if(oInvHospitalario!=null){
-            		oInvHospitalario = new InvestigacionHospitalario();
-                	oInvHospitalario.setManejoClinico(pInvestigacionHospitalario.getManejoClinico());
-                	oInvHospitalario.setUnidad(pInvestigacionHospitalario.getUnidad()!=null ? (Unidad) oEM.find(Unidad.class,pInvestigacionHospitalario.getUnidad().getUnidadId()):null);
-                	oInvHospitalario.setExpediente(pInvestigacionHospitalario.getExpediente());
-                	oInvHospitalario.setFechaIngreso(pInvestigacionHospitalario.getFechaIngreso());
-                	oInvHospitalario.setDiasEstancia(pInvestigacionHospitalario.getDiasEstancia());
-        			if(oInvHospitalario.getUnidad()!=null){
-        				oInvHospitalario.setMunicipio(pInvestigacionHospitalario.getMunicipio()!=null ? (DivisionPolitica) oEM.find(DivisionPolitica.class,pInvestigacionHospitalario.getMunicipio().getDivisionPoliticaId()):null);
-        			}else{
-        				pInvestigacionHospitalario.setInvestigacionMalaria(oInvestigacion);
-        				oEM.persist(pInvestigacionHospitalario);
-        			}
-            	}
-            }else if(oInvHospitalario!=null){
-            	oEM.remove(oInvHospitalario);
-            }
-            
-            //Se guardar on eliminan los datos asociados a investigación de lugares
-            InvestigacionLugar oInvLugar=null;
-            if(oInvLugarDetached!=null){
-            	oInvLugar = oEM.merge((InvestigacionLugar)oEM.find(InvestigacionLugar.class, oInvLugarDetached.getInvsmalariaLugarId()));
-            }
-            if(oInvestigacion.getInfeccionResidencia().intValue()==0){
-            	if(oInvLugar!=null){
-            		oInvLugar.setInfeccionResidencia(pInvestigacionLugar.getInfeccionResidencia());
-                	oInvLugar.setPais(pInvestigacionLugar.getPais()!=null ? oEM.find(Pais.class, pInvestigacionLugar.getPais().getPaisId()):null);
-                	oInvLugar.setMunicipio(pInvestigacionLugar.getMunicipio()!=null ? oEM.find(DivisionPolitica.class, pInvestigacionLugar.getMunicipio().getDivisionPoliticaId()):null);
-                	oInvLugar.setComunidad(pInvestigacionLugar.getComunidad()!=null ? oEM.find(Comunidad.class, pInvestigacionLugar.getComunidad().getComunidadId()):null);
-            	}else{
-            		pInvestigacionLugar.setInvestigacionMalaria(pInvestigacionMalaria);
-            		oEM.persist(pInvestigacionLugar);
-            	}
-            }else if(oInvLugarDetached!=null){
-            	oEM.remove(oInvLugarDetached);
-            }
-            
-           //Se guardan o eliminan los valores asociados a investigación de medicamentos
-			if (!(pInvestigacionMedicamento== null||pInvestigacionMedicamento.size()==0)) {
-				if((oMedicamentoDetached==null || oMedicamentoDetached.size()==0) && !(pInvestigacionMedicamento==null || pInvestigacionMedicamento.size()==0) ){
-					for (InvestigacionMedicamento oMedicamento : pInvestigacionMedicamento) {
-						oMedicamento.setInvestigacionMedicamentoId(0);
-						oMedicamento.setInvestigacionesMalaria(oInvestigacion);
-						oEM.persist(oMedicamento);
-					}
-				}else{
-					for (InvestigacionMedicamento oInvMedicamento : pInvestigacionMedicamento) {
-						oInvMedicamento.setInvestigacionMedicamentoId(0);
-						oInvMedicamento.setInvestigacionesMalaria(oInvestigacion);
-						if(!oMedicamentoDetached.contains(oInvMedicamento)){
-							oEM.persist(oInvMedicamento);
-						}
-					}	
-					for (InvestigacionMedicamento oInvMedicamento : oMedicamentoDetached) {
-						if(!pInvestigacionMedicamento.contains(oInvMedicamento)){
-							oEM.remove((InvestigacionMedicamento) oEM.find(InvestigacionMedicamento.class,oInvMedicamento.getInvestigacionMedicamentoId()));
-						}
-					}
-				}
-				
-			}else if (!(oMedicamentoDetached == null || oMedicamentoDetached.size() == 0)){
-				for (InvestigacionMedicamento oInvMedicamento : oMedicamentoDetached) {
-					oEM.remove((InvestigacionMedicamento) oEM.find(
-							InvestigacionMedicamento.class,
-							oInvMedicamento.getInvestigacionMedicamentoId()));
-				}
-			}
 			
     		oEM.getTransaction().commit();
     		oResultado.setFilasAfectadas(1);

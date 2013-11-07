@@ -606,7 +606,7 @@
 						</p:panel>
 							
 						<p:panel id="panInvLugOtros"
-						 	 style="position:absolute; top:595px; left:5px; height:130px; width:960px;" 
+						 	 style="position:absolute; top:550px; left:5px; height:130px; width:960px;" 
 						 	 styleClass="panDetail">
 						 	 	<p:dataTable id="grdSintomaLugarOtro" var="lugarOtro"
 										rowKey="#{lugarOtro.sintomaLugarOtroSelectedId}"
@@ -691,7 +691,7 @@
 						 	 </p:panel>
 						 	 
 						 	 <p:panel id="panTransfusion"
-						 	 	style="position:absolute; top:740px; left:5px; height:55px; width:960px;" 
+						 	 	style="position:absolute; top:695px; left:5px; height:55px; width:960px;" 
 						 	 	styleClass="panDetail">
 						 	 	  <h:outputLabel for="cboAntTransfusion" styleClass="lblDefaultSmall" 
 								   value="Antecedente Transfusional:" 
@@ -717,11 +717,11 @@
 								 styleClass="txtDefault fechaTransfusion" 
 								 value="#{investigacionMalariaBean.fechaTransfusion}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+										<script type="text/javascript">
+											jQuery('.fechaTransfusion').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+										</script>
 								 </h:inputText>
-								<script type="text/javascript">
-										jQuery('.fechaTransfusion').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
-								
+							
 								<h:outputLabel for="cboPaisTransfusion" styleClass="lblDefaultSmall" 
 							   	value="País donde fue Efectuada la Transfusión:" 
 							   	style="position:absolute; left:300px; top:8px;"/>
@@ -767,7 +767,7 @@
 						 	 </p:panel>
 						 	 
 						 	 <p:panel id="panManejoClinico"
-						 	 	style="position:absolute; top:810px; left:5px; height:180px; width:960px;" 
+						 	 	style="position:absolute; top:765px; left:5px; height:180px; width:960px;" 
 						 	 	styleClass="panDetail">
 						 	 	  
 						 	 	 <h:outputLabel for="cboManejoClinico" styleClass="lblDefaultSmall" 
@@ -792,11 +792,12 @@
 								 styleClass="txtDefault inicioTratMClinico" 
 								 value="#{investigacionMalariaBean.inicioTratamientoMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
-								 </h:inputText>
-								<script type="text/javascript">
+								 
+								 	<script type="text/javascript">
 										jQuery('.inicioTratMClinico').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
-								
+									</script>
+								 </h:inputText>
+
 								<h:outputLabel for="txtFinTratamientoMClinico" styleClass="lblDefaultSmall" 
 								   value="Fin de Tratamiento:" 
 								   style="position:absolute; left:225px; top:8px;"/>
@@ -805,22 +806,22 @@
 								 styleClass="txtDefault finTratamientoMClinico" 
 								 value="#{investigacionMalariaBean.finTratamientoMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
-								 </h:inputText>
-								<script type="text/javascript">
+								 		<script type="text/javascript">
 										jQuery('.finTratamientoMClinico').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
-								
+										</script>
+								 </h:inputText>		
+								 						
 								<h:outputLabel for="txtMedicamentosAntiMalarico" styleClass="lblDefaultSmall" 
 								   value="Medicamento Antimalárico Utilizado en el Tratatamiento:" 
 								   style="position:absolute; left:325px; top:8px;"/>
 								<h:inputText id="txtMedicamentosAntiMalarico"
 									disabled="true" 
 									value="#{investigacionMalariaBean.medicamentosEnLista}"
-								 	style="position:absolute; left:325px; top:23px; width:330px;"
+								 	style="position:absolute; left:325px; top:23px; width:605px;"
 								 	styleClass="txtDefault">
 									 	<h:outputLink id="btnEliminarMedicamento"
 												  value="javascript:void(0)" 
-												  style="position:absolute; top:25px; left:645px;z-index:1001">
+												  style="position:absolute; top:25px; left:920px;z-index:1001">
 											<h:graphicImage value="/images/delete.gif" 
 											width="15" height="15" style="right:0px; border:0px;"  />
 											<p:ajax event="click"
@@ -831,7 +832,7 @@
 								 	</h:inputText>
 								 	
 									<h:outputLink value="javascript:void(0)" 
-											  style="position:absolute; top:23px; left:664px;">
+											  style="position:absolute; top:23px; left:939px;">
 										<h:graphicImage value="/images/BusquedaOn.png" width="18" height="18" style="right:0px; border:0px;"  />
 										<p:ajax process="@this"
 												event="click"
@@ -842,17 +843,17 @@
 									
 								<h:outputLabel for="txtUnidadMClinico" styleClass="lblDefaultSmall" 
 								   value="Unidad de Hospitalización:" 
-								   style="position:absolute; left:687px; top:8px;"/>
+								   style="position:absolute; left:10px; top:50px;"/>
 								<h:inputText id="txtUnidadMClinico"
 									disabled="true" 
-								 	style="position:absolute; left:687px; top:23px; width:248px;"
+								 	style="position:absolute; left:10px; top:65px; width:335px;"
 								 	styleClass="txtDefault"
 								 	value="#{investigacionMalariaBean.unidadMClinicoSelected.nombre}"/>
 							
 								<h:outputLink id="btnQuitarUnidadHosp"
 											  disabled="#{investigacionMalariaBean.manejoClinico==0 ||investigacionMalariaBean.unidadMClinicoSelected ==null}"
 											  value="javascript:void(0)" 
-											  style="position:absolute; top:25px; left:924px;z-index:1001">
+											  style="position:absolute; top:68px; left:335px;z-index:1001">
 									<h:graphicImage value="/images/delete.gif" 
 									width="15" height="15" style="right:0px; border:0px;"  />
 									<p:ajax event="click"
@@ -862,7 +863,7 @@
 								</h:outputLink>					 	
 								<h:outputLink disabled="#{investigacionMalariaBean.manejoClinico==0}"
 											 value="javascript:void(0)" 
-											 style="position:absolute; top:23px; left:945px;z-index:1001">
+											 style="position:absolute; top:66px; left:355px;z-index:1001">
 									<h:graphicImage value="#{investigacionMalariaBean.manejoClinico==0 ? '/images/BusquedaOff.png' : '/images/BusquedaOn.png'}"
 									 width="18" height="18" style="right:0px; border:0px;"  />
 									 <p:ajax event="click"
@@ -889,10 +890,10 @@
 								 styleClass="txtDefault fechaIngresoMClinico" 
 								 value="#{investigacionMalariaBean.fechaIngresoMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
-								 </h:inputText>
-								<script type="text/javascript">
+								 	<script type="text/javascript">
 										jQuery('.fechaIngresoMClinico').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
+									</script>
+								 </h:inputText>
 								
 								<h:outputLabel for="txtEstanciaMClinico" styleClass="lblDefaultSmall" 
 							    value="Días de Estadía:" 
@@ -929,7 +930,7 @@
 								   value="Tratamiento Supervisado:" 
 								   style="position:absolute; left:255px; top:93px;"/>
 								 <h:selectOneMenu id="cboTratSupervisadoMClinico" styleClass="txtDefault cboDefault"  
-							 		style="position:absolute; left:255px;top:108px;width:110px;"
+							 		style="position:absolute; left:255px;top:108px;width:115px;"
 							 		value="#{investigacionMalariaBean.tratamientoSupervisadoMClinico}">
 							 			<f:selectItem itemValue="0" itemLabel="No" /> 
 										<f:selectItem itemValue="1" itemLabel="Si" />
@@ -1006,16 +1007,16 @@
 								 styleClass="txtDefault fechaDefuncionMClinico" 
 								 value="#{investigacionMalariaBean.fechaDefuncionMClinico}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
-								 </h:inputText>
-								<script type="text/javascript">
+								 	<script type="text/javascript">
 										jQuery('.fechaDefuncionMClinico').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
-								
+									</script>
+								 </h:inputText>
+						
 								 <h:outputLabel for="cboAutomedicacionMClinico" styleClass="lblDefaultSmall" 
 								   value="Auto Medicación:" 
 								   style="position:absolute; left:255px; top:138px;"/>
 								 <h:selectOneMenu id="cboAutomedicacionMClinico" styleClass="txtDefault cboDefault"  
-							 		style="position:absolute; left:255px;top:153px;width:110px;"
+							 		style="position:absolute; left:255px;top:153px;width:115px;"
 							 		value="#{investigacionMalariaBean.automedicacionMClinico}">
 							 			<f:selectItem itemValue="0" itemLabel="No" /> 
 										<f:selectItem itemValue="1" itemLabel="Si"/>
@@ -1030,13 +1031,13 @@
 								 <h:inputText id="txtmMedicAtomedicacionMClinico" 
 								  maxlength="300"
 								 disabled="#{investigacionMalariaBean.automedicacionMClinico==0}"
-								 style="position:absolute; left:380px; top:153px; width:525px;"
+								 style="position:absolute; left:380px; top:153px; width:570px;"
 								 styleClass="txtDefault" 
 								 value="#{investigacionMalariaBean.medicamentosAutomedicacionMClinico}"/>
 							</p:panel>
 							
 							<p:panel id="panResultInvest"
-						 	 	style="position:absolute; top:1005px; left:5px; height:95px; width:960px;" 
+						 	 	style="position:absolute; top:960px; left:5px; height:95px; width:960px;" 
 						 	 	styleClass="panDetail">
 						 	 	 
 						 	 	 <h:outputLabel for="txtFechaInfeccionRInv" styleClass="lblDefaultSmall" 
@@ -1047,10 +1048,11 @@
 								 styleClass="txtDefault fechaInfeccionRInv" 
 								 value="#{investigacionMalariaBean.fechaInfeccionRInv}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+									<script type="text/javascript">
+											jQuery('.fechaInfeccionRInv').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+									</script>
 								 </h:inputText>
-								<script type="text/javascript">
-										jQuery('.fechaInfeccionRInv').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>
+								
 						 	 	 
 						 	 	 <h:outputLabel for="cboInfeccionEnResidenciaRInv" styleClass="lblDefaultSmall" 
 								   value="Infección en Residencia:" 
@@ -1186,7 +1188,7 @@
 							</p:panel>
 							
 							<p:panel id="panObservaciones"
-						 	 	style="position:absolute; top:1115px; left:5px; height:85px; width:960px;" 
+						 	 	style="position:absolute; top:1070px; left:5px; height:85px; width:960px;" 
 						 	 	styleClass="panDetail">
 									<h:outputLabel for="txtObservaciones" styleClass="lblDefaultSmall" 
 								    value="Observaciones:" 
@@ -1200,7 +1202,7 @@
 							</p:panel>
 							
 							<p:panel id="panResponsable"
-						 	 	style="position:absolute; top:1215px; left:5px; height:50px; width:960px;" 
+						 	 	style="position:absolute; top:1170px; left:5px; height:50px; width:960px;" 
 						 	 	styleClass="panDetail">
 									<h:outputLabel for="cboNivelAutorizacion" styleClass="lblDefaultSmall" 
 								    value="Nivel Autorización:" 
@@ -1232,7 +1234,7 @@
 						 	</p:panel>
 						 	
 						 	<p:panel id="panCierre"
-							 	 	style="position:absolute; top:1280px; left:5px; height:50px; width:960px;" 
+							 	 	style="position:absolute; top:1235px; left:5px; height:50px; width:960px;" 
 							 	 	styleClass="panDetail">
 							 	 	
 							 	 	<h:outputLabel for="cboCasoCerrado" styleClass="lblDefaultSmall" 
@@ -1257,10 +1259,10 @@
 								 styleClass="txtDefault fechaCierre" 
 								 value="#{investigacionMalariaBean.fechaCierre}">
 								 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+									 <script type="text/javascript">
+											jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+									</script>	
 								 </h:inputText>
-								<script type="text/javascript">
-										jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-								</script>	
 							</p:panel>
 						</div>
 						 	 
@@ -1296,7 +1298,7 @@
 						
 						
 					<!-- Modal para confirmar la eliminación de la Investigacion M10 -->
-					<p:confirmDialog message="Desea eliminar el lugar vistado?"
+					<p:confirmDialog message="Desea eliminar la investigación"
 							modal="true" 
 							header="Aviso" 
 							severity="alert" 
@@ -1517,11 +1519,11 @@
 							 styleClass="txtDefault fechaUltimaLugOtro" 
 							 value="#{investigacionMalariaBean.fechaUltimaLugOtro}">
 							 	<f:convertDateTime pattern="MMyyyy"></f:convertDateTime>
+								<script type="text/javascript">
+										jQuery('.fechaUltimaLugOtro').dateEntry({dateFormat: 'my/',maxDate: new Date()}); 
+								</script>
 							 </h:inputText>
-							<script type="text/javascript">
-									jQuery('.fechaUltimaLugOtro').dateEntry({dateFormat: 'my/',maxDate: new Date()}); 
-							</script>
-							
+
 							<h:outputLabel for="txtEstadiaLugOtro" styleClass="lblDefaultSmall" 
 							   value="Días de Estadía:" 
 							   style="position:absolute; left:10px; top:93px;"/>
@@ -1683,11 +1685,12 @@
 							 styleClass="txtDefault fechaUltimaLugAnte" 
 							 value="#{investigacionMalariaBean.fechaUltimaLugAnte}">
 							 	<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
-							 </h:inputText>
-							<script type="text/javascript">
+							
+								<script type="text/javascript">
 									jQuery('.fechaUltimaLugAnte').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
-							</script>
-
+								</script>
+							 </h:inputText>
+						
 							<h:outputLabel for="txtEstadiaLugAnte" styleClass="lblDefaultSmall" 
 							   value="Días de Estadía:" 
 							   style="position:absolute; left:145px; top:93px;"/>

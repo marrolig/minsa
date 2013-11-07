@@ -130,14 +130,6 @@ public class InvestigacionValidacion {
 					oResultado.setOk(false);
 					return oResultado;
 				}
-
-				if (pInvestigacionMalaria.getFechaDefuncion().after(
-						pInvestigacionMalaria.getMuestreoHematico().getFechaToma())) {
-					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de toma de muestra");
-					oResultado.setOk(false);
-					return oResultado;
-				}
-
 			}	
 		}else{
 			oResultado.setMensaje("Debe indicar la condición final de la persona objeto de la investigación epidemiológica. Vivo o Fallecido");
@@ -217,8 +209,8 @@ public class InvestigacionValidacion {
 		//Validando datos vinculados a Investigación hospitalario
 		if (!(pInvestigacionHospitalario == null
 				|| pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionMalaria.getFechaDefuncion() == null)) {
-			if (pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())) {
-				oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de ingreso a hospitalización");
+			if (pInvestigacionHospitalario.getFechaIngreso().after(pInvestigacionMalaria.getFechaDefuncion())) {
+				oResultado.setMensaje("La fecha de ingreso a hospitalización no puede ser posterior a la fecha de defuncion");
 				oResultado.setOk(false);
 				return oResultado;
 			}
@@ -227,8 +219,8 @@ public class InvestigacionValidacion {
 		//Validando datos vinculados a Investigación sintomas
 		if(pInvestigacionSintoma!=null){
 			if(!(pInvestigacionSintoma.getFechaInicioSintomas()==null || pInvestigacionMalaria.getFechaDefuncion()==null)){
-				if(pInvestigacionMalaria.getFechaDefuncion().after(pInvestigacionSintoma.getFechaInicioSintomas())){
-					oResultado.setMensaje("La fecha de defunción no puede ser posterior a la fecha de inicio de sintomas");
+				if(pInvestigacionMalaria.getFechaDefuncion().before(pInvestigacionSintoma.getFechaInicioSintomas())){
+					oResultado.setMensaje("La fecha de defunción no puede ser anterior a la fecha de inicio de sintomas");
 					oResultado.setOk(false);
 					return oResultado;
 				}
@@ -236,7 +228,7 @@ public class InvestigacionValidacion {
 			if(!(pInvestigacionSintoma.getFechaInicioSintomas()==null || pInvestigacionMalaria == null || pInvestigacionMalaria.getInicioTratamiento()==null)){
 				if(pInvestigacionMalaria.getInicioTratamiento().before(pInvestigacionSintoma.getFechaInicioSintomas())){
 					oResultado.setOk(false);
-					oResultado.setMensaje("La fecha de inicio del tratamiento no puede ser inferior a la fecha de inicio de los síntomas");
+					oResultado.setMensaje("La fecha de inicio del tratamiento no puede ser anterior a la fecha de inicio de los síntomas");
 					return oResultado;
 				}
 			}
@@ -339,7 +331,7 @@ public class InvestigacionValidacion {
 		}
 		
 		if(!(pInvestigacionHospitalario.getFechaIngreso() == null || pInvestigacionHospitalario.getFechaIngreso().after(new Date()))) {
-			if (pInvestigacionHospitalario.getInvestigacionMalaria().getFechaDefuncion().after(pInvestigacionHospitalario.getFechaIngreso())) {
+			if (pInvestigacionHospitalario.getFechaIngreso().after(new Date())) {
 				oResultado.setMensaje("La fecha en la cual ingreso a la unidad de salud para el manejo clínico hospitalario no puede ser posterior a la fecha actual");
 				oResultado.setOk(false);
 				return oResultado;
@@ -353,13 +345,13 @@ public class InvestigacionValidacion {
 		}
 		
 		if(pInvestigacionHospitalario.getExpediente()==null){
-			oResultado.setMensaje("La número de expediente en la unidad de hospitalización es requerido");
+			oResultado.setMensaje("El número de expediente en la unidad de hospitalización es requerido");
 			oResultado.setOk(false);
 			return oResultado;
 		}
 		
 		if(pInvestigacionHospitalario.getMunicipio()==null){
-			oResultado.setMensaje("El municipio en el que se encuentra la unidad de hospitalización es requerida");
+			oResultado.setMensaje("El municipio en el que se encuentra la unidad de hospitalización es requerido");
 			oResultado.setOk(false);
 			return oResultado;
 		}
@@ -369,6 +361,7 @@ public class InvestigacionValidacion {
 			oResultado.setOk(false);
 			return oResultado;
 		}
+		
 		if(pInvestigacionHospitalario.getDiasEstancia().intValue() < 1){
 			oResultado.setMensaje("Si el paciente ha sido hospitalizado, el número de días no puede ser menor a uno.");
 			oResultado.setOk(false);

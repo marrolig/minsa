@@ -913,6 +913,7 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	public void cambiarPaisTransfusion(){
+		this.unidadesTransfusion=null;
 		this.unidadTransfusionSelected=null;
 		this.unidadTransfusionSelectedId=0;
 		
@@ -925,9 +926,9 @@ private static final long serialVersionUID = 1L;
 		this.paisTransfusionSelected=oPais;
 		this.paisTransfusionSelectedId=oPais.getPaisId();
 		
-		if(paisTransfusionSelected.getCodigoAlfados().trim().equals("") || 
-				paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false){
-			return;
+		if((paisTransfusionSelected.getCodigoAlfados().trim().equals("") || 
+				paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)){
+			this.unidadesTransfusion = unidadService.UnidadesActivasPorPropiedad(Utilidades.ES_UNIDAD_TRANSFUSIONAL);
 		}
 		
 	}
@@ -1341,7 +1342,7 @@ private static final long serialVersionUID = 1L;
 			
 			//Si es sintomático y los sintomas inician en un lugar diferente al lugar de resisencia,
 			//Se almacenan los valores asociados a Sintomas Lugares Inicio
-			if(!(this.sintomaInicio==null||this.sintomaInicio.intValue()!=0)){
+			if(!(this.sintomaInicio==null||this.sintomaInicio.intValue()==0)){
 				oSintomaLugarInicio = new SintomaLugarInicio();
 				oSintomaLugarInicio.setInicioResidencia(this.sintomaInicio);
 				if (this.paisLugInicioSelected != null) {
