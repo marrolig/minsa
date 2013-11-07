@@ -1,6 +1,8 @@
 package ni.gob.minsa.malaria.modelo.rociado;
 
 import java.io.Serializable;
+import java.util.Date;
+
 import javax.persistence.*;
 
 
@@ -23,8 +25,9 @@ public class ChecklistMalaria implements Serializable {
 	@JoinColumn(name="ELEMENTO_LISTA", referencedColumnName="CODIGO", nullable=false)
 	private ItemsCheckListMalaria elementoLista;
 
-	@Column(name="FECHA_REGISTRO", nullable=false)
-	private Object fechaRegistro;
+    @Temporal( TemporalType.DATE)
+	@Column(name="FECHA_REGISTRO",nullable=false)
+	private Date fechaRegistro;
 
 	@Column(name="USUARIO_REGISTRO", nullable=false, length=50)
 	private String usuarioRegistro;
@@ -53,11 +56,11 @@ public class ChecklistMalaria implements Serializable {
 		this.elementoLista = elementoLista;
 	}
 
-	public Object getFechaRegistro() {
+	public Date getFechaRegistro() {
 		return this.fechaRegistro;
 	}
 
-	public void setFechaRegistro(Object fechaRegistro) {
+	public void setFechaRegistro(Date fechaRegistro) {
 		this.fechaRegistro = fechaRegistro;
 	}
 

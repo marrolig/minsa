@@ -8,7 +8,6 @@ import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Sector;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -110,7 +109,7 @@ public class RociadosMalaria implements Serializable {
 	private Short viviendasRociadas;
 	
     @Temporal( TemporalType.DATE)
-	@Column(nullable=false)
+	@Column(name="FECHA_REGISTRO",nullable=false)
 	private Date fechaRegistro;
 	
     @Column(name="USUARIO_REGISTRO",length=60)

@@ -31,7 +31,7 @@
 </style>
 <f:view>
 <h:form id="frmRociado">
-<ni:titleBar titleText="Vigilancia > Encuestas> Encuesta Entomologica" />
+<ni:titleBar titleText="Vigilancia > Estadisticas> Rociado" />
 <p:growl id="grwMensaje" showDetail="true" life="5000" />
 <p:ajaxStatus style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
 	<f:facet name="start">
@@ -117,17 +117,29 @@
 
 <p:panel id="pnRociado" visible="#{rociadoBean.panelRociado!=0}" style="height: 375px;" styleClass="panDetail" >
 
-<div style="float: left; width: 220px; margin-left: 10px;">
-	<div>
-		<h:outputLabel value="Ubicacion:" style="font-style:italic;" styleClass="lblDefaultSmall"/>
+<div style="float: left; width: 100%; margin-bottom: 5px;  margin-left: 50px;">
+	<div style="float: left; width: 200px;">
+		<h:outputLabel for="frmInp_Control" value="Control de Registro de Rociados:" styleClass="lblDefaultSmall"/>
+		<h:inputText id="frmInp_Control" value="#{rociadoBean.frmInp_Control}" style="width: 40px; margin-left: 5px;" styleClass="txtDefault dist" />
+			<script type="text/javascript">
+					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
+			</script>
+	</div>	
+</div>
+
+<p:panel styleClass="panDetail" style="float: left; width: 280px; height: 160px; margin-right: 10px; margin-left: 50px;">
+	<div style="margin-bottom: 5px;">
+		<h:outputLabel value="Ubicacion:" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
 	</div>
-	<div style="float: left; width: 200px; margin-right: 20px">
+	<div style="float: left; width: 200px; margin-right: 20px; margin-bottom: 5px;">
 		<h:outputLabel for="frmSom_SilaisUbicacion" styleClass="lblDefaultSmall" value="Silais:" />
-		<h:selectOneMenu id="frmSom_SilaisUbicacion" value="#{rocieadoBean.frmSom_SilaisUbicacion}" styleClass="txtDefault cboDefault" >
+		<h:selectOneMenu id="frmSom_SilaisUbicacion" value="#{rocieadoBean.frmSom_SilaisUbicacion}" 
+			style="width: 200px;"
+			styleClass="txtDefault cboDefault" >
 			<f:selectItem itemValue="0"  itemLabel="Seleccionar" />
 			<f:selectItems value="#{rociadoBean.itemsSilais}" var="silais" itemValue="#{silais.codigo}" itemLabel="#{silais.nombre}" />
 			<p:ajax event="change" process=":frmRociado:frmSom_SilaisUbicacion" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 	
-			listener="#{rociadoBean.actualizarMunicipiosUbicacion}" update=":frmRociado:frmSom_MunicipioUbicaCriadero,grwMensaje"/>
+			listener="#{rociadoBean.actualizarMunicipiosUbicacion}" update=":frmRociado:frmSom_MunicipioUbicacion,grwMensaje"/>
 		</h:selectOneMenu>
 	</div>
 	
@@ -158,18 +170,25 @@
 		</p:autoComplete>
 	</div>	
 	
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_Control" value="Control:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Control" value="#{rociadoBean.frmInp_Control}" style="width: 40px;" styleClass="txtDefault dist" />
-			<script type="text/javascript">
-					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
-			</script>
-	</div>
-	
-</div>
+</p:panel>
 
-<div style="float: left; width: 200px; margin-left: 5px;">
-	<div style="float: left; width: 200px;">
+
+<p:panel style="float: left;width: 280px; height: 160px; margin-right: 5px;" styleClass="panDetail">
+	<div style="margin-bottom: 5px;">
+		<h:outputLabel value="Datos Generales" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
+	</div>
+
+
+	<div style="float: left; width: 60px;">
+		<h:outputLabel for="frmInp_Carga" value="Carga:" styleClass="lblDefaultSmall"/>
+		<h:inputText id="frmInp_Carga" value="#{rociadoBean.frmInp_Carga}" style="width: 40px;" styleClass="txtDefault dist" />
+			<script type="text/javascript">
+					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
+			</script>		
+	</div>
+
+
+	<div style="float: left; width: 200px; height: 33px;">
 		<h:outputLabel for="frmSom_Equipo" value="Equipo:" styleClass="lblDefaultSmall"/>
 		<h:selectOneMenu id="frmSom_Equipo" value="#{rociadoBean.frmSom_Equipo}" style="width: 200px;"
 			styleClass="txtDefault cboDefault">
@@ -178,22 +197,15 @@
 		</h:selectOneMenu>
 	</div>
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_Carga" value="Carga:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Carga" value="#{rociadoBean.frmInp_Carga}" style="width: 40px;" styleClass="txtDefault dist" />
+	<div style="float: left; width: 60px;margin-top: 5px;">
+		<h:outputLabel for="frmInp_Formula" value="Formulacion:" styleClass="lblDefaultSmall"/>
+		<h:inputText id="frmInp_Formula" value="#{rociadoBean.frmInp_Formula}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
 			</script>		
 	</div>
 
-	<div style="float: left; width: 200px">
-		<h:outputLabel for="frmSom_CheckList" value="Lista de Comprobación:" />
-		<h:selectManyCheckbox id="frmSom_CheckList" value="#{rociadoBean.frmSom_CheckList}" style="width: 200px;" >
-			<f:selectItems value="#{rociadoBean.itemsCheckList}" var="itm" itemValue="#{itm.catalogoId}" itemLabel="#{itm.valor}" />
-		</h:selectManyCheckbox>
-	</div>
-
-	<div style="float: left; width: 200px;">
+	<div style="float: left; width: 200px; height: 33px; margin-top: 5px;">
 		<h:outputLabel for="frmSom_Insecticida" value="Insecticida:" styleClass="lblDefaultSmall"/>
 		<h:selectOneMenu id="frmSom_Insecticida" value="#{rociadoBean.frmSom_Insecticida}" style="width: 200px;"
 			styleClass="txtDefault cboDefault">
@@ -202,15 +214,9 @@
 		</h:selectOneMenu>
 	</div>
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_Formula" value="Formulacion:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Formula" value="#{rociadoBean.frmInp_Formula}" style="width: 40px;" styleClass="txtDefault dist" />
-			<script type="text/javascript">
-					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
-			</script>		
-	</div>
 
-	<div style="float: left; width: 40px;">
+
+	<div style="float: left; width: 60px;margin-top: 5px;">
 		<h:outputLabel for="frmInp_Boquilla" value="Boquilla:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_Boquilla" value="#{rociadoBean.frmInp_Boquilla}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -218,19 +224,19 @@
 			</script>		
 	</div>
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 60px;margin-top: 5px;">
 		<h:outputLabel for="frmInp_Ciclo" value="Ciclo:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_Ciclo" value="#{rociadoBean.frmInp_Ciclo}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>
-	
-	<div>
+
+	<div style="float: left; width: 100px;margin-top: 5px;">
 		<h:outputLabel for="frmDate_Fecha" value="Fecha Rociado:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmDate_Fecha" value="#{rociadoBean.frmDate_Fecha}" style="width: 90px;"
+		<h:inputText id="frmDate_Fecha" value="#{rociadoBean.frmDate_Fecha}" style="width: 130px;"
 				requiredMessage="Fecha de rociado requerida"  
-				styleClass="frmDate_Fecha">
+				styleClass="txtDefault frmDate_Fecha">
 		<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 		</h:inputText>
 		<script type="text/javascript">
@@ -238,20 +244,35 @@
 		</script>
 	</div>
 
-</div>
+
+</p:panel>
+
+<p:panel  style="float: left;width: 280px; height: 160px;" styleClass="panDetail">
+	<div style="float: left; width: 240px">
+		<h:outputLabel for="frmSom_CheckList" value="Lista de Comprobación:" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
+		<h:selectManyCheckbox id="frmSom_CheckList" value="#{rociadoBean.frmSom_CheckList}" style="width: 240px;"
+			layout="pageDirection" >
+			<f:selectItems value="#{rociadoBean.itemsCheckList}" var="itm" itemValue="#{itm.catalogoId}" itemLabel="#{itm.valor}" />
+		</h:selectManyCheckbox>
+	</div>
+</p:panel>
 
 
-<div style="float: left;">
+<p:panel  style="float: left;width: 280px; height: 140px; margin-right: 5px; margin-top: 5px; margin-left: 50px;" styleClass="panDetail" >
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_viProgramadas" value="Viviendas Programadas:" styleClass="lblDefaultSmall"/>
+	<div style="margin-bottom: 5px;">
+		<h:outputLabel value="Datos de viviendas y desalojo:" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
+	</div>
+
+	<div style="float: left; width: 80px;">
+		<h:outputLabel for="frmInp_viProgramadas" value="Programadas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_viProgramadas" value="#{rociadoBean.frmInp_viProgramadas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_VidesAdecuado" value="Adecuado:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_VidesAdecuado" value="#{rociadoBean.frmInp_VidesAdecuado}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -259,7 +280,7 @@
 			</script>		
 	</div>
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_VidesNoAdecuado" value="No Adecuado:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_VidesNoAdecuado" value="#{rociadoBean.frmInp_VidesNoAdecuado}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -267,23 +288,33 @@
 			</script>		
 	</div>
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_ViRociadas" value="Viviendas Rociadas:" styleClass="lblDefaultSmall"/>
+	<div style="float: left; width: 80px;  margin-top: 5px;">
+		<h:outputLabel for="frmInp_ViRociadas" value="Rociadas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViRociadas" value="#{rociadoBean.frmInp_ViRociadas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>
-	
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_HabitantesProtegidos" value="No Adecuado:" styleClass="lblDefaultSmall"/>
+
+	<div style="float: left; width: 60px;  margin-top: 5px;">
+		<h:outputLabel for="frmInp_HabitantesProtegidos" value="Habitantes:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_HabitantesProtegidos" value="#{rociadoBean.frmInp_HabitantesProtegidos}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>	
+
+</p:panel>
 	
-	<div style="float: left; width: 40px;">
+
+<p:panel  style="float: left;width: 280px; height: 140px; margin-right: 5px; margin-top: 5px;" styleClass="panDetail">	
+
+	<div style="margin-bottom: 5px;">
+		<h:outputLabel value="Viviendas no rociadas por motivo:" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
+	</div>
+
+
+	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_ViNoRxRenuente" value="Renuentes:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViNoRxRenuente" value="#{rociadoBean.frmInp_ViNoRxRenuente}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -291,7 +322,7 @@
 			</script>		
 	</div>	
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_ViNoRxCerradas" value="Cerradas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViNoRxCerradas" value="#{rociadoBean.frmInp_ViNoRxCerradas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -299,7 +330,7 @@
 			</script>		
 	</div>		
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_ViNoRxConstruccion" value="Construcción:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViNoRxConstruccion" value="#{rociadoBean.frmInp_ViNoRxConstruccion}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -307,7 +338,7 @@
 			</script>		
 	</div>		
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 80px;  margin-top: 5px;">
 		<h:outputLabel for="frmInp_ViNoRxEnfermos" value="Enfermos:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViNoRxEnfermos" value="#{rociadoBean.frmInp_ViNoRxConstruccion}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -315,7 +346,7 @@
 			</script>		
 	</div>			
 
-	<div style="float: left; width: 40px;">
+	<div style="float: left; width: 50px;  margin-top: 5px;">
 		<h:outputLabel for="frmInp_ViNoRxOtros" value="Otros:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_ViNoRxOtros" value="#{rociadoBean.frmInp_ViNoRxOtros}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
@@ -323,47 +354,56 @@
 			</script>		
 	</div>	
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_HabRociadas" value="Habitaciones Rociadas:" styleClass="lblDefaultSmall"/>
+</p:panel>
+
+
+<p:panel  style="float: left;width: 280px; height: 140px; margin-right: 5px; margin-top: 5px;" styleClass="panDetail">
+
+	<div style="margin-bottom: 5px;">
+		<h:outputLabel value="Total Habitaciones e Insecticidas:" style="font-style:italic;font-weight:bold;" styleClass="lblDefaultSmall"/>
+	</div>
+
+
+	<div style="float: left; width: 80px;">
+		<h:outputLabel for="frmInp_HabRociadas" value="H.Rociadas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_HabRociadas" value="#{rociadoBean.frmInp_HabRociadas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>	
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_HabNoRociadas" value="Habitaciones Rociadas:" styleClass="lblDefaultSmall"/>
+	<div style="float: left; width: 80px;">
+		<h:outputLabel for="frmInp_HabNoRociadas" value="H.No Rociadas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_HabNoRociadas" value="#{rociadoBean.frmInp_HabNoRociadas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
 			</script>		
 	</div>	
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_TotalCargas" value="Total Cargas:" styleClass="lblDefaultSmall"/>
+	<div style="float: left; width: 80px; ">
+		<h:outputLabel for="frmInp_TotalCargas" value="T. Cargas:" styleClass="lblDefaultSmall"/>
 		<h:inputText id="frmInp_TotalCargas" value="#{rociadoBean.frmInp_TotalCargas}" style="width: 40px;" styleClass="txtDefault dist" />
 			<script type="text/javascript">
 					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
 			</script>		
 	</div>	
+	
+	<div style="width: 250px;">
+		<div style="float: left; width: 80px;  margin-top: 5px;">
+			<h:outputLabel for="frmInp_TotalUtilizadas" value="T. Utilizadas:" styleClass="lblDefaultSmall"/>
+			<h:inputText id="frmInp_TotalUtilizadas" value="#{rociadoBean.frmInp_TotalUtilizadas}" style="width: 40px;" styleClass="txtDefault dist" />
+				<script type="text/javascript">
+						jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
+				</script>		
+		</div>	
+	
+		<div style="float: left; width: 250px;  margin-top: 5px;">
+			<h:outputLabel for="frmInp_Rociador" value="Rociador:" styleClass="lblDefaultSmall"/>
+			<h:inputText id="frmInp_Rociador" value="#{rociadoBean.frmInp_Rociador}" style="width: 250px;" styleClass="txtDefault" />
+		</div>	
+	</div>
 
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_TotalUtilizadas" value="Total Utilizadas:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_TotalUtilizadas" value="#{rociadoBean.frmInp_TotalUtilizadas}" style="width: 40px;" styleClass="txtDefault dist" />
-			<script type="text/javascript">
-					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
-			</script>		
-	</div>	
-
-	<div style="float: left; width: 40px;">
-		<h:outputLabel for="frmInp_Rociador" value="Rociador:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Rociador" value="#{rociadoBean.frmInp_Rociador}" style="width: 40px;" styleClass="txtDefault" />
-	</div>	
-
-
-</div>
-
-
+</p:panel>
 
 
 </p:panel>
@@ -371,12 +411,12 @@
 <p:panel id="pnBotones">
 
 	<p:commandButton id="cmbNuevo" value="Nuevo" 
-		process="@this" update="@this,cmbGuardar,pnBusqueda,pnRociado,cmbRegresar"
+		process="@this" update="@this,pnBusqueda,pnRociado,cmbGuardar,cmbRegresar"
 		disabled="#{rociadoBean.cmbNuevo!=0}" styleClass="btnDefault"
 		actionListener="#{rociadoBean.actualizarVisibilidadPaneles}" />
 
 	<p:commandButton id="cmbGuardar" value="Guardar" 
-		process="@this,pnRociado" update="grwMensaje" disabled="#{rociadoBean.cmbGuardar==0}"
+		process="@this,:frmRociado:pnRociado" update=":frmRociado:grwMensaje" disabled="#{rociadoBean.cmbGuardar==0}"
 		actionListener="#{rociadoBean.guardar}" styleClass="btnDefault" />
 
 	<p:commandButton id="cmbRegresar" value="Regresar" process="@this" update="@this,pnBusqueda,pnRociado,cmbRegresar,cmbGuardar,cmbNuevo" 

@@ -65,14 +65,14 @@ public class RociadoBean implements Serializable {
 	private static ComunidadService srvComunidad = new ComunidadDA();
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<ChecklistMalaria,Integer> srvItemsListaCat = new CatalogoElementoDA(ChecklistMalaria.class,"ChecklistMalaria");
+	private static CatalogoElementoService<ItemsCheckListMalaria,Integer> srvItemsListaCat = new CatalogoElementoDA(ItemsCheckListMalaria.class,"ItemsCheckListMalaria");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<EquiposMalaria,Integer> srvEquiposCat = new CatalogoElementoDA(EquiposMalaria.class,"EquiposMalaria");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<InsecticidasMalaria,Integer> srvInsecticidaCat = new CatalogoElementoDA(InsecticidasMalaria.class,"InsecticidasMalaria");
 	
-	private Integer frmSom_SilaisBusqueda;
-	private String frmSom_MunicipioBusqueda;
+	private Integer frmSom_SilaisBusqueda = 0;
+	private String frmSom_MunicipioBusqueda = "0";
 	private Comunidad frmInp_ComunidadBusqueda;
 	private List<EntidadAdtva> itemsSilais;
 	private List<DivisionPolitica> itemsMunicipioBusqueda;
@@ -80,8 +80,8 @@ public class RociadoBean implements Serializable {
 	
 	private RociadosMalaria rociadoActual;
 	
-	private Integer frmSom_SilaisUbicacion;
-	private String frmSom_MunicipioUbicacion;
+	private Integer frmSom_SilaisUbicacion = 0;
+	private String frmSom_MunicipioUbicacion = "0";
 	private Comunidad frmInp_ComunidadUbicacion;
 	private List<DivisionPolitica> itemsMunicipio;
 	
@@ -120,7 +120,7 @@ public class RociadoBean implements Serializable {
 	
 	
 	
-	private List<ChecklistMalaria> itemsCheckList;
+	private List<ItemsCheckListMalaria> itemsCheckList;
 	private List<EquiposMalaria> itemsEquipos;
 	private List<InsecticidasMalaria> itemsInsecticidas;
 	
@@ -182,14 +182,14 @@ public class RociadoBean implements Serializable {
 			cmbRegresar = 1;
 			cmbGuardar = 1;
 			cmbNuevo = 1;
-			limpiarFormulario();
+			limpiarFormularioRociado();
 		}else if( evt.getComponent().getClientId().equals("frmRociado:cmbRegresar")){;
 			panelBusqueda = 0;
 			panelRociado = 0;
 			cmbNuevo = 0;
 			cmbGuardar = 0;
 			cmbRegresar = 0;
-			limpiarFormulario();
+			limpiarFormularioRociado();
 		}
 
 	}	
@@ -246,9 +246,18 @@ public class RociadoBean implements Serializable {
 	
 	public void limpiarFormulario(ActionEvent evt){
 		limpiarFormulario();
+		limpiarFormularioRociado();
 	}
 	
 	public void limpiarFormulario(){
+		panelBusqueda = 0;
+		panelRociado = 0;
+		cmbNuevo = 0;
+		cmbGuardar = 0;
+		cmbRegresar = 0;		
+	}
+	
+	public void limpiarFormularioRociado(){
 		
 		frmSom_SilaisUbicacion = null;
 		frmSom_MunicipioUbicacion = null;
@@ -285,13 +294,6 @@ public class RociadoBean implements Serializable {
 		frmInp_TotalUtilizadas = null;
 		
 		frmInp_Rociador = null;
-		
-		
-		panelBusqueda = 0;
-		panelRociado = 0;
-		cmbNuevo = 0;
-		cmbGuardar = 0;
-		cmbRegresar = 0;		
 		
 	}
 	
@@ -975,11 +977,11 @@ public class RociadoBean implements Serializable {
 		this.frmSom_CheckList = frmSom_CheckList;
 	}
 
-	public List<ChecklistMalaria> getItemsCheckList() {
+	public List<ItemsCheckListMalaria> getItemsCheckList() {
 		return itemsCheckList;
 	}
 
-	public void setItemsCheckList(List<ChecklistMalaria> itemsCheckList) {
+	public void setItemsCheckList(List<ItemsCheckListMalaria> itemsCheckList) {
 		this.itemsCheckList = itemsCheckList;
 	}
 
