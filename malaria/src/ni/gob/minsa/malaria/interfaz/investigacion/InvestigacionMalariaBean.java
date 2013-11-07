@@ -333,6 +333,7 @@ private static final long serialVersionUID = 1L;
 	/**************************************************
 	 * Constructor
 	 **************************************************/
+	
 	public InvestigacionMalariaBean(){
 		init();
 	}
@@ -926,8 +927,10 @@ private static final long serialVersionUID = 1L;
 		this.paisTransfusionSelected=oPais;
 		this.paisTransfusionSelectedId=oPais.getPaisId();
 		
-		if((paisTransfusionSelected.getCodigoAlfados().trim().equals("") || 
-				paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO) == false)){
+		if(paisTransfusionSelected==null || paisTransfusionSelected.getCodigoAlfados().trim().equals("")){
+			return;
+		}
+		if(paisTransfusionSelected.getCodigoAlfados().trim().equalsIgnoreCase(Utilidades.PAIS_CODIGO)){
 			this.unidadesTransfusion = unidadService.UnidadesActivasPorPropiedad(Utilidades.ES_UNIDAD_TRANSFUSIONAL);
 		}
 		
