@@ -11,7 +11,7 @@ import org.eclipse.persistence.annotations.Cache;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="ML_ITMCHKLISTRX")
+@DiscriminatorValue(value="ML_ITCHK")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class ItemsCheckListMalaria extends Catalogo {
 

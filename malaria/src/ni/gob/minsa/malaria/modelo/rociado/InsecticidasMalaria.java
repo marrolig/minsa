@@ -11,17 +11,12 @@ import org.eclipse.persistence.annotations.Cache;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="ML_INSECTICIDAS")
+@DiscriminatorValue(value="ML_INSC")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class InsecticidasMalaria extends Catalogo {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public InsecticidasMalaria() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	

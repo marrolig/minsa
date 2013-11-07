@@ -16,7 +16,7 @@ public class ChecklistMalaria implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="CHECKLISTMALARIAID_GENERATOR", sequenceName="SEQ_CHKLISTMALARIAID")
+	@SequenceGenerator(name="CHECKLISTMALARIAID_GENERATOR", sequenceName="SIVE.SEQ_CHKLISTMALARIAID",allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="CHECKLISTMALARIAID_GENERATOR")
 	@Column(name="CHECKLIST_MALARIA_ID", unique=true, nullable=false, precision=10)
 	private long checklistMalariaId;

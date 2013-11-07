@@ -97,7 +97,7 @@ public class RociadoChkListDA implements RociadoChkListServices {
 			return oResultado;
 		}
 		
-		String strJPQL = "select chkList from ChecklistMalaria chkList where chkList.rociadosMalaria.rociadoId = :pRociadoId order by chkList.fecha desc";
+		String strJPQL = "select chkList from ChecklistMalaria chkList where chkList.rociadosMalaria.rociadoId = :pRociadoId";
 		
 		try{
 			

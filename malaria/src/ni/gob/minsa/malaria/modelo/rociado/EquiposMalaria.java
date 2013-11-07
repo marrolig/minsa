@@ -11,7 +11,7 @@ import org.eclipse.persistence.annotations.Cache;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="ML_EQUIPOS")
+@DiscriminatorValue(value="ML_TEQ")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class EquiposMalaria extends Catalogo {
 

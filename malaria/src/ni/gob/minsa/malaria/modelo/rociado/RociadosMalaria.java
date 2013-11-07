@@ -21,7 +21,7 @@ public class RociadosMalaria implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="ROCIADOID_GENERATOR", sequenceName="SEQ_ROCIADOID")
+	@SequenceGenerator(name="ROCIADOID_GENERATOR", sequenceName="SIVE.SEQ_ROCIADOID",allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="ROCIADOID_GENERATOR")
 	@Column(name="ROCIADO_ID", unique=true, nullable=false, precision=10)
 	private long rociadoId;
@@ -62,7 +62,7 @@ public class RociadosMalaria implements Serializable {
 	private EntidadAdtva silais;
 
 	@ManyToOne
-	@JoinColumn(name="EQUIPO",referencedColumnName="CODIGO",nullable=false)
+	@JoinColumn(name="EQUIPO",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private EquiposMalaria equipo;
 
     @Temporal( TemporalType.DATE)
@@ -79,7 +79,7 @@ public class RociadosMalaria implements Serializable {
 	private Short habRociadas;
 
 	@ManyToOne
-	@JoinColumn(name="INSECTICIDA",referencedColumnName="CODIGO",nullable=false)
+	@JoinColumn(name="INSECTICIDA",referencedColumnName="CODIGO",nullable=false,updatable=true)
 	private InsecticidasMalaria insecticida;
 
 	@ManyToOne

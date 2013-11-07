@@ -292,9 +292,19 @@ public class RociadoBean implements Serializable {
 		
 		frmInp_TotalCargas = null;
 		frmInp_TotalUtilizadas = null;
+		frmInp_HabitantesProtegidos = null;
 		
 		frmInp_Rociador = null;
 		
+	}
+	
+	public void calcularViviendas(){
+		frmInp_ViRociadas = (short) ( (frmInp_VidesAdecuado == null ? 0 : frmInp_VidesAdecuado) 
+											+ (frmInp_VidesNoAdecuado == null ? 0 : frmInp_VidesNoAdecuado)) ;
+	}
+	
+	public void cacularTotalInsecticidaUtilizado(){
+		frmInp_TotalUtilizadas = (frmInp_TotalCargas == null ? 0 : frmInp_TotalCargas) * ( frmInp_Formula == null ? 0 : frmInp_Formula );
 	}
 	
 	private void actualizarDatosRociado(RociadosMalaria pRociado){
@@ -321,6 +331,7 @@ public class RociadoBean implements Serializable {
 		
 		frmSom_Equipo = pRociado.getEquipo() != null ? pRociado.getEquipo().getCatalogoId() : 0;
 		frmInp_Carga = pRociado.getCarga();
+		
 		frmInp_Boquilla = pRociado.getBoquilla();
 		frmSom_Insecticida = pRociado.getInsecticida() != null ? pRociado.getInsecticida().getCatalogoId() : 0;
 		frmInp_Formula = pRociado.getFormulacion();
@@ -341,7 +352,28 @@ public class RociadoBean implements Serializable {
 		frmInp_HabRociadas = pRociado.getHabRociadas();
 		frmInp_HabNoRociadas = pRociado.getHabNoRociadas();
 		
+		frmInp_TotalCargas = pRociado.getTotalCargas();
+		frmInp_TotalUtilizadas = pRociado.getTotalUtilizadas();
+		frmInp_HabitantesProtegidos = pRociado.getHabitantesProtegidos();
+		
 		frmInp_Rociador = pRociado.getRociador();
+		
+		
+		List<ChecklistMalaria> listaChk = new ArrayList<ChecklistMalaria>();
+		oResultado = null;
+		oResultado = srvChkList.obtenerChkListPorRociado(pRociado);
+		if( oResultado.isExcepcion()  ){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,oResultado.getMensaje(),oResultado.getMensajeDetalle());
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		frmSom_CheckList = new ArrayList<Long>();
+		listaChk = (List<ChecklistMalaria>) oResultado.getObjeto();
+		if( listaChk != null){
+			for( ChecklistMalaria oChk: listaChk ){
+				frmSom_CheckList.add(oChk.getElementoLista().getCatalogoId());
+			}
+		}
 		
 	}
 	
@@ -377,6 +409,8 @@ public class RociadoBean implements Serializable {
 			return oResultado;
 		}
 			
+
+		
 		if( frmSom_Equipo == 0){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Completar Equipo");
@@ -432,7 +466,7 @@ public class RociadoBean implements Serializable {
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
 			return oResultado;			
 		}				
-		
+
 		if( frmInp_viProgramadas == null ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Completar viviendas programadas");
@@ -751,6 +785,7 @@ public class RociadoBean implements Serializable {
 
 	public void setRociadoActual(RociadosMalaria rociadoActual) {
 		this.rociadoActual = rociadoActual;
+		actualizarDatosRociado(rociadoActual);
 	}
 
 	public Integer getFrmSom_SilaisUbicacion() {
