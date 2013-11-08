@@ -231,9 +231,9 @@
 
 	<div style="float: left; width: 80px;">
 		<h:outputLabel for="frmInp_Carga" value="Carga:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Carga" value="#{rociadoBean.frmInp_Carga}" style="width: 60px;" styleClass="txtDefault dist" />
+		<h:inputText id="frmInp_Carga" value="#{rociadoBean.frmInp_Carga}" style="width: 60px;" styleClass="txtDefault frmInp_Carga" />
 			<script type="text/javascript">
-					jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
+					jQuery(".frmInp_Carga").format({precision: 1,allow_negative:false,autofix:true});
 			</script>		
 	</div>
 
@@ -249,12 +249,12 @@
 
 	<div style="float: left; width: 80px;margin-top: 5px;">
 		<h:outputLabel for="frmInp_Formula" value="Formulacion:" styleClass="lblDefaultSmall"/>
-		<h:inputText id="frmInp_Formula" value="#{rociadoBean.frmInp_Formula}" style="width: 60px;" styleClass="txtDefault dist" >
+		<h:inputText id="frmInp_Formula" value="#{rociadoBean.frmInp_Formula}" style="width: 60px;" styleClass="txtDefault frmInp_Formula" >
 			<f:ajax event="change" execute="frmInp_Formula" 
 				render="frmInp_TotalUtilizadas" listener="#{rociadoBean.cacularTotalInsecticidaUtilizado}" />
 		</h:inputText>
 			<script type="text/javascript">
-					jQuery(".dist").format({precision: 2,allow_negative:false,autofix:true});
+					jQuery(".frmInp_Formula").format({precision: 1,allow_negative:false,autofix:true});
 			</script>		
 	</div>
 
@@ -437,20 +437,20 @@
 	<div style="float:left; width: 250px;">
 		<div style="float: left; width: 100px; margin-left: 15px;">
 			<h:outputLabel for="frmInp_TotalCargas" value="Total de Cargas:" styleClass="lblDefaultSmall"/>
-			<h:inputText id="frmInp_TotalCargas" value="#{rociadoBean.frmInp_TotalCargas}" style="width: 100px;" styleClass="txtDefault dist" >
+			<h:inputText id="frmInp_TotalCargas" value="#{rociadoBean.frmInp_TotalCargas}" style="width: 100px;" styleClass="txtDefault frmInp_TotalCargas" >
 				<f:ajax event="change" execute="frmInp_TotalCargas" 
 					render="frmInp_TotalUtilizadas" listener="#{rociadoBean.cacularTotalInsecticidaUtilizado}" />
 			</h:inputText>
 				<script type="text/javascript">
-						jQuery(".dist").format({precision:2,allow_negative:false,autofix:false});
+						jQuery(".frmInp_TotalCargas").format({precision:1,allow_negative:false,autofix:true});
 				</script>		
 		</div>	
 
 		<div style="float: left; width: 100px;  margin-left: 20px;">
 			<h:outputLabel for="frmInp_TotalUtilizadas" value="Total Utilizadas:" styleClass="lblDefaultSmall"/>
-			<h:inputText id="frmInp_TotalUtilizadas" disabled="true" value="#{rociadoBean.frmInp_TotalUtilizadas}" style="width: 100px;" styleClass="txtDefault dist" />
+			<h:inputText id="frmInp_TotalUtilizadas" disabled="true" value="#{rociadoBean.frmInp_TotalUtilizadas}" style="width: 100px;" styleClass="txtDefault frmInp_TotalUtilizadas" />
 				<script type="text/javascript">
-						jQuery(".dist").format({precision: 1,allow_negative:false,autofix:true});
+						jQuery(".frmInp_TotalUtilizadas").format({precision: 1,allow_negative:false,autofix:true});
 				</script>		
 		</div>	
 

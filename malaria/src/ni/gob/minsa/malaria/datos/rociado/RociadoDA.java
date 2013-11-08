@@ -29,12 +29,13 @@ import ni.gob.minsa.malaria.modelo.encuesta.TiposCriaderos;
 import ni.gob.minsa.malaria.modelo.encuesta.TurbidezAgua;
 import ni.gob.minsa.malaria.modelo.encuesta.noEntidad.CriaderosUltimaNotificacion;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
+import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Sector;
 import ni.gob.minsa.malaria.modelo.rociado.ChecklistMalaria;
 import ni.gob.minsa.malaria.modelo.rociado.EquiposMalaria;
-import ni.gob.minsa.malaria.modelo.rociado.InsecticidasMalaria;
+import ni.gob.minsa.malaria.modelo.rociado.InsecticidaML;
 import ni.gob.minsa.malaria.modelo.rociado.RociadosMalaria;
 import ni.gob.minsa.malaria.servicios.rociado.RociadoServices;
 import ni.gob.minsa.malaria.soporte.Mensajes;
@@ -323,9 +324,10 @@ public class RociadoDA implements RociadoServices {
             	
             	Sector oSector = (Sector)oEM.find(Sector.class,pRociado.getSector().getSectorId());
             	oRociado.setSector(oSector);
-            	
-            	InsecticidasMalaria oInsecticida = (InsecticidasMalaria)oEM.find(InsecticidasMalaria.class,pRociado.getInsecticida().getCatalogoId());
-            	oRociado.setInsecticida(oInsecticida);
+
+//            	InsecticidaML oInsecticida = (InsecticidaML)oEM.find(InsecticidaML.class,pRociado.getInsecticida().getCatalogoId());
+//            	oRociado.setInsecticida(oInsecticida);
+            	oRociado.setInsecticida(pRociado.getInsecticida());
             	
             	EquiposMalaria oEquipo = (EquiposMalaria)oEM.find(EquiposMalaria.class,pRociado.getEquipo().getCatalogoId());
             	oRociado.setEquipo(oEquipo);
@@ -420,7 +422,7 @@ public class RociadoDA implements RociadoServices {
 		Query query = null;
 		String strSQL = "";
 		
-		strSQL = "WITH PARAMS as ( select ? as pSilais, ? as pCodMunicipio, ? as pCodComunidad, ? as pSector, ? as pFecha, ? as pControl from dual ) "
+		strSQL = "WITH PARAMS as ( select  ? as pCodComunidad, ? as pFecha, ? as pControl from dual ) "
 				+ " Select " 
 				+ "   Rx.Control, " 
 				+ "   rx.Fecha "
@@ -428,22 +430,16 @@ public class RociadoDA implements RociadoServices {
 				+ "   Rociados_Malaria rx "
 				+ "   inner join params on 1=1 "
 				+ " Where "
-				+ "   Rx.Control = Pcontrol " 
-				+ "   And (rx.entidad_Adtva = Psilais Or 0 = Psilais) "
-				+ "   And (Rx.Municipio = Pcodmunicipio Or 0=Pcodmunicipio) "
-				+ "   And (Rx.Comunidad = Pcodcomunidad Or 0=Pcodcomunidad) "
-				+ "	  And (Rx.sector = pSector or 0=pSector) "
-				+ "   And To_Char(rx.Fecha,'YYYYMM') = To_Char(to_date(Pfecha,'dd/MM/yyyy'),'YYYYMM') ";
+				+ "   Rx.Control = pControl " 
+				+ "   And Rx.Comunidad = pCodComunidad"
+				+ "   And To_Char(rx.Fecha,'YYYYMM') = To_Char(to_date(pFecha,'dd/MM/yyyy'),'YYYYMM') ";
 		
 		try{
 			
 			query = em.createNativeQuery(strSQL);
-			query.setParameter(1,pCodSilais);
-			query.setParameter(2,pCodMunicipio);
-			query.setParameter(3,pCodComunidad);
-			query.setParameter(4,pCodSector);
-			query.setParameter(5,pFecha);
-			query.setParameter(6,pNumControl);
+			query.setParameter(1,pCodComunidad);
+			query.setParameter(2,pFecha);
+			query.setParameter(3,pNumControl);
 			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 			
 			List<Object[]> oFilasResultados=query.getResultList();
@@ -458,9 +454,57 @@ public class RociadoDA implements RociadoServices {
     		oResultado.setOk(false);
     		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
     		oResultado.setFilasAfectadas(0);	
+    		return false;
 		}		
-		return false;
 
 	}
+
+	@Override
+	public InfoResultado obtenerCatalogoPorCodigo(String pCodigo) {
+		InfoResultado oResultado = new InfoResultado();
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		Query query = null;
+		
+		if( pCodigo.isEmpty() ){
+			oResultado.setOk(false);
+			oResultado.setMensaje(Mensajes.RESTRICCION_BUSQUEDA);
+			oResultado.setMensajeDetalle("Comunidad no identificada");
+			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+			oResultado.setFilasAfectadas(0);
+			return oResultado;
+		}
+		
+		String strJPQL = "select ct from InsecticidaML ct where ct.codigo = :pCodigo";
+		
+		InsecticidaML oInsecticida;
+		
+		try{
+			
+			query = em.createQuery(strJPQL);
+			query.setParameter("pCodigo", pCodigo);
+			query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+			
+			oInsecticida = (InsecticidaML) query.getSingleResult();
+			if( oInsecticida == null){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Registro no encontrado");
+				return oResultado;
+			}
+			
+			oResultado.setOk(true);
+			oResultado.setObjeto(oInsecticida);
+			
+            
+		}catch(Exception iExcepcion){
+    		oResultado.setExcepcion(true);
+    		oResultado.setMensaje(Mensajes.ERROR_NO_CONTROLADO + iExcepcion.getMessage());
+    		oResultado.setFuenteError(iExcepcion.toString().split(":",1).toString());
+    		oResultado.setOk(false);
+    		oResultado.setGravedad(InfoResultado.SEVERITY_FATAL);
+    		oResultado.setFilasAfectadas(0);	
+		}
+		
+		return oResultado;	}
 
 }

@@ -76,7 +76,7 @@
 		<class>ni.gob.minsa.malaria.modelo.rociado.ChecklistMalaria</class>
 		<class>ni.gob.minsa.malaria.modelo.rociado.RociadosMalaria</class>
 		<class>ni.gob.minsa.malaria.modelo.rociado.EquiposMalaria</class>
-		<class>ni.gob.minsa.malaria.modelo.rociado.InsecticidasMalaria</class>
+		<class>ni.gob.minsa.malaria.modelo.rociado.InsecticidaML</class>
 		<class>ni.gob.minsa.malaria.modelo.rociado.ItemsCheckListMalaria</class>
 		<properties>
 			<property name="eclipselink.logging.level" value="FINEST"/>

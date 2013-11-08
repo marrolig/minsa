@@ -4,6 +4,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
+import ni.gob.minsa.malaria.modelo.general.Catalogo;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Sector;
@@ -78,9 +79,11 @@ public class RociadosMalaria implements Serializable {
 	@Column(name="HAB_ROCIADAS", nullable=false, precision=4)
 	private Short habRociadas;
 
-	@ManyToOne
-	@JoinColumn(name="INSECTICIDA",referencedColumnName="CODIGO",nullable=false,updatable=true)
-	private InsecticidasMalaria insecticida;
+//	@ManyToOne
+//	@JoinColumn(name="INSECTICIDA",referencedColumnName="CODIGO",insertable=true,updatable=true,nullable=false)
+//	private InsecticidaML insecticida;
+	
+	private String insecticida;
 
 	@ManyToOne
 	@JoinColumn(name="MUNICIPIO",referencedColumnName="CODIGO_NACIONAL",nullable=false)
@@ -260,15 +263,7 @@ public class RociadosMalaria implements Serializable {
 	public void setHabRociadas(Short habRociadas) {
 		this.habRociadas = habRociadas;
 	}
-
-	public InsecticidasMalaria getInsecticida() {
-		return insecticida;
-	}
-
-	public void setInsecticida(InsecticidasMalaria insecticida) {
-		this.insecticida = insecticida;
-	}
-
+	
 	public DivisionPolitica getMunicipio() {
 		return municipio;
 	}
@@ -364,6 +359,22 @@ public class RociadosMalaria implements Serializable {
 	public void setTotalUtilizadas(Float totalUtilizadas) {
 		this.totalUtilizadas = totalUtilizadas;
 	}
+
+	public String getInsecticida() {
+		return insecticida;
+	}
+
+	public void setInsecticida(String insecticida) {
+		this.insecticida = insecticida;
+	}
+
+//	public InsecticidaML getInsecticida() {
+//		return insecticida;
+//	}
+//
+//	public void setInsecticida(InsecticidaML insecticida) {
+//		this.insecticida = insecticida;
+//	}
 
     
 	

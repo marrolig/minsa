@@ -12,9 +12,6 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 
-import org.primefaces.model.LazyDataModel;
-import org.primefaces.model.SortOrder;
-
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.encuestas.CriaderoDA;
 import ni.gob.minsa.malaria.datos.estructura.EntidadAdtvaDA;
@@ -24,15 +21,13 @@ import ni.gob.minsa.malaria.datos.poblacion.DivisionPoliticaDA;
 import ni.gob.minsa.malaria.datos.poblacion.SectorDA;
 import ni.gob.minsa.malaria.datos.rociado.RociadoChkListDA;
 import ni.gob.minsa.malaria.datos.rociado.RociadoDA;
-import ni.gob.minsa.malaria.modelo.encuesta.AbundanciaFauna;
-import ni.gob.minsa.malaria.modelo.encuesta.noEntidad.CriaderosUltimaNotificacion;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Sector;
 import ni.gob.minsa.malaria.modelo.rociado.ChecklistMalaria;
 import ni.gob.minsa.malaria.modelo.rociado.EquiposMalaria;
-import ni.gob.minsa.malaria.modelo.rociado.InsecticidasMalaria;
+import ni.gob.minsa.malaria.modelo.rociado.InsecticidaML;
 import ni.gob.minsa.malaria.modelo.rociado.ItemsCheckListMalaria;
 import ni.gob.minsa.malaria.modelo.rociado.RociadosMalaria;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices;
@@ -45,6 +40,9 @@ import ni.gob.minsa.malaria.servicios.rociado.RociadoChkListServices;
 import ni.gob.minsa.malaria.servicios.rociado.RociadoServices;
 import ni.gob.minsa.malaria.soporte.Mensajes;
 import ni.gob.minsa.malaria.soporte.Utilidades;
+
+import org.primefaces.model.LazyDataModel;
+import org.primefaces.model.SortOrder;
 
 @ManagedBean
 @ViewScoped
@@ -69,7 +67,7 @@ public class RociadoBean implements Serializable {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static CatalogoElementoService<EquiposMalaria,Integer> srvEquiposCat = new CatalogoElementoDA(EquiposMalaria.class,"EquiposMalaria");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<InsecticidasMalaria,Integer> srvInsecticidaCat = new CatalogoElementoDA(InsecticidasMalaria.class,"InsecticidasMalaria");
+	private static CatalogoElementoService<InsecticidaML,Integer> srvInsecticidaCat = new CatalogoElementoDA(InsecticidaML.class,"InsecticidaML");
 	
 	private Integer frmSom_SilaisBusqueda = 0;
 	private String frmSom_MunicipioBusqueda = "0";
@@ -122,7 +120,7 @@ public class RociadoBean implements Serializable {
 	
 	private List<ItemsCheckListMalaria> itemsCheckList;
 	private List<EquiposMalaria> itemsEquipos;
-	private List<InsecticidasMalaria> itemsInsecticidas;
+	private List<InsecticidaML> itemsInsecticidas;
 	
 	
 	private short panelBusqueda = 0;
@@ -333,7 +331,15 @@ public class RociadoBean implements Serializable {
 		frmInp_Carga = pRociado.getCarga();
 		
 		frmInp_Boquilla = pRociado.getBoquilla();
-		frmSom_Insecticida = pRociado.getInsecticida() != null ? pRociado.getInsecticida().getCatalogoId() : 0;
+				
+//		frmSom_Insecticida = pRociado.getEquipo() != null ? pRociado.getInsecticida().getCatalogoId() : 0;
+		
+		oResultado = null;
+		oResultado = srvRociado.obtenerCatalogoPorCodigo(pRociado.getInsecticida());
+		if( oResultado.isOk() && oResultado.getObjeto() != null){
+			frmSom_Insecticida = ((InsecticidaML) oResultado.getObjeto()).getCatalogoId();
+		}
+		
 		frmInp_Formula = pRociado.getFormulacion();
 		frmInp_Ciclo = pRociado.getCiclo();
 		frmDate_Fecha = pRociado.getFecha();
@@ -466,7 +472,17 @@ public class RociadoBean implements Serializable {
 			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
 			return oResultado;			
 		}				
-
+		
+		if( rociadoActual == null ){
+			boolean esPermitidoRegistro = srvRociado.validarNumeroControlRociado(frmInp_Control,0,"0",frmInp_ComunidadUbicacion.getCodigo(),"0", frmDate_Fecha);
+			if( !esPermitidoRegistro ){
+				oResultado.setOk(false);
+				oResultado.setMensaje("El numero de control ya existe registrado, validar los datos");
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				return oResultado;
+			}
+		}
+		
 		if( frmInp_viProgramadas == null ){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Completar viviendas programadas");
@@ -606,8 +622,8 @@ public class RociadoBean implements Serializable {
 				if( auxIdRociado == 0) rociadoActual.setRociadoId(0);
 				return oResultado;
 			}
-			InsecticidasMalaria oInsecticida = (InsecticidasMalaria) oResultado.getObjeto();
-			rociadoActual.setInsecticida(oInsecticida);
+			InsecticidaML oInsecticida = (InsecticidaML) oResultado.getObjeto();
+			rociadoActual.setInsecticida(oInsecticida.getCodigo());
 			
 			oResultado = null;
 			oResultado = srvMunicipio.EncontrarPorCodigoNacional(frmSom_MunicipioUbicacion);
@@ -650,12 +666,17 @@ public class RociadoBean implements Serializable {
 			List<ChecklistMalaria> listChk = new ArrayList<ChecklistMalaria>();
 			List<ChecklistMalaria> listChkEliminar = new ArrayList<ChecklistMalaria>();
 			if( frmSom_CheckList != null ){
+				
+				
+				
 				oResultado = null;
 				oResultado = srvChkList.obtenerChkListPorRociado(rociadoActual);
 				if( oResultado.isExcepcion() ){
 					return oResultado;
 				}
 				listChk = (List<ChecklistMalaria>) oResultado.getObjeto();
+				
+				if( listChk == null ) listChk = new ArrayList<ChecklistMalaria>();
 				for(i=0; i < frmSom_CheckList.size(); i++){
 					oResultado = null;
 					oLong = Long.valueOf(frmSom_CheckList.get(i));
@@ -1080,7 +1101,7 @@ public class RociadoBean implements Serializable {
 		return lazyRociados;
 	}
 
-	public List<InsecticidasMalaria> getItemsInsecticidas() {
+	public List<InsecticidaML> getItemsInsecticidas() {
 		return itemsInsecticidas;
 	}
 

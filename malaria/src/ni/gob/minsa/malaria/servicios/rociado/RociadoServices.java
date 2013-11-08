@@ -82,5 +82,7 @@ public interface RociadoServices {
 	 * @return boolean
 	 */
 	public boolean validarNumeroControlRociado(int pNumControl, long pCodSilais, String pCodMunicipio, String pCodComunidad, String pCodSector, Date pFecha);
+
+	public InfoResultado obtenerCatalogoPorCodigo(String pCodigo);
 	
 }
