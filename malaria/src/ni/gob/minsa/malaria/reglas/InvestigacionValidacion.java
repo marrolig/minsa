@@ -163,19 +163,21 @@ public class InvestigacionValidacion {
 		}
 		
 		//Validanto datos donde iniciaron los síntomas
-		if(pInvestigacionMalaria.getSintomatico().intValue()==1 && pInvestigacionMalaria.getInfeccionResidencia().intValue()==0 && pSintomaLugarInicio==null){
-			oResultado.setOk(false);
-			oResultado.setMensaje("Si la persona es sintomática debe inidicar donde iniciaron los síntomas");
-			return oResultado;
-		}else if(pInvestigacionMalaria.getSintomatico().intValue()==1 && pSintomaLugarInicio!=null){
-			oResultado = validarSintomaLugarInicio(pSintomaLugarInicio);
-			if(oResultado.isOk()==false) return oResultado;
+		if(pInvestigacionMalaria.getSintomatico().intValue()==1 && pInvestigacionSintoma!=null){
+			if(pInvestigacionSintoma.getInicioResidencia().intValue()==0 && pSintomaLugarInicio==null){
+				oResultado.setOk(false);
+				oResultado.setMensaje("Si la persona es sintomática debe inidicar donde iniciaron los síntomas");
+				return oResultado;
+			}else if(pInvestigacionSintoma.getInicioResidencia().intValue()==0){
+				oResultado = validarSintomaLugarInicio(pSintomaLugarInicio);
+				if(oResultado.isOk()==false) return oResultado;
+			}
 		}
-		
+	
 		//Validadon datos de investigacion asociados a lugares
 		if(pInvestigacionMalaria.getInfeccionResidencia().intValue()==0 && pInvestigacionLugar==null){
 			oResultado.setOk(false);
-			oResultado.setMensaje("Si declara que la persona ha realizado viajes en los últimos 30 días a zonas maláricas, debe definir los lugares visitados");
+			oResultado.setMensaje("Si la infección no se producen en el lugar de residencia, debe indicar el lugar donde ocurre ");
 			return oResultado;
 		}else{
 			oResultado = validarInvestigacionLugar(pInvestigacionLugar);
@@ -382,7 +384,7 @@ public class InvestigacionValidacion {
 		if(pInvestigacionLugar.getInfeccionResidencia().intValue()!=1){
 			if(pInvestigacionLugar.getPais()==null && pInvestigacionLugar.getMunicipio()==null){
 				oResultado.setOk(false);
-				oResultado.setMensaje("Si la infección no ocurre en el lugar de residencia de la persona y el lugar donde se produce es a nivel nacional, debe indicar el municipio");
+				oResultado.setMensaje("Si la infección no ocurre en el lugar de residencia de la persona y el lugar donde se produce es a nivel nacional, debe indicar el municipio de ocurrencia");
 				return oResultado;
 			}
 		}
@@ -398,18 +400,23 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
-		if(pSintomaLugarInicio.getInicioResidencia().intValue()==0){
-			if(pSintomaLugarInicio.getPais()==null &&( pSintomaLugarInicio.getMunicipio()==null || pSintomaLugarInicio.getMunicipio().getDivisionPoliticaId() < 1)){
-				oResultado.setOk(false);
-				oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona, debe indicar el municipio de ocurrencia");
-				return oResultado;
-			}
-			if(pSintomaLugarInicio.getEstadia()==null){
-				oResultado.setOk(false);
-				oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona y el lugar donde se produce es a nivel nacional, debe indicar los días de estadía");
-				return oResultado;
-			}
+		if(pSintomaLugarInicio.getInicioResidencia()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si la persona es sintomática debe inidicar donde iniciaron los síntomas");
+			return oResultado;
 		}
+		
+		if(pSintomaLugarInicio.getPais()==null &&( pSintomaLugarInicio.getMunicipio()==null || pSintomaLugarInicio.getMunicipio().getDivisionPoliticaId() < 1)){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona, debe indicar el municipio de ocurrencia");
+			return oResultado;
+		}
+		if(pSintomaLugarInicio.getEstadia()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si los síntomas no ocurren en el lugar de residencia de la persona, debe indicar los días de estadía");
+			return oResultado;
+		}
+		
 		
 		oResultado.setOk(true);
 		return oResultado;
@@ -428,7 +435,7 @@ public class InvestigacionValidacion {
 			oResultado.setMensaje("Si el paciente es sintomático debe indicar la fecha de inicio de síntomas");
 			return oResultado;
 		}
-		
+			
 		if (pInvestigacionSintoma.getFechaInicioSintomas()==null) {
 			oResultado.setOk(false);
 			oResultado.setMensaje("La fecha de inicio de sintomas es requerida");
@@ -441,6 +448,11 @@ public class InvestigacionValidacion {
 			return oResultado;
 		}
 		
+		if(pInvestigacionSintoma.getSintomatico().intValue()==1 && pInvestigacionSintoma.getInicioResidencia()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Si el paciente es sintomático debe indicar el lugar donde inician los síntomas");
+			return oResultado;
+		}
 		
 		if(pInvestigacionSintoma.getFechaInicioSintomas()!=null){
 			if(!(pInvestigacionSintoma.getInvestigacionMalaria()==null || pInvestigacionSintoma.getInvestigacionMalaria().getInicioTratamiento()==null)){
@@ -458,7 +470,7 @@ public class InvestigacionValidacion {
 			oResultado.setMensaje("Debe indicar el estado febril del paciente.");
 			return oResultado;
 		}
-	
+		
 	
 		oResultado.setOk(true);
 		return oResultado;

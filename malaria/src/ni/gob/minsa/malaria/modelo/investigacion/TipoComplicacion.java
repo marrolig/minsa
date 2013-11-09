@@ -14,7 +14,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="TCOMP")
+@DiscriminatorValue(value="TCMPecM")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class TipoComplicacion extends Catalogo  {
 

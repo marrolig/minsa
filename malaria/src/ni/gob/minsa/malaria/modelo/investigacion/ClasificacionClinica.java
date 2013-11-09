@@ -13,7 +13,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="CDIAG")
+@DiscriminatorValue(value="CCDecM")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class ClasificacionClinica extends Catalogo {
 

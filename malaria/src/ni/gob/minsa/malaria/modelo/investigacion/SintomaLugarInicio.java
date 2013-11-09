@@ -42,11 +42,14 @@ public class SintomaLugarInicio implements Serializable {
 	@Column(name="FECHA_REGISTRO", updatable=false, nullable=false)
 	private Date fechaRegistro;
 
-	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1)
+	@Column(name="INICIO_RESIDENCIA", nullable=false, precision=1,insertable=false, updatable=false )
 	private BigDecimal inicioResidencia;
 	
-	@OneToOne
-	@JoinColumn(name="INVESTIGACION_SINTOMA", referencedColumnName="INVESTIGACION_SINTOMA_ID",nullable=false)
+	@OneToOne( optional = false,targetEntity=InvestigacionSintoma.class)
+	@JoinColumns( {  
+           @JoinColumn(name = "INVESTIGACION_SINTOMA", referencedColumnName = "INVESTIGACION_SINTOMA_ID",nullable=false),  
+           @JoinColumn(name = "INICIO_RESIDENCIA", referencedColumnName = "INICIO_RESIDENCIA",nullable=false) 
+           }) 
 	private InvestigacionSintoma investigacionSintoma;
 
 	@ManyToOne

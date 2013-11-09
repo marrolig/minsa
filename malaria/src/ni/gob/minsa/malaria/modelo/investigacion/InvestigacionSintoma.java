@@ -53,15 +53,15 @@ public class InvestigacionSintoma implements Serializable {
 	private BigDecimal sintomatico;
 	
 	//bi-directional many-to-one association to SintomasLugaresAnte
-	@OneToOne(mappedBy="investigacionSintoma",targetEntity=SintomaLugarInicio.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="investigacionSintoma",targetEntity=SintomaLugarInicio.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL, orphanRemoval = true)
 	private SintomaLugarInicio sintomaLugarInicio;
 	
 	//bi-directional many-to-one association to SintomasLugaresAnte
-	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarAnte.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarAnte.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL, orphanRemoval = true)
 	private Set<SintomaLugarAnte> sintomaLugarAntes;
 
 	//bi-directional many-to-one association to SintomasLugaresOtro
-	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarOtro.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="investigacionSintoma",targetEntity=SintomaLugarOtro.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL, orphanRemoval = true)
 	private Set<SintomaLugarOtro> sintomaLugarOtros;
 
     public InvestigacionSintoma() {

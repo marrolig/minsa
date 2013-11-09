@@ -15,7 +15,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
 
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="IMDIAG")
+@DiscriminatorValue(value="CDMecM")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class ConfirmacionDiagnostico extends Catalogo {
 

@@ -17,7 +17,7 @@ import org.eclipse.persistence.annotations.Cache;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="CLFC")
+@DiscriminatorValue(value="TCCecM")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class ClasificacionCaso extends Catalogo {
 

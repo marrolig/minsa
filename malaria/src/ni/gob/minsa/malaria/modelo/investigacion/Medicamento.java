@@ -15,7 +15,7 @@ import ni.gob.minsa.malaria.modelo.general.Catalogo;
  */
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue(value="IMEDIC")
+@DiscriminatorValue(value="MMecM")
 @Cache(alwaysRefresh=true,disableHits=true)
 public class Medicamento extends Catalogo  {
 

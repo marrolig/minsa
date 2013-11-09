@@ -151,19 +151,19 @@ public class InvestigacionMalaria implements Serializable {
 	private BigDecimal viajesZonaRiesgo;
 
 	//bi-directional many-to-one association to InvestigacionesMedicamento
-	@OneToMany(mappedBy="investigacionMalaria",targetEntity=InvestigacionMedicamento.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="investigacionMalaria",targetEntity=InvestigacionMedicamento.class,fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
 	private Set<InvestigacionMedicamento> investigacionMedicamentos;
 	
-	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionSintoma.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionSintoma.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
 	private InvestigacionSintoma investigacionSintomas;
 	
-	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionLugar.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionLugar.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
 	private InvestigacionLugar investigacionLugares;
 	
-	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionTransfusion.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionTransfusion.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
 	private InvestigacionTransfusion investigacionTransfusiones; 
 	
-	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionHospitalario.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="investigacionMalaria",targetEntity=InvestigacionHospitalario.class,optional=true,fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
 	private InvestigacionHospitalario investigacionHospitalarios;
 
     public InvestigacionMalaria() {

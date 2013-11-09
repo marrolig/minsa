@@ -431,13 +431,14 @@ private static final long serialVersionUID = 1L;
 			//Si es sintomático y los sintomas inician en un lugar diferente al lugar de resisencia,
 			//se obtienen los valores asociados a al luger de inicio
 			if (this.esSintomatico.intValue() == 1 && this.investigacionSintomaSelected != null) {
+				
+				this.sintomaInicio = this.investigacionSintomaSelected.getInicioResidencia();
+				
 				if (this.investigacionSintomaSelected.getInicioResidencia().intValue() == 0) {
-					this.sintomaInicio = this.investigacionSintomaSelected.getInicioResidencia();
 					 oInfoResultado = sintomaLugarInicioService.EncontrarPorInvestigacionSintoma(
 							this.investigacionSintomaSelected.getInvestigacionSintomaId());
 					if (oInfoResultado.isOk()) {
 						SintomaLugarInicio oLugInicio = (SintomaLugarInicio) oInfoResultado.getObjeto();
-						this.sintomaInicio = oLugInicio.getInicioResidencia();
 						this.estadiaLugar = oLugInicio.getEstadia();
 						if(oLugInicio.getPais()!=null){
 							this.paisLugInicioSelected = oLugInicio.getPais();
@@ -631,6 +632,7 @@ private static final long serialVersionUID = 1L;
 		this.muniLugInicioSelected=null;
 		this.muniLugInicioSelectedId=0;
 		this.comuLugInicioSelected=null;
+		this.estadiaLugar=null;
 		
 		if(!(this.sintomaInicio==null || this.sintomaInicio.intValue()!=0)){
 			InfoResultado oResultado=paisService.Encontrar(Utilidades.PAIS_CODIGO);
@@ -1345,17 +1347,19 @@ private static final long serialVersionUID = 1L;
 			
 			//Si es sintomático y los sintomas inician en un lugar diferente al lugar de resisencia,
 			//Se almacenan los valores asociados a Sintomas Lugares Inicio
-			if(!(this.sintomaInicio==null||this.sintomaInicio.intValue()==0)){
-				oSintomaLugarInicio = new SintomaLugarInicio();
-				oSintomaLugarInicio.setInicioResidencia(this.sintomaInicio);
-				if (this.paisLugInicioSelected != null) {
-					if (!this.paisLugInicioSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
-						oSintomaLugarInicio.setPais(this.paisLugInicioSelected);
+			if(this.sintomaInicio!=null){
+				if(this.sintomaInicio.intValue()==0){
+					oSintomaLugarInicio = new SintomaLugarInicio();
+					oSintomaLugarInicio.setInicioResidencia(this.sintomaInicio);
+					if (this.paisLugInicioSelected != null) {
+						if (!this.paisLugInicioSelected.getCodigoAlfados().equalsIgnoreCase(Utilidades.PAIS_CODIGO)) {
+							oSintomaLugarInicio.setPais(this.paisLugInicioSelected);
+						}
 					}
+					oSintomaLugarInicio.setMunicipio(this.muniLugInicioSelected);
+					oSintomaLugarInicio.setComunidad(this.comuLugInicioSelected);
+					oSintomaLugarInicio.setEstadia(this.estadiaLugar);
 				}
-				oSintomaLugarInicio.setMunicipio(this.muniLugInicioSelected);
-				oSintomaLugarInicio.setComunidad(this.comuLugInicioSelected);
-				oSintomaLugarInicio.setEstadia(this.estadiaLugar);
 			}
 		}
 		oInvestigacion.setViajesZonaRiesgo(this.viajeZonaRiesgo);
