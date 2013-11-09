@@ -1,7 +1,6 @@
 package ni.gob.minsa.malaria.datos.vigilancia;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import javax.naming.InitialContext;
@@ -123,18 +122,15 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         	// unidad de notificación
         	// municipio de notificación
         	// puesto de notificación (clave y colvol, si procede)
-        	// número de lámina (si la fecha de recepción aún no ha sido declarada)
+        	// número de lámina 
         	// persona, aunque sus datos pueden ser modificados
 
-        	// si no se había declarado diagnóstico (resultados de la prueba de gota gruesa)
-        	// se pueden modificar el número de lámina, fecha de toma y año/semana epidemiológica
+        	// TODO Si ya existe una investigación epidemiológica no debe modificarse
+        	//      ni la fecha de toma ni la semana y año epidemiológico
 
-        	if (oMuestreoHematico.getDiagnostico()==null) {
-        		oMuestreoHematico.setNumeroLamina(pMuestreoHematico.getNumeroLamina());
-            	oMuestreoHematico.setFechaToma(pMuestreoHematico.getFechaToma());
-            	oMuestreoHematico.setAñoEpidemiologico(pMuestreoHematico.getAñoEpidemiologico());
-            	oMuestreoHematico.setSemanaEpidemiologica(pMuestreoHematico.getSemanaEpidemiologica());
-        	}
+        	oMuestreoHematico.setFechaToma(pMuestreoHematico.getFechaToma());
+            oMuestreoHematico.setAñoEpidemiologico(pMuestreoHematico.getAñoEpidemiologico());
+            oMuestreoHematico.setSemanaEpidemiologica(pMuestreoHematico.getSemanaEpidemiologica());
         	
         	// Datos de la persona que pueden ser modificados.  Estos datos únicamente serán modificados
         	// si son modificados directamente en el registro del muestreo hemático.  Si desde otro aplicativo
@@ -147,7 +143,6 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         		oMuestreoHematico.setEtnia(null);
         	}
         	
-        	// la comunidad se considera requerida
         	Comunidad oComunidadResidencia = (Comunidad)oEM.find(Comunidad.class, pMuestreoHematico.getComunidadResidencia().getComunidadId());
         	oMuestreoHematico.setComunidadResidencia(oComunidadResidencia);
         	
@@ -157,16 +152,18 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         	DivisionPolitica oMunicipioResidencia = (DivisionPolitica)oEM.find(DivisionPolitica.class, pMuestreoHematico.getMunicipioResidencia().getDivisionPoliticaId());
         	oMuestreoHematico.setMunicipioResidencia(oMunicipioResidencia);
         	
-        	// el sexo es requerido
         	Sexo oSexo = (Sexo)oEM.find(Sexo.class, pMuestreoHematico.getSexo().getCatalogoId());
         	oMuestreoHematico.setSexo(oSexo);
+        	
+        	oMuestreoHematico.setDireccionResidencia(pMuestreoHematico.getDireccionResidencia());
 
         	// datos de la ficha
         	
         	oMuestreoHematico.setTipoBusqueda(pMuestreoHematico.getTipoBusqueda());
         	oMuestreoHematico.setEmbarazada(pMuestreoHematico.getEmbarazada());
-        	oMuestreoHematico.setPersonaReferente(pMuestreoHematico.getPersonaReferente()!=null && !pMuestreoHematico.getPersonaReferente().isEmpty()?pMuestreoHematico.getPersonaReferente():null);
-        	oMuestreoHematico.setTelefonoReferente(pMuestreoHematico.getTelefonoReferente()!=null && !pMuestreoHematico.getTelefonoReferente().isEmpty()?pMuestreoHematico.getTelefonoReferente():null);
+        	oMuestreoHematico.setPersonaReferente(pMuestreoHematico.getPersonaReferente());
+        	oMuestreoHematico.setTelefonoReferente(pMuestreoHematico.getTelefonoReferente());
+        	oMuestreoHematico.setEmpleador(pMuestreoHematico.getEmpleador());
     
         	// si se declaró la manzana, la busca en el contexto de la persistencia
         	if (pMuestreoHematico.getManzana()!=null) {
@@ -197,16 +194,31 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         	// datos de la prueba rápida
         	
         	if (pMuestreoHematico.getPruebaRapida()==null) {
-        		oMuestreoHematico.setPruebaRapida(null);
-        	} else {
-        		// para la prueba rápida de malaria, todos los datos
-        		// son requeridos, por tanto si luego de la validación
-        		// el objeto no es nulo, podría ser ya existía y
-        		// los datos hayan sido eliminados.  Por tanto, si la fecha
-        		// es nula, todo el objeto sera null
-        		if ((pMuestreoHematico.getPruebaRapida().getFecha()==null)) {
+
+        		if (oMuestreoHematico.getPruebaRapida()!=null) {
+
+            		MuestreoPruebaRapida oPruebaRapida = (MuestreoPruebaRapida)oEM.find(MuestreoPruebaRapida.class, oMuestreoHematico.getPruebaRapida().getMuestreoPruebaRapidaId());
+            		if (oPruebaRapida!=null) {
+            			oEM.remove(oPruebaRapida);
+            		}
         			oMuestreoHematico.setPruebaRapida(null);
+        		}
+        	} else {
+        		// para la prueba rápida de malaria, todos los datos son requeridos, por tanto si luego de la validación
+        		// el objeto no es nulo, podría ser ya existía y los datos hayan sido eliminados.  Por tanto, si la fecha
+        		// es nula, todo el objeto sera null
+
+        		if ((pMuestreoHematico.getPruebaRapida().getFecha()==null)) {
+
+        			if (oMuestreoHematico.getPruebaRapida()!=null) {
+                		MuestreoPruebaRapida oPruebaRapida = (MuestreoPruebaRapida)oEM.find(MuestreoPruebaRapida.class, oMuestreoHematico.getPruebaRapida().getMuestreoPruebaRapidaId());
+                		if (oPruebaRapida!=null) {
+                			oEM.remove(oPruebaRapida);
+                		}
+            			oMuestreoHematico.setPruebaRapida(null);
+            		}
         		} else {
+
         			if (oMuestreoHematico.getPruebaRapida()==null) {
         				// como no existían datos de la prueba rápida en la base de datos
         				// se coloca directamente el objeto de la prueba rápida
@@ -214,6 +226,7 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         			} else {
         				// si existen datos de la prueba rápida, se obtiene el objeto del contexto
         				// para luego modificarlo y ser persistido
+
         				MuestreoPruebaRapida oMuestreoPruebaRapida = (MuestreoPruebaRapida)oEM.find(MuestreoPruebaRapida.class, oMuestreoHematico.getPruebaRapida().getMuestreoPruebaRapidaId());
         				oMuestreoPruebaRapida.setFecha(pMuestreoHematico.getPruebaRapida().getFecha());
         				
@@ -239,6 +252,13 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         	// datos del diagnóstico por la técnica de la gota gruesa
         	
         	if (pMuestreoHematico.getDiagnostico()==null) {
+
+        		if (oMuestreoHematico.getDiagnostico()!=null) {
+        			MuestreoDiagnostico oDiagnostico = (MuestreoDiagnostico)oEM.find(MuestreoDiagnostico.class, oMuestreoHematico.getDiagnostico().getMuestreoDiagnosticoId());
+        			if (oDiagnostico!=null) {
+        				oEM.remove(oDiagnostico);
+        			}
+        		}
         		oMuestreoHematico.setDiagnostico(null);
         	} else {
         		
@@ -246,6 +266,12 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         		// por consiguiente si dicha fecha no existe, significaría que todos los datos asociados al diagnóstico fueron eliminados
         		
         		if ((pMuestreoHematico.getDiagnostico().getFechaRecepcion()==null)) {
+            		if (oMuestreoHematico.getDiagnostico()!=null) {
+            			MuestreoDiagnostico oDiagnostico = (MuestreoDiagnostico)oEM.find(MuestreoDiagnostico.class, oMuestreoHematico.getDiagnostico().getMuestreoDiagnosticoId());
+            			if (oDiagnostico!=null) {
+            				oEM.remove(oDiagnostico);
+            			}
+            		}
         			oMuestreoHematico.setDiagnostico(null);
         		} else {
         			
@@ -576,6 +602,10 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
     	try{
     		MuestreoHematico oMuestreoHematico = (MuestreoHematico)oEM.find(MuestreoHematico.class, pMuestreoHematicoId);
+
+    		// TODO  Aquí debe validarse si ya existe una investigación asociada para
+    		//       abortar la eliminación
+    		
     		if (oMuestreoHematico!=null) {
     			oEM.remove(oMuestreoHematico);
     			oEM.getTransaction().commit();
@@ -639,13 +669,12 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<MuestreoHematico> ListarPorPersona(long pPersonaId,Date pFechaToma) {
+	public List<MuestreoHematico> ListarPorPersona(long pPersonaId) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         try{
             Query query = em.createNamedQuery("MuestreoHematico.listarPorPersona");
             query.setParameter("pPersonaId", pPersonaId);
-            query.setParameter("pFechaToma",pFechaToma);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
             return(query.getResultList());
         } finally{
@@ -655,13 +684,12 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<MuestreoHematico> ListarPorClave(String pClave,Date pFechaToma) {
+	public List<MuestreoHematico> ListarPorClave(String pClave) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         try{
             Query query = em.createNamedQuery("MuestreoHematico.listarPorClave");
             query.setParameter("pClave", pClave);
-            query.setParameter("pFechaToma",pFechaToma);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
             return(query.getResultList());
         } finally{

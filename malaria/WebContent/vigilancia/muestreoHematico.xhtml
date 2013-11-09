@@ -67,7 +67,7 @@
 					<p:ajax event="change" process="cboEntidad" 
 							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
 							listener="#{muestreoHematicoBean.obtenerUnidades}" 
-							update="panControl,panPaciente,panReferente,panTratamiento,panPRM,panPGG,panButton,grwMensaje"/>
+							update="panControl,grwMensaje,panButton"/>
 			</h:selectOneMenu>
 
 			<h:outputLabel for="cboUnidad" styleClass="lblDefaultSmall" 
@@ -85,7 +85,7 @@
 					<p:ajax event="change" process="cboUnidad" 
 							onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
 							listener="#{muestreoHematicoBean.cambiarUnidad}" 
-							update="#{muestreoHematicoBean.estado==0?'panControl,grwMensaje':'panControl,panPaciente,panReferente,panTratamiento,panPRM,panPGG,panButton,grwMensaje'}"/>
+							update="panControl,grwMensaje,panButton"/>
 			</h:selectOneMenu>
 
 			<h:outputLabel for="txtColVol" styleClass="lblDefaultSmall" 
@@ -97,19 +97,15 @@
 					styleClass="txtDefault" > 
 			</h:inputText>
 			
-			<h:outputLink id="lnkBuscar" value="javascript:void(0)" 
-					styleClass="navDelLink"     
-            		style="position: absolute; top: 65px; left: 540px;cursor:pointer;border:0.08em solid #9d9d9d;" >
-				<h:graphicImage height="17" title="Haga clic para búsqueda de colaboradores voluntarios"  
-					style="position: absolute; top: 0px; left:0px; border:0px;"
-					url="/images/buscar.gif">
-				</h:graphicImage>
-				<p:ajax event="click" process="@this,cboUnidad"
-					listener="#{muestreoHematicoBean.obtenerColVoles}" 
-					onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgColVol.show();"
-					update="frmMuestreo:grdColVoles,frmMuestreo:txtFiltroColVol,frmMuestreo:panButtonColVol,grwMensaje">
-				</p:ajax>
-			</h:outputLink>
+			<p:commandButton id="btnBuscarColVol" 
+							 icon="icon-dbase" ajax="true"
+							 disabled="#{muestreoHematicoBean.estado!=0}" 
+							 title="Haga clic para búsqueda de colaboradores voluntarios"
+							 style="position:absolute; left:540px;top:65px;width:21px;height:21px;"
+							 onstart="statusDialog.show();" actionListener="#{muestreoHematicoBean.listarColVoles}"
+        					 oncomplete="statusDialog.hide();dlgColVol.show();"
+        					 update="frmMuestreo:grdColVoles,frmMuestreo:txtFiltroColVol,frmMuestreo:panButtonColVol,grwMensaje"  
+        				 	 process="@this,cboUnidad" />
 
 			<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
 					value="Clave:" 
@@ -121,7 +117,9 @@
 
 				<p:ajax event="change" process="@this" 
 						listener="#{muestreoHematicoBean.cambiarClave}" 
-						update="grwMensaje,txtClave,txtColVol,cboUnidad,cboEntidad"/>
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();document.getElementById('frmMuestreo:txtLamina').focus();"
+						update="@form"/>
+						
 			</h:inputText>
 
 			<h:outputLabel for="txtLamina" styleClass="lblDefaultSmall" 
@@ -131,9 +129,10 @@
 					value="#{muestreoHematicoBean.numeroLamina}"
 					disabled="#{muestreoHematicoBean.estado!=0}"
 					styleClass="txtDefault" >
-				<p:ajax event="change" process="@this" 
-						listener="#{muestreoHematicoBean.comprobarLamina}" 
-						update="grwMensaje"/>
+				<p:ajax event="change" process="@this"  
+						listener="#{muestreoHematicoBean.comprobarLamina}"
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();document.getElementById('frmMuestreo:txtFechaMuestra').focus();" 
+						update="@form"/>
 			</h:inputText>
 
 			<h:outputLink id="lnkAceptarLamina" value="javascript:void(0)" 
@@ -142,23 +141,26 @@
 				 <h:graphicImage height="11" 
 				 					style="position: absolute; top: 1px; left:1px;"
 				 					url="/images/check8px.png">
-				 </h:graphicImage>&nbsp;Aceptar
+				 </h:graphicImage>&nbsp;&nbsp;Aceptar
 			</h:outputLink>
 
 			<h:outputLink id="lnkCancelarLamina" value="javascript:void(0)" 
-					styleClass="btLinkControl" rendered="#{muestreoHematicoBean.estado==1}"     
+					styleClass="btLinkControl" rendered="#{muestreoHematicoBean.estado!=0}"     
             		style="position: absolute; width:40px; height:11px; top: 7px; left: 730px;cursor:pointer;text-decoration:none;" >
 				 <h:graphicImage height="11" 
 				 					style="position: absolute; top: 1px; left:1px;"
 				 					url="/images/cross8px.png">
-				 </h:graphicImage>&nbsp;Cancelar
+				 </h:graphicImage>&nbsp;&nbsp;Cancelar
+				 <p:ajax event="click" listener="#{muestreoHematicoBean.cancelarLamina}"
+				 		 onstart="statusDialog.show();" oncomplete="statusDialog.hide();" process="@this" 
+						 update="@form" />
 			</h:outputLink>
 			
 			<h:outputLabel for="txtFechaMuestra" styleClass="lblDefaultSmall" 
 							   value="Toma Muestra Gota Gruesa:" 
 							   style="position:absolute; left:790px; top:8px;"/>
 			<h:inputText id="txtFechaMuestra" style="position:absolute; left:790px; top:23px; width:115px;"
-						 value="#{muestreoHematicoBean.fechaTomaMuestra}"
+						 value="#{muestreoHematicoBean.muestreoHematicoSelected.fechaToma}"
 						 disabled="#{muestreoHematicoBean.estado!=0 and muestreoHematicoBean.estado!=1}"
 						 styleClass="txtDefault fechaMuestra">
 				<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
@@ -173,13 +175,11 @@
 			<h:outputLabel for="cboTipoBusqueda" styleClass="lblDefaultSmall" 
 						 value="Búsqueda:" 
 					   	 style="position:absolute; left:917px; top:8px;"/>
-			<h:selectOneMenu id="cboTipoBusqueda" styleClass="txtDefault cboDefault" converter="tipoBusquedaConverter"  
+			<h:selectOneMenu id="cboTipoBusqueda" styleClass="txtDefault cboDefault"  
 						 style="position:absolute; left:917px;top:23px;width:60px;" 
-						 value="#{muestreoHematicoBean.tipoBusquedaSelected}"> 
-				<f:selectItems var="tipoBusqueda.codigo" 
-							   itemValue="#{tipoBusqueda.codigo}" 
-							   itemLabel="#{tipoBusqueda.nombre}" 
-							   value="#{muestreoHematicoBean.tiposBusquedas}" />
+						 value="#{muestreoHematicoBean.muestreoHematicoSelected.tipoBusqueda}"> 
+				<f:selectItem itemValue="0" itemLabel="Pasivo" />
+				<f:selectItem itemValue="1" itemLabel="Activo" />
 			</h:selectOneMenu>
 			
 			<h:outputLabel for="txtMunicipio" styleClass="lblDefaultSmall" 
@@ -193,11 +193,23 @@
 							   value="Semana Epidemiológica:" 
 							   style="position:absolute; left:790px; top:50px;"/>
 			<h:inputText id="txtSemanaEpi" style="position:absolute; left:790px; top:65px; width:40px;"
-							 value="#{muestreoHematicoBean.semanaEpidemiologica}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.semanaEpidemiologica}" 
 							 styleClass="txtDefault" disabled="true" />
 			<h:inputText id="txtAnioEpi" style="position:absolute; left:842px; top:65px; width:62px;"
-							 value="#{muestreoHematicoBean.anioEpidemiologico}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.añoEpidemiologico}" 
 							 styleClass="txtDefault" disabled="true" />
+							 
+			<h:outputLink disabled="#{muestreoHematicoBean.puestoNotificacionId==0 and muestreoHematicoBean.unidadSelectedId==0}" 
+						 	onclick="dlgListaMuestras.show()" 
+				 			value="javascript:void(0)" 
+				 			style="position:absolute; top:55px; left:915px; width:46px; height:28px; padding-top:1px;padding-bottom:1px;padding-left:7px;padding-right:7px;" 
+				 			styleClass="navDelLink">
+				 	<h:outputText value="Consultar Muestras"/>
+				 	<f:ajax event="click"  
+				 			listener="#{muestreoHematicoBean.obtenerMuestras}" 
+				 			render="@this">
+					</f:ajax>
+			</h:outputLink>
 		
         </p:panel>
 
@@ -213,9 +225,9 @@
 							 styleClass="txtDefault" disabled="true" />
 
 				<p:commandButton id="btnEditarPersona" icon="icon-user" ajax="true" 
-						 title="Haga clic para modificar los datos de la persona"
+						 title="Haga clic para seleccionar o agregar al paciente"
 						 style="position:absolute; left:323px;top:23px;width:21px;height:21px;"
-        				 oncomplete="dlgPersona.show();"  
+        				 oncomplete="#{empty muestreoHematicoBean.personaSelected?'dlgBusquedaPersona.show()':'dlgPersona.show()'};"  
         				 process="@this panPaciente" />
 
 				<h:outputLabel for="txtMHSexo" styleClass="lblDefaultSmall" 
@@ -258,12 +270,13 @@
 				<h:outputLabel for="cboEmbarazada" styleClass="lblDefaultSmall" 
 						 	value="Embarazada:" 
 					   	 	style="position:absolute; left:917px; top:8px;"/>
-				<h:selectOneMenu id="cboEmbarazada" styleClass="txtDefault cboDefault"  
+				<h:selectOneMenu id="cboEmbarazada" styleClass="txtDefault cboDefault"
+							disabled="#{muestreoHematicoBean.personaSelected.sexoCodigo!='SEXO|F'}"  
 						 	style="position:absolute; left:917px;top:23px;width:60px;" 
-						 	value="#{muestreoHematicoBean.embarazada}">
+						 	value="#{muestreoHematicoBean.muestreoHematicoSelected.embarazada}">
 					<f:selectItem itemLabel="" itemValue="" />
-					<f:selectItem itemLabel="No" itemValue="0" itemDisabled="#{muestreoHematicoBean.personaSelected.sexoValor!='SEXO|F'}" />
-					<f:selectItem itemLabel="Si" itemValue="1" itemDisabled="#{muestreoHematicoBean.personaSelected.sexoValor!='SEXO|F'}" />
+					<f:selectItem itemLabel="No" itemValue="0" />
+					<f:selectItem itemLabel="Si" itemValue="1" />
 				</h:selectOneMenu>
 
 				<h:outputLabel for="txtMHResidencia" styleClass="lblDefaultSmall" 
@@ -276,6 +289,7 @@
 				<h:outputLabel for="txtMHDirResidencia" styleClass="lblDefaultSmall" 
 							   value="Dirección de Residencia:" 
 							   style="position:absolute; left:465px; top:50px;"/>
+				
 				<h:inputText id="txtMHDirResidencia" style="position:absolute; left:465px; top:65px; width:506px;"
 							 value="#{muestreoHematicoBean.personaSelected.direccionResi}" 
 							 styleClass="txtDefault" disabled="true" />
@@ -291,7 +305,7 @@
 					<h:outputLabel for="txtManzana" styleClass="lblDefaultSmall" 
 								   value="Manzana:" 
 								   style="position:absolute; left:95px; top:92px;"/>
-					<h:inputText id="txtManzana" disabled="#{empty muestreoHematicoBean.manzanaCodigo}"
+					<h:inputText id="txtManzana" disabled="true"
 								 style="position:absolute; left:95px; top:107px; width:75px;"
 								 value="#{muestreoHematicoBean.manzanaCodigo}" 
 								 styleClass="txtDefault" />
@@ -317,7 +331,7 @@
 					<h:outputLabel for="txtVivienda" styleClass="lblDefaultSmall" 
 								   value="Vivienda:" 
 								   style="position:absolute; left:202px; top:92px;"/>
-					<h:inputText id="txtVivienda" disabled="#{empty muestreoHematicoBean.manzanaCodigo}" 
+					<h:inputText id="txtVivienda" disabled="true" 
 								 style="position:absolute; left:202px; top:107px; width:75px;"
 								 value="#{muestreoHematicoBean.viviendaCodigo}" 
 								 styleClass="txtDefault" />
@@ -358,7 +372,7 @@
 							   value="Empleador o Lugar de Trabajo:" 
 							   style="position:absolute; left:640px; top:92px;"/>
 				<h:inputText id="txtEmpleador" style="position:absolute; left:640px; top:107px; width:330px;"
-							 value="#{muestreoHematicoBean.empleador}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.empleador}" 
 							 styleClass="txtDefault" />							 
 
 		
@@ -373,25 +387,25 @@
 							   style="position:absolute; left:10px; top:8px; font-weight:bold;"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{empty muestreoHematicoBean.personaReferente}"
+							   rendered="#{empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente}"
 							   value="No existen datos para la persona de contacto" 
 							   style="position:absolute; left:10px; top:30px; font-style:italic;"/>
 
 				<h:outputLabel id="lblNombreReferente" styleClass="lblDefaultSmall" 
-							   rendered="#{!empty muestreoHematicoBean.personaReferente}"
-							   value="#{muestreoHematicoBean.personaReferente}" 
+							   rendered="#{!empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.personaReferente}" 
 							   style="position:absolute; left:10px; top:25px;"/>
 
 				<h:outputLabel id="lblTelefonoReferente" styleClass="lblDefaultSmall" 
-							   rendered="#{!empty muestreoHematicoBean.personaReferente}"
-							   value="#{muestreoHematicoBean.telefonoReferente}" 
+							   rendered="#{!empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.telefonoReferente}" 
 							   style="position:absolute; left:10px; top:42px;"/>
 
-				<p:commandButton id="btnReferente" icon="#{empty muestreoHematicoBean.personaReferente?'icon-form-add':'icon-form-edit'}" ajax="true"
+				<p:commandButton id="btnReferente" icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente?'icon-form-add':'icon-form-edit'}" ajax="true"
 						 title="Haga clic para agregar o editar los datos del referente"
 						 style="position:absolute; left:200px;top:41px;width:21px;height:21px;"
         				 oncomplete="dlgReferente.show();"
-        				 update="panDetalleReferente panButtonReferente" 
+        				 update="frmMuestreo:panDetalleReferente frmMuestreo:panButtonReferente" 
         				 process="@this" />
 
 		</p:panel>
@@ -408,19 +422,23 @@
 							   value="Inicio de Síntomas:" 
 							   style="position:absolute; left:10px; top:26px;"/>
 				<h:inputText id="txtInicioSintomas" style="position:absolute; left:10px; top:41px; width:95px;"
-							 value="#{muestreoHematicoBean.inicioSintomas}" 
-							 styleClass="txtDefault iniSintomas" />	
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioSintomas}" 
+							 styleClass="txtDefault iniSintomas" >	
+						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						<f:ajax event="blur" 
+							render="panTratamiento" execute="@this" />
+				</h:inputText>
 				<script type="text/javascript">
 						jQuery('.iniSintomas').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
 				</script> 
 							 
 				<h:outputLink id="btnQuitarIniSintomas" 
-							  rendered="#{!empty muestreoHematicoBean.inicioSintomas}"
+							  rendered="#{!empty muestreoHematicoBean.muestreoHematicoSelected.inicioSintomas}"
 							  styleClass="navLink" value="javascript:void(0)"
 							  title="Quitar la declaración de la fecha de inicio de los síntomas"
-							  style="position:absolute; left:98px; top:45px;height:15px;width:15px; ">
+							  style="position:absolute; left:93px; top:43px;height:15px;width:15px; ">
 					<h:graphicImage url="../images/delete.gif" width="14" height="14" style="right:0px; border:0px;"  />
-					<f:ajax event="click" listener="#{muestreoHematico.quitarInicioSintomas}" 
+					<f:ajax event="click" listener="#{muestreoHematicoBean.quitarInicioSintomas}" 
 							render="panTratamiento" execute="@this" />
 
 				</h:outputLink>
@@ -430,7 +448,7 @@
 					   	 	style="position:absolute; left:124px; top:26px;"/>
 				<h:selectOneMenu id="cboManejoClinico" styleClass="txtDefault cboDefault"  
 						 	style="position:absolute; left:124px;top:41px;width:85px;" 
-						 	value="#{muestreoHematicoBean.manejoClinico}">
+						 	value="#{muestreoHematicoBean.muestreoHematicoSelected.manejoClinico}">
 					<f:selectItem itemLabel="Ambulatorio" itemValue="0" />
 					<f:selectItem itemLabel="Hospitalario" itemValue="1" />
 				</h:selectOneMenu>
@@ -439,21 +457,23 @@
 							   value="Inicio de Tratamiento:" 
 							   style="position:absolute; left:221px; top:26px;"/>
 				<h:inputText id="txtInicioTratamiento" style="position:absolute; left:221px; top:41px; width:95px;"
-							 value="#{muestreoHematicoBean.inicioTratamiento}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}" 
 							 styleClass="txtDefault iniTratamiento">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						<f:ajax event="blur" listener="#{muestreoHematicoBean.cambiarTratamiento}" 
+							render="panTratamiento" execute="@this" />
 				</h:inputText>
 				<script type="text/javascript">
 						jQuery('.iniTratamiento').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
 				</script> 
 						 
 				<h:outputLink id="btnQuitarIniTratamiento" 
-							  rendered="#{!empty muestreoHematicoBean.inicioTratamiento}"
+							  rendered="#{!empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 							  styleClass="navLink" value="javascript:void(0)"
-							  title="Quitar la declaración de la fecha de inicio del tratamiento"
-							  style="position:absolute; left:314px; top:45px;height:15px;width:15px; ">
+							  title="Quitar los datos vinculados al tratamiento"
+							  style="position:absolute; left:305px; top:43px;height:15px;width:15px; ">
 					<h:graphicImage url="../images/delete.gif" width="14" height="14" style="right:0px; border:0px;"  />
-					<f:ajax event="click" listener="#{muestreoHematico.quitarInicioTratamiento}" 
+					<f:ajax event="click"  listener="#{muestreoHematicoBean.quitarTratamiento}" 
 							render="panTratamiento" execute="@this" />
 				</h:outputLink>
 				
@@ -461,21 +481,22 @@
 							   value="Fin de Tratamiento:" 
 							   style="position:absolute; left:325px; top:26px;"/>
 				<h:inputText id="txtFinTratamiento" style="position:absolute; left:325px; top:41px; width:95px;"
-							 value="#{muestreoHematicoBean.finTratamiento}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.finTratamiento}" 
 							 styleClass="txtDefault finTratamiento">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						<f:ajax event="blur" render="panTratamiento" execute="@this" />
 				</h:inputText>
 				<script type="text/javascript">
 						jQuery('.finTratamiento').dateEntry({dateFormat: 'dmy/',minDate: (jQuery('.iniTratamiento').dateEntry('getDate')==null?'-7300':jQuery('.iniTratamiento').dateEntry('getDate')), maxDate: new Date()}); 
 				</script> 	
 							 
 				<h:outputLink id="btnQuitarFinTratamiento" 
-							  rendered="#{!empty muestreoHematicoBean.finTratamiento}"
+							  rendered="#{!empty muestreoHematicoBean.muestreoHematicoSelected.finTratamiento}"
 							  styleClass="navLink" value="javascript:void(0)"
 							  title="Quitar la declaración de la fecha de final del tratamiento"
-							  style="position:absolute; left:438px; top:45px;height:15px;width:15px; ">
+							  style="position:absolute; left:410px; top:43px;height:15px;width:15px; ">
 					<h:graphicImage url="../images/delete.gif" width="14" height="14" style="right:0px; border:0px;"  />
-					<f:ajax event="click" listener="#{muestreoHematico.quitarFinTratamiento}" 
+					<f:ajax event="click" listener="#{muestreoHematicoBean.quitarFinTratamiento}" 
 							render="panTratamiento" execute="@this" />
 				</h:outputLink>
 				
@@ -487,7 +508,8 @@
 							   value="En Boca:" 
 							   style="position:absolute; left:440px; top:26px;"/>
 				<h:inputText id="txtEnBoca" style="position:absolute; left:440px; top:41px; width:50px;"
-							 value="#{muestreoHematicoBean.tratamientoEnBoca}" maxlength="2"
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.tratamientoEnBoca}" maxlength="2"
+							 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 							 styleClass="txtDefault boca" />	
 					<script type="text/javascript">
 						jQuery(".boca").format({precision: 2,allow_negative:false,autofix:true});
@@ -497,7 +519,8 @@
 							   value="Remanente:" 
 							   style="position:absolute; left:500px; top:26px;"/>
 				<h:inputText id="txtRemanente" style="position:absolute; left:500px; top:41px; width:50px;"
-							 value="#{muestreoHematicoBean.tratamientoRemanente}" maxlength="2"
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.tratamientoRemanente}" maxlength="2"
+							 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 							 styleClass="txtDefault remanente" />
 				 	<script type="text/javascript">
 						jQuery(".remanente").format({precision: 2,allow_negative:false,autofix:true});
@@ -512,7 +535,8 @@
 							   value="CQ:" 
 							   style="position:absolute; left:570px; top:26px;"/>
 				<h:inputText id="txtCQ"  
-							 value="#{muestreoHematicoBean.cloroquina}" styleClass="txtDefault cq" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.cloroquina}" styleClass="txtDefault cq" 
+							 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 						     style="position:absolute; left:570px; top:41px; width:48px; text-align:left;" />
 					<script type="text/javascript">
 						jQuery(".cq").format({precision: 3,allow_negative:false,autofix:true});
@@ -522,7 +546,8 @@
 							   value="PQ 5mg:" 
 							   style="position:absolute; left:628px; top:26px;"/>
 				<h:inputText id="txtPQ5mg" 
-							 value="#{muestreoHematicoBean.primaquina5mg}" styleClass="txtDefault pq5mg" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.primaquina5mg}" styleClass="txtDefault pq5mg" 
+							 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 						     style="position:absolute; left:628px; top:41px; width:48px; text-align:left;" />
 					<script type="text/javascript">
 						jQuery(".pq5mg").format({precision: 3,allow_negative:false,autofix:true});
@@ -532,7 +557,8 @@
 							   value="PQ 15mg:" 
 							   style="position:absolute; left:685px; top:26px;"/>
 				<h:inputText id="txtPQ15mg" 
-							 value="#{muestreoHematicoBean.primaquina15mg}" styleClass="txtDefault pq15mg" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.primaquina15mg}" styleClass="txtDefault pq15mg" 
+							 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
 						     style="position:absolute; left:685px; top:41px; width:48px; text-align:left;" />
 					<script type="text/javascript">
 						jQuery(".pq15mg").format({precision: 3,allow_negative:false,autofix:true});
@@ -549,43 +575,42 @@
 							   style="position:absolute; left:10px; top:8px; font-weight:bold;"/>
 
 				<p:commandButton id="btnEditarPRM" 
-						 icon="#{empty muestreoHematicoBean.muestreoPruebaRapidaSelected?'icon-form-add':'icon-form-edit'}" ajax="true"
+						 icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida?'icon-form-add':'icon-form-edit'}" ajax="true"
 						 title="Haga clic para agregar o editar los datos de la prueba rápida de malaria"
 						 style="position:absolute; left:335px;top:8px;width:21px;height:21px;"
-        				 oncomplete="dlgPRM.show();" update="panDetallePRM panButtonPRM"  
-        				 process="@this" />
+        				 oncomplete="dlgPRM.show();" process="@this" update="frmMuestreo:panDetallePRM frmMuestreo:panButtonPRM grwMensaje" />
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Resultado:" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 							   style="position:absolute; left:10px; top:30px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
-							   value="#{muestreoHematicoBean.muestreoPruebaRapidaSelected.resultado.valor}" 
-							   style="position:absolute; left:60px; top:30px; font-weight:bold; color:#{muestreoHematicoBean.muestreoPruebaRapidaSelected.resultado.codigo!='Rst_PRMS|N'?'red':'green'};"/>
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida.resultado.valor}" 
+							   style="position:absolute; left:60px; top:30px; font-weight:bold; color:#{muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida.resultado.codigo!='Rst_PRMS|N'?'red':'green'};"/>
 							   
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Realizada por:" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 							   style="position:absolute; left:150px; top:30px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
-							   value="#{muestreoHematicoBean.muestreoPruebaRapidaSelected.realizado.valor}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida.realizado.valor}" 
 							   style="position:absolute; left:214px; top:30px; font-weight:bold;"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Fecha Aplicación:" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 							   style="position:absolute; left:150px; top:46px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
-							   value="#{muestreoHematicoBean.muestreoPruebaRapidaSelected.fecha}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida.fecha}" 
 							   style="position:absolute; left:230px; top:46px; font-weight:bold;" >
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:outputLabel>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{empty muestreoHematicoBean.muestreoPruebaRapidaSelected}"
+							   rendered="#{empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 							   value="No existen datos para la Prueba Rápida de Malaria" 
 							   style="position:absolute; left:84px; top:30px; font-style:italic;"/>
 							   
@@ -600,34 +625,34 @@
 							   style="position:absolute; left:10px; top:8px; font-weight:bold;"/>
 
 				<p:commandButton id="btnEditarPGG" 
-						 icon="#{empty muestreoHematicoBean.muestreoDiagnosticoSelected?'icon-form-add':'icon-form-edit'}" ajax="true"
+						 icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico?'icon-form-add':'icon-form-edit'}" ajax="true"
 						 title="Haga clic para agregar o editar los datos de la prueba de gota gruesa"
 						 style="position:absolute; left:590px;top:8px;width:21px;height:21px;"
         				 oncomplete="dlgPGG.show();" update="panDetallePGG panButtonPGG"  
         				 process="@this" />
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{empty muestreoHematicoBean.fechaRecepcion}"
+							   rendered="#{empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion}"
 							   value="No existen datos para la Técnica de Gota Gruesa" 
 							   style="position:absolute; left:214px; top:30px; font-style:italic;"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and empty muestreoHematicoBean.fechaDiagnostico and empty muestreoHematicoBean.motivoFaltaDiagnosticoSelected}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico and empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.motivoFaltaDiagnostico}"
 							   value="La muestra ha sido recepcionada pero aún no se ha registrado el diagnóstico" 
 							   style="position:absolute; left:10px; top:30px; width:380px; font-style:italic;"/>							   
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and empty muestreoHematicoBean.fechaDiagnostico and not empty muestreoHematicoBean.motivoFaltaDiagnosticoSelected}"
-							   value="La muestra ha sido recepcionada pero no se ha podido establecer un diagnóstico.  Motivo: #{muestreoHematicoBean.motivoFaltaDiagnosticoSelected.valor}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico and not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.motivoFaltaDiagnostico}"
+							   value="La muestra ha sido recepcionada pero no se ha podido establecer un diagnóstico.  Motivo: #{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.motivoFaltaDiagnostico.valor}" 
 							   style="position:absolute; left:10px; top:30px; width:380px; font-style:italic;"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Fecha Recepción:" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion}"
 							   style="position:absolute; left:173px; top:8px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion}"
-							   value="#{muestreoHematicoBean.fechaRecepcion}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion}" 
 							   style="position:absolute; left:252px; top:8px; font-weight:bold;" >
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:outputLabel>			
@@ -636,56 +661,56 @@
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Fecha Diagnóstico:" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and not empty muestreoHematicoBean.fechaDiagnostico}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico}"
 							   style="position:absolute; left:329px; top:8px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and not empty muestreoHematicoBean.fechaDiagnostico}"
-							   value="#{muestreoHematicoBean.fechaDiagnostico}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico}" 
 							   style="position:absolute; left:415px; top:8px; font-weight:bold;" >
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:outputLabel>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Resultado:" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and not empty muestreoHematicoBean.fechaDiagnostico}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico}"
 							   style="position:absolute; left:10px; top:30px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{not empty muestreoHematicoBean.fechaRecepcion and not empty muestreoHematicoBean.fechaDiagnostico}"
-							   value="#{muestreoHematicoBean.resultado==1?'Positivo':'Negativo'}" 
-							   style="position:absolute; left:60px; top:30px; font-weight:bold; color:#{muestreoHematicoBean.resultado==1?'red':'green'};"/>
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaRecepcion and not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.fechaDiagnostico}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.resultado==1?'Positivo':'Negativo'}" 
+							   style="position:absolute; left:60px; top:30px; font-weight:bold; color:#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.resultado==1?'red':'green'};"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Densidad:" 
-							   rendered="#{muestreoHematicoBean.resultado==1}"
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.resultado==1}"
 							   style="position:absolute; left:127px; top:30px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{muestreoHematicoBean.positivoPVivax}"
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPVivax==1}"
 							   value="P.vivax" 
 							   style="position:absolute; left:173px; top:30px; font-weight:bold;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{muestreoHematicoBean.positivoPFalciparum}"
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPFalciparum==1}"
 							   value="P.falciparum" 
-							   style="position:absolute; left:173px; top:#{muestreoHematicoBean.positivoPVivax?'44px':'30px'}; font-weight:bold;"/>
+							   style="position:absolute; left:173px; top:#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPVivax==1?'44px':'30px'}; font-weight:bold;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{muestreoHematicoBean.positivoPVivax}"
-							   value="#{muestreoHematicoBean.densidadPVivaxSelected.valor}" 
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPVivax==1}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.densidadPVivax.valor}" 
 							   style="position:absolute; left:248px; top:30px; font-weight:bold;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{muestreoHematicoBean.positivoPFalciparum}"
-							   value="#{muestreoHematicoBean.densidadPFalciparumSelected.valor}" 
-							   style="position:absolute; left:248px; top:#{muestreoHematicoBean.positivoPVivax?'44px':'30px'}; font-weight:bold;"/>
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPFalciparum==1}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.densidadPFalciparum.valor}" 
+							   style="position:absolute; left:248px; top:#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPVivax==1?'44px':'30px'}; font-weight:bold;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   rendered="#{muestreoHematicoBean.positivoPFalciparum}"
-							   value="#{muestreoHematicoBean.estadioPFalciparumSelected.valor}" 
-							   style="position:absolute; left:293px; top:#{muestreoHematicoBean.positivoPVivax?'44px':'30px'}; font-weight:bold;"/>
+							   rendered="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPFalciparum==1}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.estadioPFalciparum.valor}" 
+							   style="position:absolute; left:293px; top:#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.positivoPVivax==1?'44px':'30px'}; font-weight:bold;"/>
 
 				<h:outputLabel styleClass="lblDefaultSmall" 
 							   value="Realizada por:" 
-							   rendered="#{not empty muestreoHematicoBean.unidadLaboratorioSelected}"
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.unidadLaboratorio}"
 							   style="position:absolute; left:329px; top:30px;"/>
 				<h:outputLabel styleClass="lblDefaultSmall" 
-							   value="#{muestreoHematicoBean.unidadLaboratorioSelected.nombre}, #{muestreoHematicoBean.unidadLaboratorioSelected.municipio.nombre}, #{muestreoHematicoBean.entidadLaboratorioSelected.nombre}" 
-							   rendered="#{not empty muestreoHematicoBean.unidadLaboratorioSelected}"
+							   value="#{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.unidadLaboratorio.nombre}, #{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.unidadLaboratorio.municipio.nombre}, #{muestreoHematicoBean.muestreoHematicoSelected.diagnostico.entidadAdtvaLaboratorio.nombre}" 
+							   rendered="#{not empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico.unidadLaboratorio}"
 							   style="position:absolute; left:390px; top:30px; font-weight:bold;"/>
 
 		</p:panel>		
@@ -695,10 +720,10 @@
 		<p:panel id="panButton" styleClass="panButton" 
 				 style="position:absolute; top:407px; width:985px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 			
-				<p:commandButton id="btnGuardar" value="Guardar" 
+				<p:commandButton id="btnGuardar" value="Guardar" ajax="true"
 								 styleClass="btnDefault" style="font-size:11px;"  
-								 update="panControl,grwMensaje" 
-								 process="@this" 
+								 update="@form" 
+								 process="@this,panControl,panPaciente,panTratamiento" 
 								 actionListener="#{muestreoHematicoBean.guardar}" />
 
 				<p:commandButton id="btnEliminar" value="Eliminar"  
@@ -937,7 +962,7 @@
 		<p:dialog id="dlgReferente" header="Información de la Persona Referente"  
 				  modal="true" position="center"  
 				  widgetVar="dlgReferente" 
-				  height="120" width="500" 
+				  height="120" width="500"
 				  styleClass="txtDefault"
 				  resizable="false" closable="false">
 			
@@ -974,13 +999,10 @@
 				</p:commandButton>
 				
 				<p:commandButton id="btnEliminarReferente" 
-								 value="Eliminar" 
-								 disabled="#{empty muestreoHematicoBean.personaReferente}"
-								 process="@this" ajax="true" immediate="true" 
+								 value="Eliminar" process="@this" 
+								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente}"
 								 styleClass="btnDefault" style="font-size:11px;"
-								 update="panReferente,grwMensaje" 
-								 actionListener="#{muestreoHematicoBean.eliminarReferente}"  
-								 oncomplete="dlgReferente.hide()">
+								 onclick="dlgReferente.hide();dlgConfirmarEliminarReferente.show();">
 				</p:commandButton>
 				
 				<p:commandButton value="Cancelar" onclick="dlgReferente.hide()"
@@ -1015,7 +1037,7 @@
 							   value="Fecha de Aplicación:" 
 							   style="position:absolute; left:10px; top:25px;"/>
 				<h:inputText id="txtFechaAplicacion" style="position:absolute; left:10px; top:45px; width:85px;"
-							 value="#{muestreoHematicoBean.fechaAplicacion}" 
+							 value="#{muestreoHematicoBean.muestreoPruebaRapidaSelected.fecha}" 
 							 styleClass="txtDefault fechaPRM" >
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
@@ -1062,13 +1084,10 @@
 				</p:commandButton>
 				
 				<p:commandButton id="btnEliminarPRM" 
-								 value="Eliminar" 
-								 disabled="#{empty muestreoHematicoBean.fechaAplicacion}"
-								 process="@this" ajax="true" immediate="true" 
+								 value="Eliminar" process="@this"
+								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 								 styleClass="btnDefault" style="font-size:11px;"
-								 update="panPRM grwMensaje" 
-								 actionListener="#{muestreoHematicoBean.eliminarPRM}"  
-								 oncomplete="dlgPRM.hide()">
+								 onclick="dlgPRM.hide();dlgConfirmarEliminarPRM.show();">
 				</p:commandButton>
 				
 				<p:commandButton value="Cancelar" onclick="dlgPRM.hide()"
@@ -1108,7 +1127,7 @@
 							   value="Fecha de Recepción:" 
 							   style="position:absolute; left:10px; top:25px;"/>
 				<h:inputText id="txtFechaRecepcion" style="position:absolute; left:10px; top:45px; width:85px;"
-							 value="#{muestreoHematicoBean.fechaRecepcion}" 
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.fechaRecepcion}" 
 							 styleClass="txtDefault fechaPGG" >
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				       <p:ajax event="change" process="@this" 
@@ -1123,8 +1142,8 @@
 							   value="Fecha de Diagnóstico:" 
 							   style="position:absolute; left:110px; top:25px;"/>
 				<h:inputText id="txtFechaDiagnostico" style="position:absolute; left:110px; top:45px; width:85px;"
-							 value="#{muestreoHematicoBean.fechaDiagnostico}" 
-							 disabled="#{muestreoHematicoBean.fechaRecepcion==null}"
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.fechaDiagnostico}" 
+							 disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.fechaRecepcion==null}"
 							 styleClass="txtDefault fechaPGG" >
 					   <f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				       <p:ajax event="change" process="@this" listener="#{muestreoHematicoBean.controlarDiagnostico}" 
@@ -1139,9 +1158,9 @@
 							   style="position:absolute; left:225px; top:25px;"/>
 				<h:selectOneRadio id="cboResultadoPGG" layout="pageDirection" 
 							   styleClass="txtDefaultSmall"
-							   disabled="#{muestreoHematicoBean.fechaDiagnostico==null}" 
+							   disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.fechaDiagnostico==null}" 
 							   style="position:absolute; left:218px; top:40px; width:125px;"
-				 			   value="#{muestreoHematicoBean.resultado}">
+				 			   value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado}">
 				 	<f:selectItem itemValue="0" itemLabel="Negativo" />
 				 	<f:selectItem itemValue="1" itemLabel="Positivo" />
 				 	<p:ajax event="change" process="cboResultadoPGG" listener="#{muestreoHematicoBean.cambiarResultado}" 
@@ -1154,7 +1173,7 @@
 							   
 				<h:selectBooleanCheckbox id="cboVivax" 
 							   styleClass="txtDefault" label="P.vivax"
-							   disabled="#{muestreoHematicoBean.resultado!=1}" 
+							   disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado!=1}" 
 							   style="position:absolute; left:305px; top:45px;"
 				 			   value="#{muestreoHematicoBean.positivoPVivax}">
 				 		<p:ajax event="change" process="cboVivax" 
@@ -1167,7 +1186,7 @@
 
 				<h:selectOneMenu id="cboDensidadPVivax" 
 							styleClass="txtDefault cboDefault"
-							disabled="#{!muestreoHematicoBean.positivoPVivax}"  
+							disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.positivoPVivax!=1}"  
 						 	style="position:absolute; left:400px;top:45px;width:85px;" 
 						 	value="#{muestreoHematicoBean.densidadPVivaxSelectedId}">
 					<f:selectItem itemValue="0" itemLabel="" /> 
@@ -1179,7 +1198,7 @@
 				
 				<h:selectBooleanCheckbox id="cboFalciparum" 
 							   styleClass="txtDefault" 
-							   disabled="#{muestreoHematicoBean.resultado!=1}"
+							   disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado!=1}"
 							   style="position:absolute; left:305px; top:70px;"
 				 			   value="#{muestreoHematicoBean.positivoPFalciparum}">
 				       <p:ajax event="change" process="cboFalciparum" 
@@ -1219,8 +1238,8 @@
 							   value="E.asexuados:" 
 							   style="position:absolute; left:506px; top:45px;"/>
 				<h:inputText id="txtEAsexuados" style="position:absolute; left:575px; top:45px; width:85px;"
-							 disabled="#{muestreoHematicoBean.resultado!=1}"
-							 value="#{muestreoHematicoBean.estadiosAsexuales}" maxlength="6"
+							 disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado!=1}"
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.estadiosAsexuales}" maxlength="6"
 							 styleClass="txtDefault eAsexuado" />
 				 	<script type="text/javascript">
 						jQuery(".eAsexuado").format({precision: 6,allow_negative:false,autofix:true});
@@ -1230,8 +1249,8 @@
 							   value="Gametocitos:" 
 							   style="position:absolute; left:506px; top:70px;"/>
 				<h:inputText id="txtGametocitos" style="position:absolute; left:575px; top:70px; width:85px;"
-							 disabled="#{muestreoHematicoBean.resultado!=1}"
-							 value="#{muestreoHematicoBean.gametocitos}" maxlength="6"
+							 disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado!=1}"
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.gametocitos}" maxlength="6"
 							 styleClass="txtDefault gametocito" />
 				 	<script type="text/javascript">
 						jQuery(".gametocito").format({precision: 6,allow_negative:false,autofix:true});
@@ -1241,8 +1260,8 @@
 							   value="Leucocitos:" 
 							   style="position:absolute; left:506px; top:95px;"/>
 				<h:inputText id="txtLeucocitos" style="position:absolute; left:575px; top:95px; width:85px;"
-							 disabled="#{muestreoHematicoBean.resultado!=1}"
-							 value="#{muestreoHematicoBean.leucocitos}" maxlength="6"
+							 disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.resultado!=1}"
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.leucocitos}" maxlength="6"
 							 styleClass="txtDefault leucocito" />
 				 	<script type="text/javascript">
 						jQuery(".leucocito").format({precision: 6,allow_negative:false,autofix:true});
@@ -1253,7 +1272,7 @@
 							   style="position:absolute; left:10px; top:140px; font-weight:bold;"/>
 				<h:selectOneMenu id="cboMotivoNoDiagnostico" 
 							styleClass="txtDefault cboDefault" 
-							disabled="#{muestreoHematicoBean.fechaDiagnostico!=null}" 
+							disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.fechaDiagnostico!=null}" 
 						 	style="position:absolute; left:445px;top:140px;width:220px;" 
 						 	value="#{muestreoHematicoBean.motivoFaltaDiagnosticoSelectedId}">
 					<f:selectItem itemValue="0" itemLabel="" /> 
@@ -1283,7 +1302,7 @@
 				<h:outputLabel for="txtUnidadLab" styleClass="lblDefaultSmall" 
 							   value="Unidad de Salud/Laboratorio:" 
 							   style="position:absolute; left:273px; top:203px;"/>
-		    	<p:autoComplete id="txtUnidadLab" value="#{muestreoHematicoBean.unidadLaboratorioSelected}" 
+		    	<p:autoComplete id="txtUnidadLab" value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.unidadLaboratorio}" 
      							minQueryLength="3" maxResults="10" queryDelay="300"  
      							disabled="#{muestreoHematicoBean.entidadLaboratorioSelectedId==0}"  
      							forceSelection="true" styleClass="txtDefault" required="true" 
@@ -1305,13 +1324,13 @@
 				<h:inputText id="txtMunicipioLab" styleClass="txtDefault"
 								 disabled="true" 
 								 style="position:absolute; left:10px;top:270px;width:240px;" 
-								 value="#{muestreoHematicoBean.unidadLaboratorioSelected.municipio.nombre}" /> 
+								 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.unidadLaboratorio.municipio.nombre}" /> 
 
 				<h:outputLabel for="txtLaboratorista" styleClass="lblDefaultSmall" 
 							   value="Nombre del Laboratorista:" 
 							   style="position:absolute; left:273px; top:251px;"/>
 				<h:inputText id="txtLaboratorista" style="position:absolute; left:273px; top:270px; width:387px;"
-							 value="#{muestreoHematicoBean.laboratorista}" maxlength="100" required="true"
+							 value="#{muestreoHematicoBean.muestreoDiagnosticoSelected.laboratorista}" maxlength="100" required="true"
 							 styleClass="txtDefault" />
 
 			</p:panel>
@@ -1327,14 +1346,12 @@
 				</p:commandButton>
 				
 				<p:commandButton id="btnEliminarPGG" 
-								 value="Eliminar" 
-								 disabled="#{empty muestreoHematicoBean.fechaRecepcion}"
-								 process="@this" ajax="true" immediate="true" 
+								 value="Eliminar" process="@this"
+								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico}"
 								 styleClass="btnDefault" style="font-size:11px;"
-								 update="panPGG grwMensaje" 
-								 actionListener="#{muestreoHematicoBean.eliminarPGG}"  
-								 oncomplete="dlgPGG.hide()">
+								 onclick="dlgPGG.hide();dlgConfirmarEliminarPGG.show();">
 				</p:commandButton>
+				
 				
 				<p:commandButton value="Cancelar" onclick="dlgPGG.hide()"
 								 style="font-size:11px;"
@@ -1352,6 +1369,68 @@
 			}
 			
 		</script>
+		
+		<p:confirmDialog message="Desea eliminar los datos de la persona referente?"
+				modal="true" header="Aviso" severity="alert" 
+				widgetVar="dlgConfirmarEliminarReferente">
+			<p:commandButton id="btnSiEliminarReferente" value="Si" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 process="btnSiEliminarReferente"
+							 update="panReferente :frmMuestreo:panDetalleReferente grwMensaje" 
+							 actionListener="#{muestreoHematicoBean.eliminarReferente}"  
+							 oncomplete="dlgConfirmarEliminarReferente.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarReferente.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		<!-- Modal para confirmar eliminación de los resultados de la prueba rápida-->
+		
+		<p:confirmDialog message="Desea eliminar los resultados de la prueba rápida de malaria?"
+				modal="true" header="Aviso" severity="alert" 
+				widgetVar="dlgConfirmarEliminarPRM">
+			<p:commandButton id="btnSiEliminarPRM" value="Si" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 process="btnSiEliminarPRM"
+							 update="panPRM panDetallePRM grwMensaje" 
+							 actionListener="#{muestreoHematicoBean.iniciarPRM}"  
+							 oncomplete="dlgConfirmarEliminarPRM.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarPRM.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		<p:confirmDialog message="Desea eliminar los resultados de la gota gruesa?"
+				modal="true" header="Aviso" severity="alert" 
+				widgetVar="dlgConfirmarEliminarPGG">
+			<p:commandButton id="btnSiEliminarPGG" value="Si" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 process="btnSiEliminarPGG"
+							 update="panPGG panDetallePGG grwMensaje" 
+							 actionListener="#{muestreoHematicoBean.iniciarPGG}"  
+							 oncomplete="dlgConfirmarEliminarPGG.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarPGG.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
+		
+		<p:confirmDialog message="Desea eliminar el registro del muestreo hemático?"
+				modal="true" header="Aviso" severity="alert" 
+				widgetVar="dlgConfirmarEliminarMuestra">
+			<p:commandButton id="btnSiEliminarMuestra" value="Si" immediate="true"
+							 styleClass="btnDefault" style="font-size:11px;" ajax="true"
+							 process="btnSiEliminarMuestra"
+							 update="@form grwMensaje" 
+							 actionListener="#{muestreoHematicoBean.eliminar}"  
+							 oncomplete="dlgConfirmarEliminarMuestra.hide()">
+			</p:commandButton>
+			<p:commandButton value="No" onclick="dlgConfirmarEliminarMuestra.hide()"
+							 style="font-size:11px;" styleClass="btnDefault" 
+							 type="button" /> 
+		</p:confirmDialog>
 		
 		<sis:persona id="panPersona" 
 					 widgetVarEdit="dlgPersona" 

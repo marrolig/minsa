@@ -320,15 +320,29 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("La fecha de la toma de la muestra de la gota gruesa no puede ser superior a la fecha actual");
 			return oResultado;
 		}
-		
-		// verifica que la variable embarazada se corresponda con el sexo de la persona
-		if (pMuestreoHematico.getSexo()==null) {
-			oResultado.setMensaje("El sexo de la persona es requerido");
+
+		// La semana y año epidemiológico son requeridos
+		if (pMuestreoHematico.getSemanaEpidemiologica()==null) {
+			oResultado.setMensaje("La semana epidemiológica es requerida.");
 			return oResultado;
 		}
-		
+		if (pMuestreoHematico.getAñoEpidemiologico()==null) {
+			oResultado.setMensaje("El año epidemiológico es requerido.");
+			return oResultado;
+		}
+
+		if (pMuestreoHematico.getSexo()==null) {
+			oResultado.setMensaje("El sexo del paciente es requerido");
+			return oResultado;
+		}
+
+		if (pMuestreoHematico.getSexo().getCodigo().equals(Utilidades.SEXO_MASCULINO) && pMuestreoHematico.getEmbarazada()!=null) {
+			oResultado.setMensaje("No puede especificar la condición de embarazada porque el paciente es del sexo masculino");
+			return oResultado;
+		}
+			
 		if (pMuestreoHematico.getFechaNacimiento()==null) {
-			oResultado.setMensaje("La fecha de nacimiento de la persona es requerida");
+			oResultado.setMensaje("La fecha de nacimiento del paciente es requerida");
 			return oResultado;
 		}
 		
@@ -359,11 +373,11 @@ public class VigilanciaValidacion {
 
 		if (pMuestreoHematico.getInicioTratamiento()==null &&
 				(pMuestreoHematico.getFinTratamiento()!=null || 
-				(pMuestreoHematico.getTratamientoEnBoca()!=null && !pMuestreoHematico.getTratamientoEnBoca().equals(Utilidades.CERO)) ||
-				(pMuestreoHematico.getTratamientoRemanente()!=null && !pMuestreoHematico.getTratamientoRemanente().equals(Utilidades.CERO)) ||
-				(pMuestreoHematico.getCloroquina()!=null && !pMuestreoHematico.getCloroquina().equals(Utilidades.CERO)) ||
-				(pMuestreoHematico.getPrimaquina5mg()!=null && !pMuestreoHematico.getPrimaquina5mg().equals(Utilidades.CERO)) ||
-				(pMuestreoHematico.getPrimaquina15mg()!=null && !pMuestreoHematico.getPrimaquina15mg().equals(Utilidades.CERO)))) {
+				(pMuestreoHematico.getTratamientoEnBoca()!=null && !pMuestreoHematico.getTratamientoEnBoca().equals(BigDecimal.ZERO)) ||
+				(pMuestreoHematico.getTratamientoRemanente()!=null && !pMuestreoHematico.getTratamientoRemanente().equals(BigDecimal.ZERO)) ||
+				(pMuestreoHematico.getCloroquina()!=null && !pMuestreoHematico.getCloroquina().equals(BigDecimal.ZERO)) ||
+				(pMuestreoHematico.getPrimaquina5mg()!=null && !pMuestreoHematico.getPrimaquina5mg().equals(BigDecimal.ZERO)) ||
+				(pMuestreoHematico.getPrimaquina15mg()!=null && !pMuestreoHematico.getPrimaquina15mg().equals(BigDecimal.ZERO)))) {
 			
 			oResultado.setMensaje("Si indica algún dato sobre el tratamiento malárico, la fecha de inicio del tratamiento es requerida");
 			return oResultado;
@@ -377,37 +391,39 @@ public class VigilanciaValidacion {
 			return oResultado;
 		}
 
-		// valores por omisión para las edades mínimas y máximas del embarazo
-		int edad_max_embarazo=70;
-		int edad_min_embarazo=10;
+		if (pMuestreoHematico.getSexo().equals(Utilidades.SEXO_FEMENINO)) {
+			
+			// valores por omisión para las edades mínimas y máximas del embarazo
+			int edad_max_embarazo=70;
+			int edad_min_embarazo=10;
 		
-		ParametroService parametroService = new ParametroDA();
-		InfoResultado oResultadoParametro = parametroService.Encontrar("EDAD_MAX_EMBARAZO");
-		if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
-			Parametro oParametro=(Parametro)oResultadoParametro.getObjeto();
-			if (Utilidades.esEntero(oParametro.getValor())) {
-				edad_max_embarazo=Integer.parseInt(oParametro.getValor());
+			ParametroService parametroService = new ParametroDA();
+			InfoResultado oResultadoParametro = parametroService.Encontrar("EDAD_MAX_EMBARAZO");
+			if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
+				Parametro oParametro=(Parametro)oResultadoParametro.getObjeto();
+				if (Utilidades.esEntero(oParametro.getValor())) {
+					edad_max_embarazo=Integer.parseInt(oParametro.getValor());
+				}
 			}
-		}
 	
-		oResultadoParametro = parametroService.Encontrar("EDAD_MIN_EMBARAZO");
-		if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
-			Parametro oParametro=(Parametro)oResultadoParametro.getObjeto();
-			if (Utilidades.esEntero(oParametro.getValor())) {
-				edad_min_embarazo=Integer.parseInt(oParametro.getValor());
+			oResultadoParametro = parametroService.Encontrar("EDAD_MIN_EMBARAZO");
+			if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
+				Parametro oParametro=(Parametro)oResultadoParametro.getObjeto();
+				if (Utilidades.esEntero(oParametro.getValor())) {
+					edad_min_embarazo=Integer.parseInt(oParametro.getValor());
+				}
 			}
-		}
 
-		// edad de la persona
-		int edad=Utilidades.calcularEdadEnAnios(pMuestreoHematico.getFechaNacimiento()).intValue();
+			// edad de la persona
+			int edad=Utilidades.calcularEdadEnAnios(pMuestreoHematico.getFechaNacimiento()).intValue();
 		
-		// verificar si existen los parámetros para la edad mínima y máxima del embarazo 
-		if (pMuestreoHematico.getSexo().getCodigo().equals(Utilidades.SEXO_MASCULINO) || 
-		    (pMuestreoHematico.getSexo().getCodigo().equals(Utilidades.SEXO_FEMENINO) && 
-		    		(edad<=edad_min_embarazo || edad>=edad_max_embarazo))) {
+			// verificar si existen los parámetros para la edad mínima y máxima del embarazo 
+			if (pMuestreoHematico.getSexo().getCodigo().equals(Utilidades.SEXO_FEMENINO) && 
+		    		(edad<=edad_min_embarazo || edad>=edad_max_embarazo)) {
 
-			oResultado.setMensaje("La persona es del sexo masculino o posee una edad fuera del límite establecido para el embarazo");
-			return oResultado;
+				oResultado.setMensaje("La persona posee una edad fuera del límite establecido para el embarazo ("+ String.valueOf(edad_min_embarazo) +" a " + String.valueOf(edad_max_embarazo) +")");
+				return oResultado;
+			}
 		}
 		
 		// validación de los datos de la prueba rápida de malaria

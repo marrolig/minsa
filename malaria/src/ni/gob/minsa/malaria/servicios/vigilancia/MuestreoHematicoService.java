@@ -78,11 +78,9 @@ public interface MuestreoHematicoService {
 	 * tener ninguno o más de un muestreo hemático.
 	 * 
 	 * @param pPersonaId Identificador de la persona
-	 * @param fechaToma Fecha a partir de la cual se generará el listado, comparando con
-	 * 					la fecha de toma de gota gruesa.
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPorPersona(long pPersonaId,Date fechaToma);
+	public List<MuestreoHematico> ListarPorPersona(long pPersonaId);
 
 	/**
 	 * Busca un objeto {@link MuestreoHematico} en la base de datos mediante
@@ -101,10 +99,8 @@ public interface MuestreoHematicoService {
 	 * La clave puede estar asignada en el tiempo a diferentes puestos de notificación.  
 	 * 
 	 * @param pClave Clave bajo la cual se realizó el muestreo hemático
-	 * @param fechaToma Fecha a partir de la cual se generará el listado, comparando con
-	 * 					la fecha de toma de gota gruesa.
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPorClave(String pClave,Date fechaToma);
+	public List<MuestreoHematico> ListarPorClave(String pClave);
 
 }

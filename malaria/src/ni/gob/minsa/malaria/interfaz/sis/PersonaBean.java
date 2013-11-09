@@ -307,6 +307,7 @@ public class PersonaBean implements Serializable {
 		
 		if (this.etniaSelectedId!=0) {
 			Etnia oEtnia=(Etnia)((InfoResultado)etniaService.Encontrar(this.etniaSelectedId)).getObjeto();
+			oPersona.setEtniaId(this.etniaSelectedId);
 			oPersona.setEtniaCodigo(oEtnia.getCodigo());
 			oPersona.setEtniaValor(oEtnia.getValor());
 		}
@@ -335,10 +336,14 @@ public class PersonaBean implements Serializable {
 			oPersona.setMuniResiNombre(oMunicipioResi.getNombre());
 		} 
 
-		if (this.ocupacionSelectedId!=0) {
-			Ocupacion oOcupacion = (Ocupacion)((InfoResultado)ocupacionService.Encontrar(this.ocupacionSelectedId)).getObjeto();
-			oPersona.setOcupacionCodigo(oOcupacion.getCodigo());
-			oPersona.setOcupacionValor(oOcupacion.getNombre());
+		if (this.ocupacionSelected!=null) {
+			oPersona.setOcupacionCodigo(this.ocupacionSelected.getCodigo());
+			oPersona.setOcupacionValor(this.ocupacionSelected.getNombre());
+			oPersona.setOcupacionId(this.ocupacionSelected.getOcupacionId());
+		} else {
+			oPersona.setOcupacionCodigo(null);
+			oPersona.setOcupacionId(0);
+			oPersona.setOcupacionValor(null);
 		}
 
 		if (this.paisNacimientoSelectedId!=0) {
@@ -365,10 +370,17 @@ public class PersonaBean implements Serializable {
 		
 		if (this.sexoSelectedId!=0) {
 			Sexo oSexo = (Sexo)((InfoResultado)sexoService.Encontrar(this.sexoSelectedId)).getObjeto();
+			oPersona.setSexoId(this.sexoSelectedId);
 			oPersona.setSexoCodigo(oSexo.getCodigo());
 			oPersona.setSexoValor(oSexo.getValor());
-		} 
+		}
 		
+		if (this.sexoSelectedId==0) {
+			System.out.println("---------------------------------------------");
+			System.out.println("No existe el id para el sexo");
+			System.out.println("---------------------------------------------");
+		}
+				
 		if (this.telefonoMovil!=null && !this.telefonoMovil.trim().isEmpty()) {
 			oPersona.setTelefonoMovil(this.telefonoMovil.trim());
 		}
@@ -572,6 +584,8 @@ public class PersonaBean implements Serializable {
 	 */
 	public void limpiaDetallePersona() {
 		
+		this.personaSelected=null;
+		
 		this.comunidadResidenciaSelected=null;
 		this.ocupacionSelected=null;
 		
@@ -603,16 +617,12 @@ public class PersonaBean implements Serializable {
 		this.comunidadResidenciaSelectedId=0;
 		this.comunidadResidenciaSelected=null;
 
-		this.direccion=this.personaSelected.getDireccionResi();
-		this.telefonoResidencia=this.personaSelected.getTelefonoResi();
-		this.telefonoMovil=this.personaSelected.getTelefonoMovil();
+		this.direccion=null;
+		this.telefonoResidencia=null;
+		this.telefonoMovil=null;
 
-		this.escolaridadSelectedId=this.personaSelected.getEscolaridadId();
-		if (this.escolaridadSelectedId!=0) {
-			this.escolaridades=escolaridadService.ListarActivos(this.personaSelected.getEscolaridadCodigo());
-		} else {
-			this.escolaridades=escolaridadService.ListarActivos();
-		}
+		this.escolaridadSelectedId=0;
+		this.escolaridades=escolaridadService.ListarActivos();
 
 		this.ocupacionSelectedId=0;
 		this.ocupacionSelected=null;
@@ -620,7 +630,7 @@ public class PersonaBean implements Serializable {
 		this.tipoAseguradoSelectedId=0;
 		this.tiposAsegurados=tipoAseguradoService.ListarActivos();
 		
-		this.numeroAsegurado=this.personaSelected.getAseguradoNumero();
+		this.numeroAsegurado=null;
 		this.verificado=false;
 		
 	}

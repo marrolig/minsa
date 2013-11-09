@@ -6,7 +6,6 @@ package ni.gob.minsa.malaria.interfaz.vigilancia;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,7 +25,6 @@ import org.primefaces.model.SortOrder;
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.ciportal.dto.InfoSesion;
 import ni.gob.minsa.ejbPersona.dto.Persona;
-import ni.gob.minsa.ejbPersona.servicios.PersonaBTMService;
 import ni.gob.minsa.malaria.datos.estructura.EntidadAdtvaDA;
 import ni.gob.minsa.malaria.datos.estructura.UnidadDA;
 import ni.gob.minsa.malaria.datos.general.CatalogoElementoDA;
@@ -39,33 +37,25 @@ import ni.gob.minsa.malaria.datos.poblacion.ViviendaDA;
 import ni.gob.minsa.malaria.datos.sis.SisPersonaDA;
 import ni.gob.minsa.malaria.datos.vigilancia.ColVolDA;
 import ni.gob.minsa.malaria.datos.vigilancia.MuestreoHematicoDA;
-import ni.gob.minsa.malaria.datos.vigilancia.PuestoComunidadDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoNotificacionDA;
 import ni.gob.minsa.malaria.interfaz.sis.PersonaBean;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
-import ni.gob.minsa.malaria.modelo.general.ClaseAccesibilidad;
 import ni.gob.minsa.malaria.modelo.general.Marcador;
-import ni.gob.minsa.malaria.modelo.general.Ocupacion;
 import ni.gob.minsa.malaria.modelo.general.Parametro;
-import ni.gob.minsa.malaria.modelo.general.TipoTransporte;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Manzana;
 import ni.gob.minsa.malaria.modelo.poblacion.Vivienda;
 import ni.gob.minsa.malaria.modelo.poblacion.noEntidad.ViviendaUltimaEncuesta;
-import ni.gob.minsa.malaria.modelo.seguridad.UsuarioUnidad;
 import ni.gob.minsa.malaria.modelo.sis.Etnia;
 import ni.gob.minsa.malaria.modelo.sis.Sexo;
-import ni.gob.minsa.malaria.modelo.vigilancia.ColVol;
-import ni.gob.minsa.malaria.modelo.vigilancia.ColVolAcceso;
 import ni.gob.minsa.malaria.modelo.vigilancia.DensidadCruces;
 import ni.gob.minsa.malaria.modelo.vigilancia.EstadioPFalciparum;
 import ni.gob.minsa.malaria.modelo.vigilancia.MotivoFaltaDiagnostico;
 import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoDiagnostico;
 import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoHematico;
 import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoPruebaRapida;
-import ni.gob.minsa.malaria.modelo.vigilancia.PuestoComunidad;
 import ni.gob.minsa.malaria.modelo.vigilancia.PuestoNotificacion;
 import ni.gob.minsa.malaria.modelo.vigilancia.ResponsablePruebaRapida;
 import ni.gob.minsa.malaria.modelo.vigilancia.ResultadoPruebaRapida;
@@ -78,6 +68,7 @@ import ni.gob.minsa.malaria.servicios.general.CatalogoElementoService;
 import ni.gob.minsa.malaria.servicios.general.MarcadorService;
 import ni.gob.minsa.malaria.servicios.general.ParametroService;
 import ni.gob.minsa.malaria.servicios.poblacion.ComunidadService;
+import ni.gob.minsa.malaria.servicios.poblacion.DivisionPoliticaService;
 import ni.gob.minsa.malaria.servicios.poblacion.ManzanaService;
 import ni.gob.minsa.malaria.servicios.poblacion.ViviendaService;
 import ni.gob.minsa.malaria.servicios.sis.SisPersonaService;
@@ -128,6 +119,8 @@ public class MuestreoHematicoBean implements Serializable {
 	// 3 : Ficha existente con investigación epidemiológica cerrada.
 	// -------------------------------------------------------------
 	private int estado;
+	private long muestreoHematicoId;
+	private MuestreoHematico muestreoHematicoSelected;
 	
 	// -------------------------------------------------------------
 	// Entidad Administrativa
@@ -166,14 +159,8 @@ public class MuestreoHematicoBean implements Serializable {
 	// atributos vinculados a la identificación de la ficha E-2
 	private String clave;
 	private BigDecimal numeroLamina;
-	private Date fechaTomaMuestra;
 	
-	private TipoBusqueda tipoBusquedaSelected;
 	private List<TipoBusqueda> tiposBusquedas;
-	
-	// atributos calculados en base a la fecha de toma de muestra de la gota gruesa
-	private String semanaEpidemiologica;
-	private String anioEpidemiologico;
 	
 	// atributos vinculados a la persona a la cual se le realiza el muestreo
 	// y que son almacenados en la ficha de muestreo y por tanto son inmutables
@@ -183,9 +170,6 @@ public class MuestreoHematicoBean implements Serializable {
 
 	private long personaId;
 	
-	private Sexo sexo;
-	private Date fechaNacimiento;
-	private Etnia etnia;
 	private DivisionPolitica municipioResidencia;
 	private Comunidad comunidadResidencia;
 	private String direccionResidencia;
@@ -202,24 +186,8 @@ public class MuestreoHematicoBean implements Serializable {
 	private LazyDataModel<ViviendaUltimaEncuesta> viviendas;
 	private int numViviendas;
 
-	private String personaReferente;
-	private String telefonoReferente;
 	private String tmpPersonaReferente;
 	private String tmpTelefonoReferente;
-	
-	private String empleador;
-	
-	// atributos vinculados a los síntomas y tratamiento
-
-	private Date inicioSintomas;
-	private BigDecimal manejoClinico;   // hospitalario=1, ambulatorio=0
-	private Date inicioTratamiento;
-	private Date finTratamiento;
-	private BigDecimal tratamientoEnBoca;
-	private BigDecimal tratamientoRemanente;
-	private BigDecimal cloroquina;
-	private BigDecimal primaquina5mg;
-	private BigDecimal primaquina15mg;
 	
 	// atributos vinculados a la prueba rápida de malaria
 	
@@ -239,34 +207,20 @@ public class MuestreoHematicoBean implements Serializable {
 	
 	private MuestreoDiagnostico muestreoDiagnosticoSelected;
 	
-	private Date fechaRecepcion;
-	private Date fechaDiagnostico;
-	private BigDecimal resultado;
 	private Boolean positivoPVivax;
 	private Boolean positivoPFalciparum;
 	
 	private List<DensidadCruces> densidadCruces;
 	
 	private long densidadPVivaxSelectedId;
-	private DensidadCruces densidadPVivaxSelected;
 	private long densidadPFalciparumSelectedId;
-	private DensidadCruces densidadPFalciparumSelected;
 	
 	private long estadioPFalciparumSelectedId;
-	private EstadioPFalciparum estadioPFalciparumSelected;
 	private List<EstadioPFalciparum> estadiosPFalciparum;
 	
-	private BigDecimal estadiosAsexuales;
-	private BigDecimal gametocitos;
-	private BigDecimal leucocitos;
-	
-	private EntidadAdtva entidadLaboratorioSelected;
 	private long entidadLaboratorioSelectedId;
 	private List<EntidadAdtva> entidadesLaboratorios;
-	private Unidad unidadLaboratorioSelected;
-	private String laboratorista;
 	
-	private MotivoFaltaDiagnostico motivoFaltaDiagnosticoSelected;
 	private long motivoFaltaDiagnosticoSelectedId;
 	private List<MotivoFaltaDiagnostico> motivosFaltaDiagnosticos;
 	
@@ -287,12 +241,9 @@ public class MuestreoHematicoBean implements Serializable {
 	
 	private static ColVolService colVolService = new ColVolDA();
 	private static EntidadAdtvaService entidadService = new EntidadAdtvaDA();
+	private static DivisionPoliticaService divisionService = new DivisionPoliticaDA();
 	private static UnidadService unidadService = new UnidadDA();
 	private static ComunidadService comunidadService = new ComunidadDA();
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<TipoTransporte,Integer> tipoTransporteService=new CatalogoElementoDA(TipoTransporte.class,"TipoTransporte");
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static CatalogoElementoService<ClaseAccesibilidad,Integer> claseAccesibilidadService=new CatalogoElementoDA(ClaseAccesibilidad.class,"ClaseAccesibilidad");
 	private static MarcadorService marcadorService = new MarcadorDA();
 	private static ParametroService parametroService = new ParametroDA();
 
@@ -316,6 +267,8 @@ public class MuestreoHematicoBean implements Serializable {
 	public MuestreoHematicoBean() {
 		
 		this.capaActiva=1;
+		
+		this.muestreoHematicoSelected=new MuestreoHematico();
 		
 		this.infoSesion=Utilidades.obtenerInfoSesion();
 		this.entidades= new ArrayList<EntidadAdtva>();
@@ -349,7 +302,6 @@ public class MuestreoHematicoBean implements Serializable {
 		iniciarCapaControl();
 		iniciarCapaPaciente();
 		iniciarCapaReferente();
-		iniciarCapaTratamiento();
 		iniciarCapaPRM();
 		iniciarCapaPGG();
 
@@ -416,7 +368,6 @@ public class MuestreoHematicoBean implements Serializable {
 	public void iniciarCapas() {
 
 		this.colVolPuestoSelected=null;
-		this.personaSelected=null;
 		this.puestoNotificacionId=0;
 		this.capaActiva=1;
 
@@ -437,10 +388,7 @@ public class MuestreoHematicoBean implements Serializable {
 		
 		this.clave=null;
 		this.numeroLamina=null;
-		this.fechaTomaMuestra=null;
-		this.anioEpidemiologico=null;
-		this.semanaEpidemiologica=null;
-		this.tipoBusquedaSelected=TipoBusqueda.PASIVA;
+		this.muestreoHematicoSelected=new MuestreoHematico();
 
 	}
 	
@@ -451,72 +399,45 @@ public class MuestreoHematicoBean implements Serializable {
 		
 	public void iniciarCapaReferente() {
 		
-		this.personaReferente=null;
-		this.telefonoReferente=null;
+//		this.personaReferente=null;
+//		this.telefonoReferente=null;
 		
-	}
-	
-	public void iniciarCapaTratamiento() {
-	
-		this.inicioSintomas=null;
-		this.manejoClinico=Utilidades.CERO;
-		this.inicioTratamiento=null;
-		this.finTratamiento=null;
-		this.tratamientoEnBoca=null;
-		this.tratamientoRemanente=null;
-		this.cloroquina=null;
-		this.primaquina15mg=null;
-		this.primaquina5mg=null;
-			
 	}
 	
 	public void iniciarCapaPRM() {
 		
-		this.fechaAplicacion = null;
-		this.responsablePruebaRapidaSelectedId=0;
 		this.responsablesPruebasRapidas=responsablePruebaRapidaService.ListarActivos();
-		this.responsablePruebaRapidaSelected=null;
-		this.resultadoPruebaRapidaSelectedId=0;
 		this.resultadosPruebasRapidas=resultadoPruebaRapidaService.ListarActivos();
-		this.resultadoPruebaRapidaSelected=null;
+		iniciarPRM();
 		
 	}
 	
 	public void iniciarCapaPGG() {
 		
-		this.fechaRecepcion=null;
-		this.fechaDiagnostico=null;
-		this.resultado=null;
-		this.positivoPVivax=null;
-		this.positivoPFalciparum=null;
 		this.densidadCruces=densidadCrucesService.ListarActivos();
 		this.densidadPVivaxSelectedId=0;
-		this.densidadPVivaxSelected=null;
 		this.densidadPFalciparumSelectedId=0;
-		this.densidadPFalciparumSelected=null;
 		this.estadioPFalciparumSelectedId=0;
-		this.estadioPFalciparumSelected=null;
 		this.estadiosPFalciparum=estadioPFalciparumService.ListarActivos();
-		this.estadiosAsexuales=null;
-		this.gametocitos=null;
-		this.leucocitos=null;
 		
-		this.entidadLaboratorioSelected=null;
 		this.entidadesLaboratorios=entidadService.EntidadesAdtvasActivas();
 		this.entidadLaboratorioSelectedId=this.entidadSelectedId;
-
-		this.laboratorista=null;
 		
 	}
 	
 	public void iniciarPersonas() {
 
+		this.personaId=0;
+		this.personaSelected=null;
+		
 		// inicializa las variables del componente de personas
 		FacesContext context = FacesContext.getCurrentInstance();
 		PersonaBean personaBean = (PersonaBean)context.getApplication().evaluateExpressionGet(context, "#{personaBean}", PersonaBean.class);
 		personaBean.setPersonaSelected(null);
 		personaBean.setTextoBusqueda("");
 		personaBean.setPersonaListaSelected(null);
+		personaBean.setModo(0);
+		personaBean.limpiaDetallePersona();
 
 	}
 	
@@ -543,7 +464,9 @@ public class MuestreoHematicoBean implements Serializable {
 		if (oInfoVivienda.isOk()) {
 			this.viviendaSelected=(Vivienda)oInfoVivienda.getObjeto();
 			if (this.viviendaSelected.getViviendaManzana()!=null) {
-				this.manzanaCodigo=this.viviendaSelected.getViviendaManzana().getManzana().getCodigo().substring(9, 12);;
+				this.manzanaCodigo=this.viviendaSelected.getViviendaManzana().getManzana().getCodigo().substring(9, 12);
+			} else {
+				this.manzanaCodigo=null;
 			}
 		}
 		
@@ -563,10 +486,45 @@ public class MuestreoHematicoBean implements Serializable {
 
 	}
 	
+	public void quitarInicioSintomas() {
+		
+		this.muestreoHematicoSelected.setInicioSintomas(null);
+	}
+	
+	public void cambiarTratamiento() {
+		
+		if (this.muestreoHematicoSelected.getInicioTratamiento()==null) {
+			iniTratamiento();
+		}
+	}
+	
+	public void quitarTratamiento() {
+		
+		this.muestreoHematicoSelected.setInicioTratamiento(null);
+		iniTratamiento();
+	}
+	
+	public void iniTratamiento() {
+
+		this.muestreoHematicoSelected.setFinTratamiento(null);
+		this.muestreoHematicoSelected.setCloroquina(null);
+		this.muestreoHematicoSelected.setPrimaquina15mg(null);
+		this.muestreoHematicoSelected.setPrimaquina5mg(null);
+		this.muestreoHematicoSelected.setTratamientoEnBoca(null);
+		this.muestreoHematicoSelected.setTratamientoRemanente(null);
+		
+	}
+	
+	public void quitarFinTratamiento() {
+		
+		this.muestreoHematicoSelected.setFinTratamiento(null);
+		
+	}
+	
 	public void editarReferente(ActionEvent pEvento) {
 		
-		this.tmpPersonaReferente=this.personaReferente;
-		this.tmpTelefonoReferente=this.telefonoReferente;
+		this.tmpPersonaReferente=this.muestreoHematicoSelected.getPersonaReferente();
+		this.tmpTelefonoReferente=this.muestreoHematicoSelected.getTelefonoReferente();
 		
 	}
 
@@ -582,15 +540,15 @@ public class MuestreoHematicoBean implements Serializable {
 			if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
 		} else {
 			rContext.addCallbackParam("referenteValida", true);
-			this.personaReferente=this.tmpPersonaReferente;
-			this.telefonoReferente=this.tmpTelefonoReferente;
+			this.muestreoHematicoSelected.setPersonaReferente(this.tmpPersonaReferente);
+			this.muestreoHematicoSelected.setTelefonoReferente(this.tmpTelefonoReferente);
 		}
 	}
 
 	public void eliminarReferente() {
 
-		this.personaReferente=null;
-		this.telefonoReferente=null;
+		this.muestreoHematicoSelected.setPersonaReferente(null);
+		this.muestreoHematicoSelected.setTelefonoReferente(null);
 		this.tmpPersonaReferente=null;
 		this.tmpTelefonoReferente=null;
 		
@@ -600,9 +558,6 @@ public class MuestreoHematicoBean implements Serializable {
 
 		RequestContext rContext = RequestContext.getCurrentInstance();
 
-		MuestreoPruebaRapida oMuestreoPruebaRapida = new MuestreoPruebaRapida();
-		oMuestreoPruebaRapida.setFecha(this.fechaAplicacion);
-		
 		if (this.resultadoPruebaRapidaSelectedId==0) {
 			this.resultadoPruebaRapidaSelected=null;
 		} else {
@@ -631,9 +586,9 @@ public class MuestreoHematicoBean implements Serializable {
 			}
 		}
 		
-		oMuestreoPruebaRapida.setResultado(this.resultadoPruebaRapidaSelected);
-		oMuestreoPruebaRapida.setRealizado(this.responsablePruebaRapidaSelected);
-		InfoResultado oResultado=VigilanciaValidacion.validarPRM(oMuestreoPruebaRapida);
+		this.muestreoPruebaRapidaSelected.setResultado(this.resultadoPruebaRapidaSelected);
+		this.muestreoPruebaRapidaSelected.setRealizado(this.responsablePruebaRapidaSelected);
+		InfoResultado oResultado=VigilanciaValidacion.validarPRM(this.muestreoPruebaRapidaSelected);
 		
 		if (!oResultado.isOk()) {
 			rContext.addCallbackParam("prmValida", false);
@@ -644,77 +599,70 @@ public class MuestreoHematicoBean implements Serializable {
 			
 			// si muestreoPrubaRapidaSelected es nula, implica que se trata de un nuevo
 			// valor para la prueba rápida
-			if (this.muestreoPruebaRapidaSelected==null) {
-				this.muestreoPruebaRapidaSelected=new MuestreoPruebaRapida();
+			if (this.muestreoHematicoSelected.getPruebaRapida()==null) {
+				this.muestreoHematicoSelected.setPruebaRapida(new MuestreoPruebaRapida());
 				this.muestreoPruebaRapidaSelected.setUsuarioRegistro(this.infoSesion.getUsername());
 				this.muestreoPruebaRapidaSelected.setFechaRegistro(Calendar.getInstance().getTime());
 			}
-			this.muestreoPruebaRapidaSelected.setFecha(this.fechaAplicacion);
-			this.muestreoPruebaRapidaSelected.setRealizado(this.responsablePruebaRapidaSelected);
-			this.muestreoPruebaRapidaSelected.setResultado(this.resultadoPruebaRapidaSelected);
+			this.muestreoHematicoSelected.getPruebaRapida().setFecha(this.muestreoPruebaRapidaSelected.getFecha());
+			this.muestreoHematicoSelected.getPruebaRapida().setRealizado(this.responsablePruebaRapidaSelected);
+			this.muestreoHematicoSelected.getPruebaRapida().setResultado(this.resultadoPruebaRapidaSelected);
 		}
 	}
 
-	public void eliminarPRM() {
-
-		this.muestreoPruebaRapidaSelected=null;
-		this.fechaAplicacion=null;
-		this.responsablePruebaRapidaSelectedId=0;
-		this.responsablePruebaRapidaSelected=null;
-		this.resultadoPruebaRapidaSelected=null;
-		this.resultadoPruebaRapidaSelectedId=0;
-		
-	}
-	
 	public void cambiarResultado() {
 	
 		// si el resultado es nulo, es evaluado cuando se efectúa
 		// una llamada interna y no desde el interfaz
 		
-		if (this.resultado==null) {
+		if (this.muestreoDiagnosticoSelected.getResultado()==null) {
+			this.muestreoDiagnosticoSelected.setPositivoPFalciparum(null);
+			this.muestreoDiagnosticoSelected.setPositivoPVivax(null);
 			this.positivoPVivax=null;
 			this.positivoPFalciparum=null;
 		}
 		
-		if (this.resultado!=null && this.resultado.equals(Utilidades.NEGATIVO)) {
+		if (this.muestreoDiagnosticoSelected.getResultado()!=null && this.muestreoDiagnosticoSelected.getResultado().equals(Utilidades.NEGATIVO)) {
+			this.muestreoDiagnosticoSelected.setPositivoPFalciparum(BigDecimal.ZERO);
+			this.muestreoDiagnosticoSelected.setPositivoPVivax(BigDecimal.ZERO);
 			this.positivoPVivax=Boolean.FALSE;
 			this.positivoPFalciparum=Boolean.FALSE;
 		}
 		
 		// incluye si es nulo y negativo
-		if (this.resultado==null || this.resultado.equals(Utilidades.NEGATIVO)) {
-			this.densidadPFalciparumSelected=null;
-			this.densidadPVivaxSelected=null;
+		if (this.muestreoDiagnosticoSelected.getResultado()==null || this.muestreoDiagnosticoSelected.getResultado().equals(Utilidades.NEGATIVO)) {
+			this.muestreoDiagnosticoSelected.setDensidadPFalciparum(null);
+			this.muestreoDiagnosticoSelected.setDensidadPVivax(null);
 			this.densidadPFalciparumSelectedId=0;
 			this.densidadPVivaxSelectedId=0;
-			this.estadioPFalciparumSelected=null;
+			this.muestreoDiagnosticoSelected.setEstadioPFalciparum(null);
 			this.estadioPFalciparumSelectedId=0;
-			this.gametocitos=null;
-			this.leucocitos=null;
-			this.estadiosAsexuales=null;
+			this.muestreoDiagnosticoSelected.setGametocitos(null);
+			this.muestreoDiagnosticoSelected.setLeucocitos(null);
+			this.muestreoDiagnosticoSelected.setEstadiosAsexuales(null);
 		}
 	}
 	
 	public void controlarRecepcion() {
 		
-		if (this.fechaRecepcion==null) {
-			this.fechaDiagnostico=null;
+		if (this.muestreoDiagnosticoSelected.getFechaRecepcion()==null) {
+			this.muestreoDiagnosticoSelected.setFechaDiagnostico(null);
 			controlarDiagnostico();
 
-			this.entidadLaboratorioSelected=null;
+			this.muestreoDiagnosticoSelected.setEntidadAdtvaLaboratorio(null);
 			this.entidadLaboratorioSelectedId=0;
-			this.unidadLaboratorioSelected=null;
-			this.laboratorista=null;
+			this.muestreoDiagnosticoSelected.setUnidadLaboratorio(null);
+			this.muestreoDiagnosticoSelected.setLaboratorista(null);
 		}
 	}
 	
 	public void controlarDiagnostico() {
 		
-		if (this.fechaDiagnostico==null) {
-			this.resultado=null;
+		if (this.muestreoDiagnosticoSelected.getFechaDiagnostico()==null) {
+			this.muestreoDiagnosticoSelected.setResultado(null);
 			cambiarResultado();
 		} else {
-			this.motivoFaltaDiagnosticoSelected=null;
+			this.muestreoDiagnosticoSelected.setMotivoFaltaDiagnostico(null);
 			this.motivoFaltaDiagnosticoSelectedId=0;
 		}
 	}
@@ -722,7 +670,8 @@ public class MuestreoHematicoBean implements Serializable {
 	public void controlarVivax() {
 		
 		if (!this.positivoPVivax) {
-			this.densidadPVivaxSelected=null;
+			this.muestreoDiagnosticoSelected.setPositivoPVivax(BigDecimal.ZERO);
+			this.muestreoDiagnosticoSelected.setDensidadPVivax(null);
 			this.densidadPVivaxSelectedId=0;
 		}
 	}
@@ -730,9 +679,10 @@ public class MuestreoHematicoBean implements Serializable {
 	public void controlarFalciparum() {
 		
 		if (!this.positivoPFalciparum) {
-			this.densidadPFalciparumSelected=null;
+			this.muestreoDiagnosticoSelected.setPositivoPFalciparum(BigDecimal.ZERO);
+			this.muestreoDiagnosticoSelected.setDensidadPFalciparum(null);
 			this.densidadPFalciparumSelectedId=0;
-			this.estadioPFalciparumSelected=null;
+			this.muestreoDiagnosticoSelected.setEstadioPFalciparum(null);
 			this.estadioPFalciparumSelectedId=0;
 		}
 	}
@@ -741,24 +691,20 @@ public class MuestreoHematicoBean implements Serializable {
 
 		RequestContext rContext = RequestContext.getCurrentInstance();
 
-		MuestreoDiagnostico oMuestreoDiagnostico = new MuestreoDiagnostico();
-		oMuestreoDiagnostico.setFechaRecepcion(this.fechaRecepcion);
-		oMuestreoDiagnostico.setFechaDiagnostico(this.fechaDiagnostico);
-		oMuestreoDiagnostico.setResultado(this.resultado);
-		if (this.resultado==null || this.resultado.equals(Utilidades.CERO)) {
-			oMuestreoDiagnostico.setPositivoPVivax(null);
-			oMuestreoDiagnostico.setPositivoPFalciparum(null);
+		if (this.muestreoDiagnosticoSelected.getResultado()==null || this.muestreoDiagnosticoSelected.getResultado().equals(Utilidades.NEGATIVO)) {
+			this.muestreoDiagnosticoSelected.setPositivoPVivax(null);
+			this.muestreoDiagnosticoSelected.setPositivoPFalciparum(null);
 		} else {
-			oMuestreoDiagnostico.setPositivoPVivax(this.positivoPVivax?Utilidades.POSITIVO:Utilidades.NEGATIVO);
-			oMuestreoDiagnostico.setPositivoPFalciparum(this.positivoPFalciparum?Utilidades.POSITIVO:Utilidades.NEGATIVO);
+			this.muestreoDiagnosticoSelected.setPositivoPVivax(this.positivoPVivax?Utilidades.POSITIVO:Utilidades.NEGATIVO);
+			this.muestreoDiagnosticoSelected.setPositivoPFalciparum(this.positivoPFalciparum?Utilidades.POSITIVO:Utilidades.NEGATIVO);
 		}
 		
 		if (this.densidadPVivaxSelectedId==0) {
-			this.densidadPVivaxSelected=null;
+			this.muestreoDiagnosticoSelected.setDensidadPVivax(null);
 		} else {
 			InfoResultado oResultado=densidadCrucesService.Encontrar(this.densidadPVivaxSelectedId);
 			if (oResultado.isOk()) {
-				this.densidadPVivaxSelected=(DensidadCruces) oResultado.getObjeto();
+				this.muestreoDiagnosticoSelected.setDensidadPVivax((DensidadCruces) oResultado.getObjeto());
 			} else {
 				rContext.addCallbackParam("pggValida", false);
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "La densidad en cruces que ha seleccionado no existe",Mensajes.NOTIFICACION_ADMINISTRADOR);
@@ -766,14 +712,13 @@ public class MuestreoHematicoBean implements Serializable {
 				return; 
 			}
 		}
-		oMuestreoDiagnostico.setDensidadPVivax(this.densidadPVivaxSelected);
 		
 		if (this.densidadPFalciparumSelectedId==0) {
-			this.densidadPFalciparumSelected=null;
+			this.muestreoDiagnosticoSelected.setDensidadPFalciparum(null);
 		} else {
 			InfoResultado oResultado=densidadCrucesService.Encontrar(this.densidadPFalciparumSelectedId);
 			if (oResultado.isOk()) {
-				this.densidadPFalciparumSelected=(DensidadCruces) oResultado.getObjeto();
+				this.muestreoDiagnosticoSelected.setDensidadPFalciparum((DensidadCruces) oResultado.getObjeto());
 			} else {
 				rContext.addCallbackParam("pggValida", false);
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "La densidad en cruces que ha seleccionado no existe",Mensajes.NOTIFICACION_ADMINISTRADOR);
@@ -781,18 +726,13 @@ public class MuestreoHematicoBean implements Serializable {
 				return; 
 			}
 		}
-		oMuestreoDiagnostico.setDensidadPFalciparum(this.densidadPFalciparumSelected);
-		
-		oMuestreoDiagnostico.setEstadiosAsexuales(this.estadiosAsexuales);
-		oMuestreoDiagnostico.setGametocitos(this.gametocitos);
-		oMuestreoDiagnostico.setLeucocitos(this.leucocitos);
 		
 		if (this.estadioPFalciparumSelectedId==0) {
-			this.estadioPFalciparumSelected=null;
+			this.muestreoDiagnosticoSelected.setEstadioPFalciparum(null);
 		} else {
 			InfoResultado oResultado=estadioPFalciparumService.Encontrar(this.estadioPFalciparumSelectedId);
 			if (oResultado.isOk()) {
-				this.estadioPFalciparumSelected=(EstadioPFalciparum) oResultado.getObjeto();
+				this.muestreoDiagnosticoSelected.setEstadioPFalciparum((EstadioPFalciparum) oResultado.getObjeto());
 			} else {
 				rContext.addCallbackParam("pggValida", false);
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "El estadío seleccionado para el P.falciparum no existe",Mensajes.NOTIFICACION_ADMINISTRADOR);
@@ -800,14 +740,13 @@ public class MuestreoHematicoBean implements Serializable {
 				return; 
 			}
 		}
-		oMuestreoDiagnostico.setEstadioPFalciparum(this.estadioPFalciparumSelected);
 		
 		if (this.entidadLaboratorioSelectedId==0) {
-			this.entidadLaboratorioSelected=null;
+			this.muestreoDiagnosticoSelected.setEntidadAdtvaLaboratorio(null);
 		} else {
 			InfoResultado oResultado=entidadAdtvaService.Encontrar(this.entidadLaboratorioSelectedId);
 			if (oResultado.isOk()) {
-				this.entidadLaboratorioSelected=(EntidadAdtva) oResultado.getObjeto();
+				this.muestreoDiagnosticoSelected.setEntidadAdtvaLaboratorio((EntidadAdtva) oResultado.getObjeto());
 			} else {
 				rContext.addCallbackParam("pggValida", false);
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "La entidad administrativa seleccionada no existe",Mensajes.NOTIFICACION_ADMINISTRADOR);
@@ -815,17 +754,14 @@ public class MuestreoHematicoBean implements Serializable {
 				return; 
 			}			
 		}
-		oMuestreoDiagnostico.setEntidadAdtvaLaboratorio(this.entidadLaboratorioSelected);
-		oMuestreoDiagnostico.setUnidadLaboratorio(this.unidadLaboratorioSelected);
-		oMuestreoDiagnostico.setMunicipioLaboratorio(this.unidadLaboratorioSelected.getMunicipio());
-		oMuestreoDiagnostico.setLaboratorista(this.laboratorista);
+		this.muestreoDiagnosticoSelected.setMunicipioLaboratorio(this.muestreoDiagnosticoSelected.getUnidadLaboratorio().getMunicipio());
 		
 		if (this.motivoFaltaDiagnosticoSelectedId==0) {
-			this.motivoFaltaDiagnosticoSelected=null;
+			this.muestreoDiagnosticoSelected.setMotivoFaltaDiagnostico(null);
 		} else {
 			InfoResultado oResultado=motivoFaltaDiagnosticoService.Encontrar(this.motivoFaltaDiagnosticoSelectedId);
 			if (oResultado.isOk()) {
-				this.motivoFaltaDiagnosticoSelected=(MotivoFaltaDiagnostico) oResultado.getObjeto();
+				this.muestreoDiagnosticoSelected.setMotivoFaltaDiagnostico((MotivoFaltaDiagnostico) oResultado.getObjeto());
 			} else {
 				rContext.addCallbackParam("pggValida", false);
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_ERROR, "El motivo declarado por la ausencia de diagnóstico no existe",Mensajes.NOTIFICACION_ADMINISTRADOR);
@@ -833,9 +769,8 @@ public class MuestreoHematicoBean implements Serializable {
 				return;
 			}
 		}
-		oMuestreoDiagnostico.setMotivoFaltaDiagnostico(this.motivoFaltaDiagnosticoSelected);
 		
-		InfoResultado oResultado=VigilanciaValidacion.validarPGG(oMuestreoDiagnostico);
+		InfoResultado oResultado=VigilanciaValidacion.validarPGG(this.muestreoDiagnosticoSelected);
 		
 		if (!oResultado.isOk()) {
 			rContext.addCallbackParam("pggValida", false);
@@ -844,34 +779,34 @@ public class MuestreoHematicoBean implements Serializable {
 		} else {
 			rContext.addCallbackParam("pggValida", true);
 			
-			// si muestreoDiagnosticoSelected es nulo, implica que se trata de un nuevo
+			// si muestreoDiagnosticoSelectedId es cero, implica que se trata de un nuevo
 			// valor para la prueba de gota gruesa
-			if (this.muestreoDiagnosticoSelected==null) {
-				this.muestreoDiagnosticoSelected=new MuestreoDiagnostico();
+			if (this.muestreoDiagnosticoSelected.getMuestreoDiagnosticoId()==0) {
 				this.muestreoDiagnosticoSelected.setUsuarioRegistro(this.infoSesion.getUsername());
 				this.muestreoDiagnosticoSelected.setFechaRegistro(Calendar.getInstance().getTime());
 			}
-			this.muestreoDiagnosticoSelected.setFechaRecepcion(this.fechaAplicacion);
-			this.muestreoDiagnosticoSelected.setFechaDiagnostico(this.fechaDiagnostico);
-			this.muestreoDiagnosticoSelected.setDensidadPFalciparum(this.densidadPFalciparumSelected);
-			this.muestreoDiagnosticoSelected.setDensidadPVivax(this.densidadPVivaxSelected);
-			this.muestreoDiagnosticoSelected.setEntidadAdtvaLaboratorio(this.entidadLaboratorioSelected);
-			this.muestreoDiagnosticoSelected.setEstadioPFalciparum(this.estadioPFalciparumSelected);
-			this.muestreoDiagnosticoSelected.setEstadiosAsexuales(this.estadiosAsexuales);
-			this.muestreoDiagnosticoSelected.setGametocitos(this.gametocitos);
-			this.muestreoDiagnosticoSelected.setLaboratorista(this.laboratorista);
-			this.muestreoDiagnosticoSelected.setLeucocitos(this.leucocitos);
-			this.muestreoDiagnosticoSelected.setMotivoFaltaDiagnostico(this.motivoFaltaDiagnosticoSelected);
-			this.muestreoDiagnosticoSelected.setMunicipioLaboratorio(this.unidadLaboratorioSelected.getMunicipio());
-			this.muestreoDiagnosticoSelected.setResultado(this.resultado);
-			if (this.resultado==null || this.resultado.equals(Utilidades.NEGATIVO)) {
-				this.muestreoDiagnosticoSelected.setPositivoPFalciparum(null);
-			    this.muestreoDiagnosticoSelected.setPositivoPVivax(null);
-			} else {
-				this.muestreoDiagnosticoSelected.setPositivoPFalciparum(this.positivoPFalciparum?Utilidades.POSITIVO:Utilidades.NEGATIVO);
-				this.muestreoDiagnosticoSelected.setPositivoPVivax(this.positivoPVivax?Utilidades.POSITIVO:Utilidades.NEGATIVO);
+			this.muestreoDiagnosticoSelected.setMunicipioLaboratorio(this.muestreoDiagnosticoSelected.getUnidadLaboratorio().getMunicipio());
+
+			if (this.muestreoHematicoSelected.getDiagnostico()==null) {
+				
 			}
-			this.muestreoDiagnosticoSelected.setUnidadLaboratorio(this.unidadLaboratorioSelected);
+			this.muestreoHematicoSelected.getDiagnostico().setDensidadPFalciparum(this.muestreoDiagnosticoSelected.getDensidadPFalciparum());
+			this.muestreoHematicoSelected.getDiagnostico().setDensidadPVivax(this.muestreoDiagnosticoSelected.getDensidadPVivax());
+			this.muestreoHematicoSelected.getDiagnostico().setEntidadAdtvaLaboratorio(this.muestreoDiagnosticoSelected.getEntidadAdtvaLaboratorio());
+			this.muestreoHematicoSelected.getDiagnostico().setEstadioPFalciparum(this.muestreoDiagnosticoSelected.getEstadioPFalciparum());
+			this.muestreoHematicoSelected.getDiagnostico().setEstadiosAsexuales(this.muestreoDiagnosticoSelected.getEstadiosAsexuales());
+			this.muestreoHematicoSelected.getDiagnostico().setFechaDiagnostico(this.muestreoDiagnosticoSelected.getFechaDiagnostico());
+			this.muestreoHematicoSelected.getDiagnostico().setFechaRecepcion(this.muestreoDiagnosticoSelected.getFechaRecepcion());
+			this.muestreoHematicoSelected.getDiagnostico().setGametocitos(this.muestreoDiagnosticoSelected.getGametocitos());
+			this.muestreoHematicoSelected.getDiagnostico().setLaboratorista(this.muestreoDiagnosticoSelected.getLaboratorista());
+			this.muestreoHematicoSelected.getDiagnostico().setLeucocitos(this.muestreoDiagnosticoSelected.getLeucocitos());
+			this.muestreoHematicoSelected.getDiagnostico().setMotivoFaltaDiagnostico(this.muestreoDiagnosticoSelected.getMotivoFaltaDiagnostico());
+			this.muestreoHematicoSelected.getDiagnostico().setMunicipioLaboratorio(this.muestreoDiagnosticoSelected.getMunicipioLaboratorio());
+			this.muestreoHematicoSelected.getDiagnostico().setPositivoPFalciparum(this.muestreoDiagnosticoSelected.getPositivoPFalciparum());
+			this.muestreoHematicoSelected.getDiagnostico().setPositivoPVivax(this.muestreoDiagnosticoSelected.getPositivoPVivax());
+			this.muestreoHematicoSelected.getDiagnostico().setResultado(this.muestreoDiagnosticoSelected.getResultado());
+			this.muestreoHematicoSelected.getDiagnostico().setUnidadLaboratorio(this.muestreoDiagnosticoSelected.getUnidadLaboratorio());
+
 		}
 	}
 	
@@ -985,93 +920,76 @@ public class MuestreoHematicoBean implements Serializable {
 		iniciarCapa1();
 		
 	}
+
+	/*
+	 * Inicializa el objeto MuestreoHematico vinculado al número de
+	 * lámina especificado para la clave (puesto de notificación) y deja
+	 * el interfaz preparado para que el usuario ingrese otro número de
+	 * lámina para la misma clave.
+	 */
+	public void cancelarLamina() {
+		
+		this.numeroLamina=null;
+		this.muestreoHematicoId=0;
+		this.muestreoHematicoSelected=new MuestreoHematico();
+		iniciarPRM();
+		iniciarPGG();
+		iniciarCapaReferente();
+		this.estado=0;
+		this.viviendaCodigo=null;
+		this.viviendaSelected=null;
+		this.manzanaCodigo=null;
+		this.manzanaSelected=null;
+		iniciarPersonas();
+		
+	}
 	
+	public void iniciarPRM() {
+
+		this.muestreoPruebaRapidaSelected=new MuestreoPruebaRapida();
+		this.muestreoHematicoSelected.setPruebaRapida(null);
+		this.responsablePruebaRapidaSelectedId=0;
+		this.responsablePruebaRapidaSelected=null;
+		this.resultadoPruebaRapidaSelected=null;
+		this.resultadoPruebaRapidaSelectedId=0;
+
+	}
+
+	public void iniciarPGG() {
+		
+		this.muestreoDiagnosticoSelected=new MuestreoDiagnostico();
+		this.muestreoHematicoSelected.setDiagnostico(null);
+		this.densidadPFalciparumSelectedId=0;
+		this.densidadPVivaxSelectedId=0;
+		this.motivoFaltaDiagnosticoSelectedId=0;
+		this.estadioPFalciparumSelectedId=0;
+		this.positivoPVivax=null;
+		this.positivoPFalciparum=null;
+		this.entidadLaboratorioSelectedId=this.entidadSelectedId;
+
+	}
+	
+	/*
+	 *  Obtiene las muestras asociados específicamente a un puesto de notificación o bien,
+	 *  todas aquellas muestras asociadas a todos los puestos de notificación vinculados
+	 *  a una unidad de salud.
+	 */
+	public void obtenerMuestras() {
+		
+		
+	}
+
+	/*
+	 * Calcula la semana y año epidemiológico en base a la fecha de
+	 * toma de muestra de la gota gruesa
+	 */
 	public void calcularSemana() {
 
-		this.semanaEpidemiologica=String.valueOf(CalendarioEPI.semana(this.fechaTomaMuestra));
-		this.anioEpidemiologico=String.valueOf(CalendarioEPI.año(this.fechaTomaMuestra));
+		this.muestreoHematicoSelected.setSemanaEpidemiologica(Integer.valueOf(CalendarioEPI.semana(this.muestreoHematicoSelected.getFechaToma())));
+		this.muestreoHematicoSelected.setAñoEpidemiologico(Integer.valueOf(CalendarioEPI.año(this.muestreoHematicoSelected.getFechaToma())));
 	}
 	
 	
-/*		this.capaActiva=2;
-		this.colVolId=this.colVolSelected.getColVolId();
-		
-		InfoResultado oResPersonaSel=Operacion.ensamblarPersona(this.colVolSelected.getSisPersona());
-		if (!oResPersonaSel.isOk()) {
-			FacesMessage msg = Mensajes.enviarMensaje(oResPersonaSel);
-			if (msg!=null)
-				FacesContext.getCurrentInstance().addMessage(null, msg);
-			return;
-		}
-		
-		this.personaSelected=(Persona)oResPersonaSel.getObjeto();
-		
-		if (this.colVolSelected.getColVolAcceso()!=null) {
-			
-			if (this.colVolSelected.getColVolAcceso().getTipoTransporte()!=null) {
-				this.tipoTransporteSelectedId=this.colVolSelected.getColVolAcceso().getTipoTransporte().getCatalogoId();
-				this.tiposTransportes=tipoTransporteService.ListarActivos(this.colVolSelected.getColVolAcceso().getTipoTransporte().getCodigo());
-			} else {
-				this.tiposTransportes=tipoTransporteService.ListarActivos();
-			}
-			
-			
-		} else {
-			
-		}
-		
-		// obtiene los datos vinculados al puesto de notificación
-		
-		this.puestoNotificacionId=0;
-		this.clave=null;
-		
-		// se verifica si existe un municipio de residencia asociado, ya que
-		// podría darse el caso que desde otro módulo se elimine
-		
-		// TODO eliminar si funciona
-		
-		if (this.colVolSelected.getSisPersona().getMunicipioResidencia()!=null) {
-			this.municipioComunidadSelectedId=this.colVolSelected.getSisPersona().getMunicipioResidencia().getDivisionPoliticaId();
-			this.departamentoComunidadSelectedId=this.colVolSelected.getSisPersona().getMunicipioResidencia().getDepartamento().getDivisionPoliticaId();
-			this.departamentosComunidad=divisionPoliticaService.DepartamentosActivos(this.departamentoComunidadSelectedId);
-			this.municipiosComunidad=divisionPoliticaService.MunicipiosActivos(this.departamentoComunidadSelectedId, this.municipioComunidadSelectedId);
-		} else {
-			this.municipioComunidadSelectedId=0;
-			this.departamentoComunidadSelectedId=0;
-			this.departamentosComunidad=divisionPoliticaService.DepartamentosActivos();
-		}
-		
-		this.comunidadPuestoSelected=null;
-
-		if (this.colVolId!=0) {
-			PuestoNotificacion oPuestoNotificacion = puestoNotificacionService.EncontrarPorColVol(this.colVolId);
-			if (oPuestoNotificacion!=null) {
-				this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
-				this.clave=oPuestoNotificacion.getClave();
-				this.fechaApertura=oPuestoNotificacion.getFechaApertura();
-				this.fechaCierre=oPuestoNotificacion.getFechaCierre();
-				this.puestosComunidades=oPuestoNotificacion.getComunidadesPuesto();
-			}
-			
-		}
-	
-		// inicializa las variables del componente de personas
-		FacesContext context = FacesContext.getCurrentInstance();
-		PersonaBean personaBean = (PersonaBean)context.getApplication().evaluateExpressionGet(context, "#{personaBean}", PersonaBean.class);
-		personaBean.setPersonaSelected(this.personaSelected);
-		personaBean.iniciarPropiedades();
-		
-		UIComponent componentDetalle = null; 
-		UIViewRoot root = context.getViewRoot( ); 
-		componentDetalle = (UIComponent) root.findComponent("frmColVol:panDetalle");
-		for (UIComponent uic:componentDetalle.getChildren()) {
-			if (uic instanceof EditableValueHolder) {   
-				EditableValueHolder evh=(EditableValueHolder)uic;   
-				evh.resetValue();   
-			}
-		}
-*/		
-
 	public List<Unidad> completarUnidadLaboratorio(String query) {
 		
 		List<Unidad> oUnidades = new ArrayList<Unidad>();
@@ -1136,6 +1054,11 @@ public class MuestreoHematicoBean implements Serializable {
 	 * Obtiene los colvoles asociados a una unidad de salud, la cual puede o no ser
 	 * un puesto de notificación
 	 */
+	public void listarColVoles(ActionEvent pEvento) {
+		
+		obtenerColVoles();
+	}
+	
 	public void obtenerColVoles() {
 		
 		this.colVolPuestos = new ArrayList<ColVolPuesto>();
@@ -1208,16 +1131,102 @@ public class MuestreoHematicoBean implements Serializable {
 			
 			// si el resultado es nulo, implica que no existe una pareja de valores
 			// de clave y lámina declarados, el número de lámina se declara por numeración
-			// consecutiva del block de formatos E-2 proporcionados al puesto de notificación
-			// sin embargo, finalizado el block no hay garantía de que puedan volver a numerarla
-			// a partir de uno (1).  Al momento del registro, puede ser que la lámina ya haya
-			// sido entregada al laboratorio, por lo que si la numeración existe, no puede modificarse
-			// por tanto, solo se alertará de dicho evento
+			// consecutiva del block de formatos E-2 proporcionados al puesto de notificación.
 			
 			if (oMuestreoHematico!=null) {
-				String patronFecha = "dd/MM/yyyy";
-				SimpleDateFormat formatoFecha = new SimpleDateFormat(patronFecha);
-				FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_INFO, "Existe una caso registrado para esa clave y número de lámina. Es importante garantizar la identificación única para la lámina.","La lámina existente pertenece a "+oMuestreoHematico.getSisPersona().getNombreCompleto().toUpperCase()+", cuya muestra fue tomada el "+formatoFecha.format(oMuestreoHematico.getFechaToma())));
+//				String patronFecha = "dd/MM/yyyy";
+//				SimpleDateFormat formatoFecha = new SimpleDateFormat(patronFecha);
+//				FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_INFO, "Existe una caso registrado para esa clave y número de lámina. No se permite el mismo número de lámina para la misma clave.","La lámina existente pertenece a "+oMuestreoHematico.getSisPersona().getNombreCompleto().toUpperCase()+", cuya muestra fue tomada el "+formatoFecha.format(oMuestreoHematico.getFechaToma())));
+
+				//TODO Debe actualizar la variable estado de acuerdo según exista o no la M10.
+				this.estado=1;
+				this.muestreoHematicoId=oMuestreoHematico.getMuestreoHematicoId();
+				this.muestreoHematicoSelected=oMuestreoHematico;
+				
+				// se debe ensamblar la DTO de persona
+				InfoResultado oResPersonaSel=Operacion.ensamblarPersona(oMuestreoHematico.getSisPersona());
+				if (!oResPersonaSel.isOk()) {
+					FacesMessage msg = Mensajes.enviarMensaje(oResPersonaSel);
+					if (msg!=null)
+						FacesContext.getCurrentInstance().addMessage(null, msg);
+					return;
+				}
+
+				// Se puede presentar el escenario de que los datos de la persona se modifiquen
+				// desde otra aplicación, por lo que ciertas variables de la E2 no se modificarán
+				// automáticamente.  Los datos serán cargadas desde la E2, sin embargo se indicará
+				// con un icono a la derecha de la etiqueta de la variable respectiva, que el dato
+				// a nivel de paciente ha sido modificado.
+
+				this.manzanaCodigo=null;
+				this.viviendaCodigo=null;
+				
+				this.personaSelected=(Persona)oResPersonaSel.getObjeto();
+				this.manzanaSelected=oMuestreoHematico.getManzana();
+				if (this.manzanaSelected!=null) {
+					this.manzanaCodigo=oMuestreoHematico.getManzana().getCodigo().substring(9, 12);
+				}
+				this.viviendaSelected=oMuestreoHematico.getVivienda();
+				if (this.viviendaSelected!=null) {
+					this.viviendaCodigo=oMuestreoHematico.getVivienda().getCodigo().substring(9, 14);;
+				}
+				
+				this.muestreoPruebaRapidaSelected=new MuestreoPruebaRapida();
+				if (this.muestreoHematicoSelected.getPruebaRapida()!=null) {
+					this.muestreoPruebaRapidaSelected.setMuestreoPruebaRapidaId(this.muestreoHematicoSelected.getPruebaRapida().getMuestreoPruebaRapidaId());
+					this.muestreoPruebaRapidaSelected.setFecha(this.muestreoHematicoSelected.getPruebaRapida().getFecha());
+					this.responsablePruebaRapidaSelectedId=this.muestreoHematicoSelected.getPruebaRapida().getRealizado().getCatalogoId();
+					this.resultadoPruebaRapidaSelectedId=this.muestreoHematicoSelected.getPruebaRapida().getResultado().getCatalogoId();
+				}
+
+				this.tmpPersonaReferente=this.muestreoHematicoSelected.getPersonaReferente();
+				this.tmpTelefonoReferente=this.muestreoHematicoSelected.getTelefonoReferente();
+				
+				// a fin de desacoplar los objetos y permitir la edición de los resultados
+				// de la prueba de gota gruesa de forma independiente, se utilizan un objeto diferente
+				
+				this.muestreoDiagnosticoSelected=new MuestreoDiagnostico();
+				if (this.muestreoHematicoSelected.getDiagnostico()!=null) {
+					this.muestreoDiagnosticoSelected.setMuestreoDiagnosticoId(this.muestreoHematicoSelected.getDiagnostico().getMuestreoDiagnosticoId());
+					this.muestreoDiagnosticoSelected.setFechaRecepcion(this.muestreoHematicoSelected.getDiagnostico().getFechaRecepcion());
+					this.muestreoDiagnosticoSelected.setFechaDiagnostico(this.muestreoHematicoSelected.getDiagnostico().getFechaDiagnostico());
+					this.muestreoDiagnosticoSelected.setResultado(this.muestreoHematicoSelected.getDiagnostico().getResultado());
+					this.muestreoDiagnosticoSelected.setDensidadPVivax(this.muestreoHematicoSelected.getDiagnostico().getDensidadPVivax());
+					this.muestreoDiagnosticoSelected.setDensidadPFalciparum(this.muestreoHematicoSelected.getDiagnostico().getDensidadPFalciparum());
+					this.muestreoDiagnosticoSelected.setEntidadAdtvaLaboratorio(this.muestreoHematicoSelected.getDiagnostico().getEntidadAdtvaLaboratorio());
+					this.muestreoDiagnosticoSelected.setEstadioPFalciparum(this.muestreoHematicoSelected.getDiagnostico().getEstadioPFalciparum());
+					this.muestreoDiagnosticoSelected.setEstadiosAsexuales(this.muestreoHematicoSelected.getDiagnostico().getEstadiosAsexuales());
+					this.muestreoDiagnosticoSelected.setGametocitos(this.muestreoHematicoSelected.getDiagnostico().getGametocitos());
+					this.muestreoDiagnosticoSelected.setLaboratorista(this.muestreoHematicoSelected.getDiagnostico().getLaboratorista());
+					this.muestreoDiagnosticoSelected.setLeucocitos(this.muestreoHematicoSelected.getDiagnostico().getLeucocitos());
+					this.muestreoDiagnosticoSelected.setMotivoFaltaDiagnostico(this.muestreoHematicoSelected.getDiagnostico().getMotivoFaltaDiagnostico());
+					this.muestreoDiagnosticoSelected.setMunicipioLaboratorio(this.muestreoHematicoSelected.getDiagnostico().getMunicipioLaboratorio());
+					this.muestreoDiagnosticoSelected.setUnidadLaboratorio(this.muestreoHematicoSelected.getDiagnostico().getUnidadLaboratorio());
+					this.muestreoDiagnosticoSelected.setPositivoPFalciparum(this.muestreoHematicoSelected.getDiagnostico().getPositivoPFalciparum());
+					this.muestreoDiagnosticoSelected.setPositivoPVivax(this.muestreoHematicoSelected.getDiagnostico().getPositivoPVivax());
+					this.positivoPFalciparum=this.muestreoDiagnosticoSelected.getPositivoPFalciparum().equals(BigDecimal.ONE)?Boolean.TRUE:Boolean.FALSE;
+					this.positivoPVivax=this.muestreoDiagnosticoSelected.getPositivoPVivax().equals(BigDecimal.ONE)?Boolean.TRUE:Boolean.FALSE;
+					this.densidadPFalciparumSelectedId=0;
+					if (this.muestreoDiagnosticoSelected.getDensidadPFalciparum()!=null) {
+						this.densidadPFalciparumSelectedId=this.muestreoDiagnosticoSelected.getDensidadPFalciparum().getCatalogoId();
+					}
+					this.densidadPVivaxSelectedId=0;
+					if (this.muestreoDiagnosticoSelected.getDensidadPVivax()!=null) {
+						this.densidadPVivaxSelectedId=this.muestreoDiagnosticoSelected.getDensidadPVivax().getCatalogoId();
+					}
+					this.motivoFaltaDiagnosticoSelectedId=0;
+					if (this.muestreoDiagnosticoSelected.getMotivoFaltaDiagnostico()!=null) {
+						this.motivoFaltaDiagnosticoSelectedId=this.muestreoDiagnosticoSelected.getMotivoFaltaDiagnostico().getCatalogoId();
+					}
+					
+				}
+				
+				// inicializa las variables del componente de personas
+				FacesContext context = FacesContext.getCurrentInstance();
+				PersonaBean personaBean = (PersonaBean)context.getApplication().evaluateExpressionGet(context, "#{personaBean}", PersonaBean.class);
+				personaBean.setPersonaSelected(this.personaSelected);
+				personaBean.iniciarPropiedades();
+				
 			}
 		
 		}
@@ -1240,7 +1249,7 @@ public class MuestreoHematicoBean implements Serializable {
 			return;
 		}
 		
-		if (this.fechaTomaMuestra==null) {
+		if (this.muestreoHematicoSelected.getFechaToma()==null) {
 			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "Debe especificar una fecha de toma de muestra",""));
 			return;
 		}
@@ -1250,91 +1259,114 @@ public class MuestreoHematicoBean implements Serializable {
 			return;
 		}
 		
+		// obtiene los objetos vinculados a persona que no son accesibles directamente
+		// desde el DTO de persona
+		
+		Comunidad oComunidadResidencia = null;
+		InfoResultado oResComunidad = comunidadService.Encontrar(this.personaSelected.getComuResiCodigo());
+		if (oResComunidad.isOk()) {
+			oComunidadResidencia=(Comunidad)oResComunidad.getObjeto();
+		} else {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La comunidad es requerida en los datos del paciente","Favor verificar en los datos del paciente"));
+			return;
+		}
+
+		DivisionPolitica oMunicipioResidencia = null;
+		InfoResultado oResMunicipio = divisionService.EncontrarPorCodigoNacional(this.personaSelected.getMuniResiCodigoNac());
+		if (oResMunicipio.isOk()) {
+			oMunicipioResidencia=(DivisionPolitica)oResMunicipio.getObjeto();
+		} else {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "El municipio de residencia es requerido en los datos del paciente","Favor verificar en los datos del paciente"));
+			return;
+		}
+
 		// Para una ficha de muestreo hemático existente no puede modificarse la persona asociada
 
 		InfoResultado oResultado = new InfoResultado();
-		
-		MuestreoHematico oMuestreoHematico = new MuestreoHematico();
-		oMuestreoHematico.setAñoEpidemiologico(Integer.getInteger(this.anioEpidemiologico));
-		oMuestreoHematico.setClave(this.clave);
-		oMuestreoHematico.setNumeroLamina(this.numeroLamina);
-		oMuestreoHematico.setComunidadResidencia(this.comunidadSelected);
-		oMuestreoHematico.setCloroquina(this.cloroquina);
-		oMuestreoHematico.setDireccionResidencia(this.direccionResidencia);
-		oMuestreoHematico.setEmbarazada(this.embarazada);
-		oMuestreoHematico.setFechaNacimiento(this.fechaNacimiento);
-		oMuestreoHematico.setFechaToma(this.fechaTomaMuestra);
-		oMuestreoHematico.setFinTratamiento(this.finTratamiento);
-		oMuestreoHematico.setInicioSintomas(this.inicioSintomas);
-		oMuestreoHematico.setInicioTratamiento(this.inicioTratamiento);
-		oMuestreoHematico.setManejoClinico(this.manejoClinico);
-		oMuestreoHematico.setPersonaReferente(this.personaReferente);
-		oMuestreoHematico.setPrimaquina15mg(this.primaquina15mg);
-		oMuestreoHematico.setPrimaquina5mg(this.primaquina5mg);
-		oMuestreoHematico.setSemanaEpidemiologica(Integer.getInteger(this.semanaEpidemiologica));
-		oMuestreoHematico.setTelefonoReferente(this.telefonoReferente);
-		oMuestreoHematico.setTipoBusqueda(Integer.getInteger(this.tipoBusquedaSelected.getCodigo()));
-		oMuestreoHematico.setTratamientoEnBoca(this.tratamientoEnBoca);
-		oMuestreoHematico.setTratamientoRemanente(this.tratamientoRemanente);
-		oMuestreoHematico.setUnidadNotificacion(this.unidadSelected);
-		oMuestreoHematico.setManzana(this.manzanaSelected);
-		oMuestreoHematico.setVivienda(this.viviendaSelected);
-		oMuestreoHematico.setEntidadNotificacion(this.unidadSelected.getEntidadAdtva());
-		oMuestreoHematico.setSexo((Sexo)sexoService.Encontrar(this.personaSelected.getSexoId()).getObjeto());
-		oMuestreoHematico.setEtnia((Etnia)etniaService.Encontrar(this.personaSelected.getEtniaId()).getObjeto());
-		oMuestreoHematico.setPuestoNotificacion((PuestoNotificacion)puestoNotificacionService.Encontrar(this.puestoNotificacionId).getObjeto());
-		
-		//TODO -- En el método guardar debe considerarse el parámetro para guardar
-		//a la persona
-		
-		MuestreoDiagnostico oMuestreoDiagnostico = new MuestreoDiagnostico();
-		oMuestreoDiagnostico.setDensidadPFalciparum(this.densidadPFalciparumSelected);
-		oMuestreoDiagnostico.setDensidadPVivax(this.densidadPVivaxSelected);
-		oMuestreoDiagnostico.setEntidadAdtvaLaboratorio(this.entidadLaboratorioSelected);
-		oMuestreoDiagnostico.setEstadioPFalciparum(this.estadioPFalciparumSelected);
-		oMuestreoDiagnostico.setEstadiosAsexuales(this.estadiosAsexuales);
-		oMuestreoDiagnostico.setFechaDiagnostico(this.fechaDiagnostico);
-		oMuestreoDiagnostico.setFechaRecepcion(this.fechaRecepcion);
-		oMuestreoDiagnostico.setGametocitos(this.gametocitos);
-		oMuestreoDiagnostico.setLaboratorista(this.laboratorista);
-		oMuestreoDiagnostico.setLeucocitos(this.leucocitos);
-		oMuestreoDiagnostico.setMotivoFaltaDiagnostico(this.motivoFaltaDiagnosticoSelected);
-		oMuestreoDiagnostico.setMuestreoHematico(oMuestreoHematico);
-		if (this.positivoPFalciparum!=null) {
-			oMuestreoDiagnostico.setPositivoPFalciparum(this.positivoPFalciparum?BigDecimal.ONE:BigDecimal.ZERO);
+
+		if (this.muestreoHematicoSelected.getMuestreoHematicoId()==0) {
+			this.muestreoHematicoSelected.setClave(this.clave);
+			this.muestreoHematicoSelected.setNumeroLamina(this.numeroLamina);
+			this.muestreoHematicoSelected.setUnidadNotificacion(this.unidadSelected);
+			this.muestreoHematicoSelected.setMunicipioNotificacion(this.unidadSelected.getMunicipio());
+			this.muestreoHematicoSelected.setEntidadNotificacion(this.unidadSelected.getEntidadAdtva());
+			this.muestreoHematicoSelected.setPuestoNotificacion((PuestoNotificacion)puestoNotificacionService.Encontrar(this.puestoNotificacionId).getObjeto());
 		}
-		if (this.positivoPVivax!=null) {
-			oMuestreoDiagnostico.setPositivoPVivax(this.positivoPVivax?BigDecimal.ONE:BigDecimal.ZERO);
+		
+		this.muestreoHematicoSelected.setComunidadResidencia(oComunidadResidencia);
+		this.muestreoHematicoSelected.setMunicipioResidencia(oMunicipioResidencia);
+		this.muestreoHematicoSelected.setDireccionResidencia(this.personaSelected.getDireccionResi());
+		this.muestreoHematicoSelected.setManzana(this.manzanaSelected);
+		this.muestreoHematicoSelected.setVivienda(this.viviendaSelected);
+		this.muestreoHematicoSelected.setFechaNacimiento(this.personaSelected.getFechaNacimiento());
+		this.muestreoHematicoSelected.setSexo((Sexo)sexoService.Encontrar(this.personaSelected.getSexoId()).getObjeto());
+		this.muestreoHematicoSelected.setEtnia((Etnia)etniaService.Encontrar(this.personaSelected.getEtniaId()).getObjeto());
+		
+		// los resultados del muestreo por gota gruesa ya han sido validados en la modal
+		// y los valores se han establecido en muestreoDiagnosticoSelected
+		this.muestreoHematicoSelected.setDiagnostico(null);
+		if (this.muestreoDiagnosticoSelected!=null) {
+			this.muestreoDiagnosticoSelected.setMuestreoHematico(this.muestreoHematicoSelected);
+			this.muestreoHematicoSelected.setDiagnostico(this.muestreoDiagnosticoSelected);
 		}
-		oMuestreoDiagnostico.setResultado(this.resultado);
-		oMuestreoDiagnostico.setUnidadLaboratorio(this.unidadLaboratorioSelected);
-		oMuestreoDiagnostico.setMunicipioLaboratorio(this.unidadLaboratorioSelected.getMunicipio());
-		oMuestreoDiagnostico.setFechaRegistro(Calendar.getInstance().getTime());
-		oMuestreoDiagnostico.setUsuarioRegistro(this.infoSesion.getUsername());
 		
+		// los resultados de la prueba rápida ya han sido validados en la modal
+		// y los valores se han establecido en muestreoPruebaRapidaSelected
+		this.muestreoHematicoSelected.setPruebaRapida(null);
+		if (this.muestreoPruebaRapidaSelected!=null) {
+			this.muestreoPruebaRapidaSelected.setMuestreoHematico(this.muestreoHematicoSelected);
+			this.muestreoHematicoSelected.setPruebaRapida(this.muestreoPruebaRapidaSelected);
+		}
+
+		if ((this.muestreoDiagnosticoSelected!=null) && (this.muestreoDiagnosticoSelected.getMuestreoDiagnosticoId()==0)) {
+			this.muestreoDiagnosticoSelected.setUsuarioRegistro(this.infoSesion.getUsername());
+			this.muestreoDiagnosticoSelected.setFechaRegistro(Calendar.getInstance().getTime());
+		}
+
+		if ((this.muestreoPruebaRapidaSelected!=null && (this.muestreoPruebaRapidaSelected.getMuestreoPruebaRapidaId()==0))) {
+			this.muestreoPruebaRapidaSelected.setUsuarioRegistro(this.infoSesion.getUsername());
+			this.muestreoPruebaRapidaSelected.setFechaRegistro(Calendar.getInstance().getTime());
+		}
+
+		// si el identificador del muestreo hemático es 0, implica es una nueva
+		// ficha de muestreo hemático, i.e. estado=0
+
+		if (this.muestreoHematicoId==0) {
+			this.muestreoHematicoSelected.setFechaRegistro(Calendar.getInstance().getTime());
+			this.muestreoHematicoSelected.setUsuarioRegistro(this.infoSesion.getUsername());
+			oResultado=muestreoHematicoService.Agregar(this.muestreoHematicoSelected, this.personaSelected);
+		} else {
+			oResultado=muestreoHematicoService.Guardar(this.muestreoHematicoSelected, this.personaSelected);
+		}
 		
+		if (!oResultado.isOk()) {
+			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			if (msg!=null)
+				FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
 		
+		cancelarLamina();
+		this.capaActiva=1;
 		
-		if (oResultado.isOk()){
-			iniciarCapa1();
-			oResultado.setMensaje(Mensajes.REGISTRO_GUARDADO);
-		} 
+		oResultado.setMensaje(Mensajes.REGISTRO_GUARDADO);
 		
 		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
 		if (msg!=null)
 			FacesContext.getCurrentInstance().addMessage(null, msg);
-		
 	}
 	
 	public void eliminar(ActionEvent pEvento){
 
-		if (this.puestoNotificacionId==0) return;
+		if (this.muestreoHematicoId==0) {
+			FacesContext.getCurrentInstance().addMessage(null, Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "Debe especificar un muestreo hemático.",""));
+			return;
+		}
 		
 		InfoResultado oResultado = new InfoResultado();
-
 		
 		if (oResultado.isOk()){
-			iniciarCapa1();
+			cancelarLamina();
 			oResultado.setMensaje(Mensajes.REGISTRO_ELIMINADO);
 		}
 		
@@ -1436,6 +1468,19 @@ public class MuestreoHematicoBean implements Serializable {
 
 	public void setPersonaSelected(Persona personaSelected) {
 		this.personaSelected = personaSelected;
+
+		this.personaId=this.personaSelected.getPersonaId();
+		this.muestreoHematicoSelected.setSexo((Sexo)sexoService.Encontrar(this.personaSelected.getSexoId()).getObjeto());
+		this.muestreoHematicoSelected.setEtnia((Etnia)etniaService.Encontrar(this.personaSelected.getEtniaId()).getObjeto());
+		this.muestreoHematicoSelected.setDireccionResidencia(this.personaSelected.getDireccionResi());
+		this.muestreoHematicoSelected.setFechaNacimiento(this.personaSelected.getFechaNacimiento());
+		
+		InfoResultado oResComunidad = comunidadService.Encontrar(this.personaSelected.getComuResiCodigo());
+		this.muestreoHematicoSelected.setComunidadResidencia((Comunidad)oResComunidad.getObjeto());
+
+		InfoResultado oResMunicipio = divisionService.EncontrarPorCodigoNacional(this.personaSelected.getMuniResiCodigoNac());
+		this.muestreoHematicoSelected.setMunicipioResidencia((DivisionPolitica)oResMunicipio.getObjeto());
+
 	}
 
 	public Persona getPersonaSelected() {
@@ -1486,90 +1531,6 @@ public class MuestreoHematicoBean implements Serializable {
 	 */
 	public void setNumeroLamina(BigDecimal numeroLamina) {
 		this.numeroLamina = numeroLamina;
-	}
-
-	/**
-	 * @return the fechaTomaMuestra
-	 */
-	public Date getFechaTomaMuestra() {
-		return fechaTomaMuestra;
-	}
-
-	/**
-	 * @param fechaTomaMuestra the fechaTomaMuestra to set
-	 */
-	public void setFechaTomaMuestra(Date fechaTomaMuestra) {
-		this.fechaTomaMuestra = fechaTomaMuestra;
-	}
-
-	/**
-	 * @return the semanaEpidemiologica
-	 */
-	public String getSemanaEpidemiologica() {
-		return semanaEpidemiologica;
-	}
-
-	/**
-	 * @param semanaEpidemiologica the semanaEpidemiologica to set
-	 */
-	public void setSemanaEpidemiologica(String semanaEpidemiologica) {
-		this.semanaEpidemiologica = semanaEpidemiologica;
-	}
-
-	/**
-	 * @return the anioEpidemiologico
-	 */
-	public String getAnioEpidemiologico() {
-		return anioEpidemiologico;
-	}
-
-	/**
-	 * @param anioEpidemiologico the anioEpidemiologico to set
-	 */
-	public void setAnioEpidemiologico(String anioEpidemiologico) {
-		this.anioEpidemiologico = anioEpidemiologico;
-	}
-
-	/**
-	 * @return the sexo
-	 */
-	public Sexo getSexo() {
-		return sexo;
-	}
-
-	/**
-	 * @param sexo the sexo to set
-	 */
-	public void setSexo(Sexo sexo) {
-		this.sexo = sexo;
-	}
-
-	/**
-	 * @return the fechaNacimiento
-	 */
-	public Date getFechaNacimiento() {
-		return fechaNacimiento;
-	}
-
-	/**
-	 * @param fechaNacimiento the fechaNacimiento to set
-	 */
-	public void setFechaNacimiento(Date fechaNacimiento) {
-		this.fechaNacimiento = fechaNacimiento;
-	}
-
-	/**
-	 * @return the etnia
-	 */
-	public Etnia getEtnia() {
-		return etnia;
-	}
-
-	/**
-	 * @param etnia the etnia to set
-	 */
-	public void setEtnia(Etnia etnia) {
-		this.etnia = etnia;
 	}
 
 	/**
@@ -1656,22 +1617,6 @@ public class MuestreoHematicoBean implements Serializable {
 		this.viviendaSelected = viviendaSelected;
 	}
 
-	public String getPersonaReferente() {
-		return personaReferente;
-	}
-
-	public void setPersonaReferente(String personaReferente) {
-		this.personaReferente = personaReferente;
-	}
-
-	public String getTelefonoReferente() {
-		return telefonoReferente;
-	}
-
-	public void setTelefonoReferente(String telefonoReferente) {
-		this.telefonoReferente = telefonoReferente;
-	}
-
 	public String getTmpPersonaReferente() {
 		return tmpPersonaReferente;
 	}
@@ -1686,78 +1631,6 @@ public class MuestreoHematicoBean implements Serializable {
 
 	public void setTmpTelefonoReferente(String tmpTelefonoReferente) {
 		this.tmpTelefonoReferente = tmpTelefonoReferente;
-	}
-
-	public Date getInicioSintomas() {
-		return inicioSintomas;
-	}
-
-	public void setInicioSintomas(Date inicioSintomas) {
-		this.inicioSintomas = inicioSintomas;
-	}
-
-	public BigDecimal getManejoClinico() {
-		return manejoClinico;
-	}
-
-	public void setManejoClinico(BigDecimal manejoClinico) {
-		this.manejoClinico = manejoClinico;
-	}
-
-	public Date getInicioTratamiento() {
-		return inicioTratamiento;
-	}
-
-	public void setInicioTratamiento(Date inicioTratamiento) {
-		this.inicioTratamiento = inicioTratamiento;
-	}
-
-	public Date getFinTratamiento() {
-		return finTratamiento;
-	}
-
-	public void setFinTratamiento(Date finTratamiento) {
-		this.finTratamiento = finTratamiento;
-	}
-
-	public BigDecimal getTratamientoEnBoca() {
-		return tratamientoEnBoca;
-	}
-
-	public void setTratamientoEnBoca(BigDecimal tratamientoEnBoca) {
-		this.tratamientoEnBoca = tratamientoEnBoca;
-	}
-
-	public BigDecimal getTratamientoRemanente() {
-		return tratamientoRemanente;
-	}
-
-	public void setTratamientoRemanente(BigDecimal tratamientoRemanente) {
-		this.tratamientoRemanente = tratamientoRemanente;
-	}
-
-	public BigDecimal getCloroquina() {
-		return cloroquina;
-	}
-
-	public void setCloroquina(BigDecimal cloroquina) {
-		this.cloroquina = cloroquina;
-	}
-
-	public BigDecimal getPrimaquina5mg() {
-		return primaquina5mg;
-	}
-
-	public void setPrimaquina5mg(BigDecimal primaquina5mg) {
-		this.primaquina5mg = primaquina5mg;
-	}
-
-	public BigDecimal getPrimaquina15mg() {
-		return primaquina15mg;
-	}
-
-	public void setPrimaquina15mg(BigDecimal primaquina15mg) {
-		this.primaquina15mg = primaquina15mg;
 	}
 
 	public Date getFechaAplicacion() {
@@ -1822,30 +1695,6 @@ public class MuestreoHematicoBean implements Serializable {
 		this.resultadoPruebaRapidaSelected = resultadoPruebaRapidaSelected;
 	}
 
-	public Date getFechaRecepcion() {
-		return fechaRecepcion;
-	}
-
-	public void setFechaRecepcion(Date fechaRecepcion) {
-		this.fechaRecepcion = fechaRecepcion;
-	}
-
-	public Date getFechaDiagnostico() {
-		return fechaDiagnostico;
-	}
-
-	public void setFechaDiagnostico(Date fechaDiagnostico) {
-		this.fechaDiagnostico = fechaDiagnostico;
-	}
-
-	public BigDecimal getResultado() {
-		return resultado;
-	}
-
-	public void setResultado(BigDecimal resultado) {
-		this.resultado = resultado;
-	}
-
 	public Boolean getPositivoPVivax() {
 		return positivoPVivax;
 	}
@@ -1885,20 +1734,6 @@ public class MuestreoHematicoBean implements Serializable {
 	}
 
 	/**
-	 * @return the densidadPVivaxSelected
-	 */
-	public DensidadCruces getDensidadPVivaxSelected() {
-		return densidadPVivaxSelected;
-	}
-
-	/**
-	 * @param densidadPVivaxSelected the densidadPVivaxSelected to set
-	 */
-	public void setDensidadPVivaxSelected(DensidadCruces densidadPVivaxSelected) {
-		this.densidadPVivaxSelected = densidadPVivaxSelected;
-	}
-
-	/**
 	 * @return the densidadPFalciparumSelectedId
 	 */
 	public long getDensidadPFalciparumSelectedId() {
@@ -1912,21 +1747,6 @@ public class MuestreoHematicoBean implements Serializable {
 		this.densidadPFalciparumSelectedId = densidadPFalciparumSelectedId;
 	}
 
-	/**
-	 * @return the densidadPFalciparumSelected
-	 */
-	public DensidadCruces getDensidadPFalciparumSelected() {
-		return densidadPFalciparumSelected;
-	}
-
-	/**
-	 * @param densidadPFalciparumSelected the densidadPFalciparumSelected to set
-	 */
-	public void setDensidadPFalciparumSelected(
-			DensidadCruces densidadPFalciparumSelected) {
-		this.densidadPFalciparumSelected = densidadPFalciparumSelected;
-	}
-
 	public long getEstadioPFalciparumSelectedId() {
 		return estadioPFalciparumSelectedId;
 	}
@@ -1935,57 +1755,12 @@ public class MuestreoHematicoBean implements Serializable {
 		this.estadioPFalciparumSelectedId = estadioPFalciparumSelectedId;
 	}
 
-	public EstadioPFalciparum getEstadioPFalciparumSelected() {
-		return estadioPFalciparumSelected;
-	}
-
-	public void setEstadioPFalciparumSelected(
-			EstadioPFalciparum estadioPFalciparumSelected) {
-		this.estadioPFalciparumSelected = estadioPFalciparumSelected;
-	}
-
 	public List<EstadioPFalciparum> getEstadiosPFalciparum() {
 		return estadiosPFalciparum;
 	}
 
 	public void setEstadiosPFalciparum(List<EstadioPFalciparum> estadiosPFalciparum) {
 		this.estadiosPFalciparum = estadiosPFalciparum;
-	}
-
-	public BigDecimal getEstadiosAsexuales() {
-		return estadiosAsexuales;
-	}
-
-	public void setEstadiosAsexuales(BigDecimal estadiosAsexuales) {
-		this.estadiosAsexuales = estadiosAsexuales;
-	}
-
-	public BigDecimal getGametocitos() {
-		return gametocitos;
-	}
-
-	public void setGametocitos(BigDecimal gametocitos) {
-		this.gametocitos = gametocitos;
-	}
-
-	public BigDecimal getLeucocitos() {
-		return leucocitos;
-	}
-
-	public void setLeucocitos(BigDecimal leucocitos) {
-		this.leucocitos = leucocitos;
-	}
-
-	public EntidadAdtva getEntidadLaboratorioSelected() {
-		return entidadLaboratorioSelected;
-	}
-
-	/**
-	 * @param entidadLaboratorioSelected the entidadLaboratorioSelected to set
-	 */
-	public void setEntidadLaboratorioSelected(
-			EntidadAdtva entidadLaboratorioSelected) {
-		this.entidadLaboratorioSelected = entidadLaboratorioSelected;
 	}
 
 	/**
@@ -2017,49 +1792,6 @@ public class MuestreoHematicoBean implements Serializable {
 	}
 
 	/**
-	 * @return the laboratorista
-	 */
-	public String getLaboratorista() {
-		return laboratorista;
-	}
-
-	/**
-	 * @param laboratorista the laboratorista to set
-	 */
-	public void setLaboratorista(String laboratorista) {
-		this.laboratorista = laboratorista;
-	}
-
-	/**
-	 * @return the motivoFaltaDiagnosticoSelected
-	 */
-	public MotivoFaltaDiagnostico getMotivoFaltaDiagnosticoSelected() {
-		return motivoFaltaDiagnosticoSelected;
-	}
-
-	/**
-	 * @param motivoFaltaDiagnosticoSelected the motivoFaltaDiagnosticoSelected to set
-	 */
-	public void setMotivoFaltaDiagnosticoSelected(
-			MotivoFaltaDiagnostico motivoFaltaDiagnosticoSelected) {
-		this.motivoFaltaDiagnosticoSelected = motivoFaltaDiagnosticoSelected;
-	}
-
-	/**
-	 * @return the tipoBusquedaSelected
-	 */
-	public TipoBusqueda getTipoBusquedaSelected() {
-		return tipoBusquedaSelected;
-	}
-
-	/**
-	 * @param tipoBusquedaSelected the tipoBusquedaSelected to set
-	 */
-	public void setTipoBusquedaSelected(TipoBusqueda tipoBusquedaSelected) {
-		this.tipoBusquedaSelected = tipoBusquedaSelected;
-	}
-
-	/**
 	 * @return the tiposBusquedas
 	 */
 	public List<TipoBusqueda> getTiposBusquedas() {
@@ -2087,22 +1819,6 @@ public class MuestreoHematicoBean implements Serializable {
 
 	public String getViviendaCodigo() {
 		return viviendaCodigo;
-	}
-
-	public void setEmpleador(String empleador) {
-		this.empleador = empleador;
-	}
-
-	public String getEmpleador() {
-		return empleador;
-	}
-
-	public void setUnidadLaboratorioSelected(Unidad unidadLaboratorioSelected) {
-		this.unidadLaboratorioSelected = unidadLaboratorioSelected;
-	}
-
-	public Unidad getUnidadLaboratorioSelected() {
-		return unidadLaboratorioSelected;
 	}
 
 	public void setManzanas(LazyDataModel<Manzana> manzanas) {
@@ -2200,6 +1916,29 @@ public class MuestreoHematicoBean implements Serializable {
 	 */
 	public void setFiltroColVol(String filtroColVol) {
 		this.filtroColVol = filtroColVol;
+	}
+
+	public void setMuestreoHematicoId(long muestreoHematicoId) {
+		this.muestreoHematicoId = muestreoHematicoId;
+	}
+
+	public long getMuestreoHematicoId() {
+		return muestreoHematicoId;
+	}
+
+	/**
+	 * @return the muestreoHematicoSelected
+	 */
+	public MuestreoHematico getMuestreoHematicoSelected() {
+		return muestreoHematicoSelected;
+	}
+
+	/**
+	 * @param muestreoHematicoSelected the muestreoHematicoSelected to set
+	 */
+	public void setMuestreoHematicoSelected(
+			MuestreoHematico muestreoHematicoSelected) {
+		this.muestreoHematicoSelected = muestreoHematicoSelected;
 	}
 
 }

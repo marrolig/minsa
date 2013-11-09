@@ -124,7 +124,12 @@ public class ColVolDA implements ColVolService {
         		   (pColVol.getColVolAcceso().getComoLlegar()==null || pColVol.getColVolAcceso().getComoLlegar().trim().isEmpty()) &&
         		   (pColVol.getColVolAcceso().getDistancia()==null && pColVol.getColVolAcceso().getTiempo()==null) &&
         		   (pColVol.getColVolAcceso().getPuntoReferencia()==null || pColVol.getColVolAcceso().getPuntoReferencia().trim().isEmpty()) && 
-        		   (pColVol.getColVolAcceso().getTipoTransporte()==null)) {
+        		   (pColVol.getColVolAcceso().getTipoTransporte()==null)) 
+        			if (oColVol.getColVolAcceso()!=null) {
+            		ColVolAcceso oColVolAcceso = (ColVolAcceso)oEM.find(ColVolAcceso.class, oColVol.getColVolAcceso().getColVolAccesoId());
+            		if (oColVolAcceso!=null) {
+            			oEM.remove(oColVolAcceso);
+            		}
         			oColVol.setColVolAcceso(null);
         		} else {
         			if (oColVol.getColVolAcceso()==null) {

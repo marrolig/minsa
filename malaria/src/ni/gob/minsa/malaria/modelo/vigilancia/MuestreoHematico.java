@@ -24,6 +24,7 @@ import ni.gob.minsa.malaria.modelo.poblacion.Vivienda;
 import ni.gob.minsa.malaria.modelo.sis.Etnia;
 import ni.gob.minsa.malaria.modelo.sis.Sexo;
 import ni.gob.minsa.malaria.modelo.sis.SisPersona;
+import ni.gob.minsa.malaria.soporte.TipoBusqueda;
 
 import org.eclipse.persistence.annotations.Cache;
 
@@ -39,6 +40,21 @@ import org.eclipse.persistence.annotations.Cache;
 @Entity
 @Table(name="MUESTREOS_HEMATICOS",schema="SIVE")
 @Cache(alwaysRefresh=true,disableHits=true)
+@NamedQueries({
+	@NamedQuery(
+			name="MuestreoHematico.encontrarPorLamina",
+			query="select mh from MuestreoHematico mh " +
+				    "where mh.clave=:pClave and " +
+				    "      mh.numeroLamina=:pNumeroLamina "),
+	@NamedQuery(
+			name="MuestreoHematico.listarPorClave",
+			query="select mh from MuestreoHematico mh " +
+					"where mh.clave=:pClave"),
+	@NamedQuery(
+			name="MuestreoHematico.listarPorPersona",
+			query="select mh from MuestreoHematico mh " +
+					"where mh.sisPersona.personaId=:pPersonaId")
+})				 
 public class MuestreoHematico extends BaseEntidadCreacion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -68,7 +84,7 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	private PuestoNotificacion puestoNotificacion;
 
     @Size(min=1,max=5,message="La clave debe tener de 1 a 5 caracteres")
-    @Column(nullable=true,length=5)
+    @Column(name="CLAVE",nullable=true,length=5)
     private String clave;
     
 	@Digits(integer=10,fraction=0)
@@ -110,11 +126,11 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 
 	@NotNull(message="La declaración del sexo de la persona es requerida")
 	@ManyToOne
-	@JoinColumn(name="CODIGO_SEXO",referencedColumnName="CODIGO")
+	@JoinColumn(name="SEXO",referencedColumnName="CODIGO")
 	private Sexo sexo;
 
 	@ManyToOne
-	@JoinColumn(name="CODIGO_ETNIA",referencedColumnName="CODIGO")
+	@JoinColumn(name="ETNIA",referencedColumnName="CODIGO")
 	private Etnia etnia;
 	
 	@DecimalMin(value="0",message="El valor del indicador de embarazo no es válido")
@@ -146,12 +162,16 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	@JoinColumn(name="VIVIENDA",referencedColumnName="CODIGO")
 	private Vivienda vivienda;
 
+    @Size(min=0,max=100,message="El total de caracteres para el empleador o lugar de trabajo no debe superar los 100 caracteres")
+    @Column(name="EMPLEADOR",nullable=true,length=100)
+	private String empleador;
+	
     @Size(min=1,max=100,message="El total de caracteres para la persona referente no debe superar los 100 caracteres")
-    @Column(nullable=true,length=100)
+    @Column(name="PERSONA_REFERENTE",nullable=true,length=100)
 	private String personaReferente;
 	
     @Size(min=1,max=50,message="El total de caracteres para indicar el número de teléfono de la persona referente no debe superar los 50 caracteres")
-    @Column(nullable=true,length=50)
+    @Column(name="TELEFONO_REFERENTE",nullable=true,length=50)
 	private String telefonoReferente;
 	
 	@Temporal( TemporalType.TIMESTAMP)
@@ -203,13 +223,15 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	@Column(name="PRIMAQUINA_15MG",nullable=true,updatable=true)
 	private BigDecimal primaquina15mg;
 
-	@OneToOne(mappedBy="muestreoHematico",targetEntity=MuestreoPruebaRapida.class,fetch=FetchType.LAZY,optional=true,cascade=CascadeType.ALL)
+	@OneToOne(mappedBy="muestreoHematico",targetEntity=MuestreoPruebaRapida.class,fetch=FetchType.LAZY,optional=true, cascade=CascadeType.ALL)
 	private MuestreoPruebaRapida pruebaRapida;
 
 	@OneToOne(mappedBy="muestreoHematico",targetEntity=MuestreoDiagnostico.class,fetch=FetchType.LAZY,optional=true,cascade=CascadeType.ALL)
 	private MuestreoDiagnostico diagnostico;
 	
     public MuestreoHematico() {
+    	tipoBusqueda=Integer.valueOf(TipoBusqueda.PASIVA.getCodigo());
+    	manejoClinico=BigDecimal.ZERO;
     }
 
 	public void setSisPersona(SisPersona sisPersona) {
@@ -576,7 +598,7 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	 * @param personaReferente Nombre y apellidos de la persona referente
 	 */
 	public void setPersonaReferente(String personaReferente) {
-		this.personaReferente = personaReferente;
+		this.personaReferente = (personaReferente==null || personaReferente.trim().isEmpty())?null:personaReferente.trim();
 	}
 
 	/**
@@ -594,7 +616,7 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	 * @param telefonoReferente Número de teléfono
 	 */
 	public void setTelefonoReferente(String telefonoReferente) {
-		this.telefonoReferente = telefonoReferente;
+		this.telefonoReferente = (telefonoReferente ==null || telefonoReferente.trim().isEmpty())?null:telefonoReferente.trim();
 	}
 
 	/**
@@ -770,7 +792,7 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	}
 
 	public void setClave(String clave) {
-		this.clave = clave;
+		this.clave = (clave==null || clave.trim().isEmpty())?null:clave.trim();
 	}
 
 	public String getClave() {
@@ -778,11 +800,19 @@ public class MuestreoHematico extends BaseEntidadCreacion implements Serializabl
 	}
 
 	public void setDireccionResidencia(String direccionResidencia) {
-		this.direccionResidencia = direccionResidencia;
+		this.direccionResidencia = (direccionResidencia==null || direccionResidencia.trim().isEmpty())?null:direccionResidencia.trim();
 	}
 
 	public String getDireccionResidencia() {
 		return direccionResidencia;
+	}
+
+	public void setEmpleador(String empleador) {
+		this.empleador = (empleador==null || empleador.trim().isEmpty())?null:empleador.trim();
+	}
+
+	public String getEmpleador() {
+		return empleador;
 	}
 
 }
