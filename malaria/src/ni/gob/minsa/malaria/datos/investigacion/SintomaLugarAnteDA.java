@@ -142,13 +142,22 @@ public class SintomaLugarAnteDA implements SintomaLugarAnteService{
 	 */
 	@Override
 	public InfoResultado Guardar(SintomaLugarAnte pSintomaLugarAnte) {
-		InfoResultado oResultado=new InfoResultado();
-		
-    	EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarAnteService#Agregar(ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte)
+	 */
+	@Override
+	public InfoResultado Agregar(
+			SintomaLugarAnte pSintomaLugarAnte) {
+		EntityManager oEM= jpaResourceBean.getEMF().createEntityManager();
     	oEM.getTransaction().begin();
 		@SuppressWarnings("unused")
 		java.sql.Connection connection = oEM.unwrap(java.sql.Connection.class);
-		
+		InfoResultado oResultado=new InfoResultado();
 		oResultado=InvestigacionValidacion.validarSintomaLugarAnte(pSintomaLugarAnte);
 		if (!oResultado.isOk()) return oResultado;
         
@@ -202,15 +211,6 @@ public class SintomaLugarAnteDA implements SintomaLugarAnteService{
     		oEM.close();
     	}
 	}
-	/*
-	 * (non-Javadoc)
-	 * @see ni.gob.minsa.malaria.servicios.investigacion.SintomaLugarAnteService#Agregar(ni.gob.minsa.malaria.modelo.investigacion.SintomaLugarAnte)
-	 */
-	@Override
-	public InfoResultado Agregar(
-			SintomaLugarAnte pSintomaLugarAnte) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 }
