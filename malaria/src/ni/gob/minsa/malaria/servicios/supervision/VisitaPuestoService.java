@@ -58,6 +58,30 @@ public interface VisitaPuestoService {
 			int pAñoEpi,
 			Long pMunicipioId);
 	
+	
+	/**
+	 * 
+	 *  Guarda un objeto {@link VisitaPuesto} existente en la base de datos y retorna el
+	 * resultado de la operación en un objeto {@link InfoResultado}. 
+	 * <p>
+	 * Realiza una operación UPDATE en la base de datos
+	 * 
+	 * @param pVisitaPuesto objeto {@link VisitaPuesto} a ser almacenado en la base de datos.
+	 * @return  Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado Guardar(VisitaPuesto pVisitaPuesto);
+	
+	/**
+	 * Agrega un objeto {@link VisitaPuesto} en la base de datos y retorna el
+	 * resultado de la operación en un objeto {@link InfoResultado}
+	 * <p>
+	 * Realiza una operación INSERT en la base de datos
+	 *  
+	 * @param pVisitaPuesto Objeto {@link VisitaPuesto} a ser agregado en la base de datos
+	 * @return Objeto {@link InfoResultado} con el resultado de la operación
+	 */
+	public InfoResultado Agregar(VisitaPuesto pVisitaPuesto);
+	
 	/**
 	 * Elimina el objeto {@link VisitaPuestoService} de la base de datos utilizando
 	 * su identificador o clave primaria.
