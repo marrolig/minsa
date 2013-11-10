@@ -1846,6 +1846,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 					oLong = Long.valueOf(String.valueOf(frmSom_EspecieAnopheles.get(i)));
 					oEspecie = new CriaderosEspecie();
 					oResultado = null;
+					existe = false;
 					for(CriaderosEspecie oEspCri: listaEspeciesCriadero){
 						if( oEspCri.getEspecieAnophele().getCatalogoId() == oLong ){
 							existe = true;
@@ -1869,6 +1870,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				for(CriaderosEspecie oEspCri1 : listaEspeciesCriadero){
 					for(int i=0; i < frmSom_EspecieAnopheles.size() ;i++){
 						oLong = Long.valueOf(String.valueOf(frmSom_EspecieAnopheles.get(i)));
+						existe = false;
 						if( oEspCri1.getEspecieAnophele().getCatalogoId() == oLong ){
 							existe = true;
 							break;

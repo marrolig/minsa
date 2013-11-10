@@ -87,7 +87,7 @@ public class RociadoBean implements Serializable {
 	
 	private Long frmSom_Equipo;
 	private Float frmInp_Carga;
-	private List<Long> frmSom_CheckList;
+	private Long[] frmSom_CheckList;
 	private String frmInp_Boquilla;
 	private Long frmSom_Insecticida;
 	private Float frmInp_Formula;
@@ -373,11 +373,12 @@ public class RociadoBean implements Serializable {
 			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
-		frmSom_CheckList = new ArrayList<Long>();
+		frmSom_CheckList = new Long[6];
+		int i=0;
 		listaChk = (List<ChecklistMalaria>) oResultado.getObjeto();
 		if( listaChk != null){
 			for( ChecklistMalaria oChk: listaChk ){
-				frmSom_CheckList.add(oChk.getElementoLista().getCatalogoId());
+				frmSom_CheckList[i++] = oChk.getElementoLista().getCatalogoId();
 			}
 		}
 		
@@ -677,9 +678,10 @@ public class RociadoBean implements Serializable {
 				listChk = (List<ChecklistMalaria>) oResultado.getObjeto();
 				
 				if( listChk == null ) listChk = new ArrayList<ChecklistMalaria>();
-				for(i=0; i < frmSom_CheckList.size(); i++){
+				for(i=0; i < frmSom_CheckList.length; i++){
 					oResultado = null;
-					oLong = Long.valueOf(frmSom_CheckList.get(i));
+					oLong = frmSom_CheckList[i];
+					existe = false;
 					ChecklistMalaria oCheckList = new ChecklistMalaria();
 					for( ChecklistMalaria oChk : listChk ){
 						if( oChk.getElementoLista().getCatalogoId() == oLong ){
@@ -700,8 +702,9 @@ public class RociadoBean implements Serializable {
 				}
 				existe = false;
 				for( ChecklistMalaria oChk1 : listChk){
-					for(i=0; i < frmSom_CheckList.size() ;i++){
-						oLong = Long.valueOf(String.valueOf(frmSom_CheckList.get(i)));
+					for(i=0; i < frmSom_CheckList.length ;i++){
+						oLong = frmSom_CheckList[i];
+						existe = false;
 						if( oChk1.getElementoLista().getCatalogoId() == oLong ){
 							existe = true;
 							break;
@@ -729,6 +732,11 @@ public class RociadoBean implements Serializable {
 				}
 				
 			}
+			
+			oResultado = new InfoResultado();
+			oResultado.setOk(true);
+			if( auxIdRociado > 0 ) oResultado.setMensaje(Mensajes.REGISTRO_GUARDADO);
+			else oResultado.setMensaje(Mensajes.REGISTRO_AGREGADO);
 			
 		}catch(Exception e){
 			if( auxIdRociado == 0) rociadoActual.setRociadoId(0);
@@ -1025,11 +1033,11 @@ public class RociadoBean implements Serializable {
 		this.frmInp_Rociador = frmInp_Rociador;
 	}
 
-	public List<Long> getFrmSom_CheckList() {
+	public Long[] getFrmSom_CheckList() {
 		return frmSom_CheckList;
 	}
 
-	public void setFrmSom_CheckList(List<Long> frmSom_CheckList) {
+	public void setFrmSom_CheckList(Long[] frmSom_CheckList) {
 		this.frmSom_CheckList = frmSom_CheckList;
 	}
 
