@@ -294,6 +294,8 @@ public class RociadoBean implements Serializable {
 		
 		frmInp_Rociador = null;
 		
+		frmSom_CheckList = new Long[6];
+		
 	}
 	
 	public void calcularViviendas(){
@@ -606,7 +608,7 @@ public class RociadoBean implements Serializable {
 			rociadoActual.setTotalCargas(frmInp_TotalCargas);
 			rociadoActual.setTotalUtilizadas(frmInp_TotalUtilizadas);
 			rociadoActual.setViviendasProgramadas(frmInp_viProgramadas);
-			rociadoActual.setViviendasRociadas(frmInp_ViRociadas);
+			rociadoActual.setViviendasRociadas( ((Integer) (frmInp_VidesAdecuado + frmInp_VidesNoAdecuado)).shortValue());
 			
 			oResultado = null;
 			oResultado = srvEquiposCat.Encontrar(frmSom_Equipo);

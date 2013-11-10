@@ -339,6 +339,7 @@ public class RociadoDA implements RociadoServices {
             	oRociado.setConstruccion(pRociado.getConstruccion());
             	oRociado.setControl(pRociado.getControl());
             	oRociado.setDesalojoAdecuado(pRociado.getDesalojoAdecuado());
+            	oRociado.setDesalojoInadecuado(pRociado.getDesalojoInadecuado());
             	oRociado.setEnfermos(pRociado.getEnfermos());
             	oRociado.setFecha(pRociado.getFecha());
             	oRociado.setFormulacion(pRociado.getFormulacion());
@@ -432,7 +433,7 @@ public class RociadoDA implements RociadoServices {
 				+ " Where "
 				+ "   Rx.Control = pControl " 
 				+ "   And Rx.Comunidad = pCodComunidad"
-				+ "   And To_Char(rx.Fecha,'YYYYMM') = To_Char(to_date(pFecha,'dd/MM/yyyy'),'YYYYMM') ";
+				+ "   And To_Char(rx.Fecha,'YYYYMM') = To_Char(pFecha,'YYYYMM') ";
 		
 		try{
 			
