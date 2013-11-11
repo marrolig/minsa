@@ -61,6 +61,19 @@ import org.eclipse.persistence.annotations.Cache;
 					"		  pn.colVol.sisPersona.primerNombre, " +
 					"		  pn.colVol.sisPersona.segundoNombre"),
 	@NamedQuery(
+			name="PuestoNotificacion.listarMunicipiosPorEntidad",
+			query="select distinct tm from DivisionPolitica tm where tm.divisionPoliticaId in ( " +
+					"		select pn.unidad.municipio.divisionPoliticaId from PuestoNotificacion pn " +
+					"		where (pn.unidad IS NOT NULL AND pn.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) AND " +
+					"      (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>CURRENT_DATE))) " +
+					" ) or tm.divisionPoliticaId in( " +
+					" 		select pnc.colVol.unidad.municipio.divisionPoliticaId from PuestoNotificacion pnc " +
+					" 		where (pnc.colVol IS NOT NULL and pnc.colVol.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) AND " +
+					"      (:pTodos=1 or (:pTodos=0 and (pnc.fechaCierre IS NULL or pnc.fechaCierre>CURRENT_DATE))) " +
+					" ) " +
+					"order by tm.nombre"
+	),
+	@NamedQuery(
 			name="PuestoNotificacion.encontrarPorUnidad",
 			query="select pn from PuestoNotificacion pn " +
 							"where pn.unidad IS NOT NULL and pn.unidad.unidadId=:pUnidadId " +

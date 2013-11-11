@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:ni="http://minsa.gob.ni/mat">
+
+<ui:define name="titulo">
+	  		Supervisión Puesto
+		</ui:define>
+	<h:body>
+	<ui:composition template="/templates/main-template.xhtml">
+		<ui:define name="content">
+			<style type="text/css">
+				.ui-datatable-scrollable-body {
+					overflow-y: auto !important;
+					overflow-x: hidden !important;
+				}
+				
+				.ui-inputfield {
+					padding: 0px !important;
+				}
+				
+				.ui-datatable-data-empty .ui-dt-c {
+					width: 100% !important;
+				}
+			</style>
+			
+			<f:view>
+				<h:form id="frmVisita">
+					<ni:titleBar titleText="Supervisión > Visita Puesto" />
+	
+						<p:growl id="grwMensaje" showDetail="true" life="5000" />
+	
+						<p:ajaxStatus
+							style="width:16px;height:16px;position:absolute; top:0px; left:48%;">
+							<f:facet name="start">
+								<h:graphicImage value="../images/loading.gif" />
+							</f:facet>
+							<f:facet name="complete">
+								<h:outputText value="" />
+							</f:facet>
+						</p:ajaxStatus>
+						
+						<p:panel id="panControl" styleClass="panDefault">
+							<h:outputLabel for="cboEntidad" styleClass="lblDefault"
+								value="Entidad:"
+								style="position:absolute; left:10px; top:35px;" />
+							<h:selectOneMenu id="cboEntidad"
+								disabled="#{visitaPuestoBean.capaActiva==2}"
+								styleClass="txtDefault cboDefault"
+								style="position:absolute; left:60px;top:35px;width:170px;"
+								value="#{visitaPuestoBean.entidadSelectedId}">
+								<f:selectItems value="#{visitaPuestoBean.entidades}"
+									var="entidad" itemValue="#{entidad.entidadAdtvaId}"
+									itemLabel="#{entidad.nombre}" />
+								<p:ajax event="change" process="cboEntidad"
+									onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+									listener="#{visitaPuestoBean.obtenerMunicipios}"
+									update="cboMunicipio grdVisitas panCapa1Button grwMensaje" />
+							</h:selectOneMenu>
+							
+							
+							<h:outputText value="Año Epidemiológico:" styleClass="lblDefault"
+									style="position:absolute; left:240px; top:35px;"  />
+								<h:selectOneMenu id="cboAnioEpi"
+									disabled="#{visitaPuestoBean.capaActiva==2}"
+									styleClass="txtDefault cboDefault"
+									style="position:absolute; left:345px;top:35px;width:60px;"
+									value="#{visitaPuestoBean.anioEpiSelected}">
+									<f:selectItems 
+										value="#{visitaPuestoBean.aniosEpidemiologicos}" />
+									<p:ajax event="change" process="cboAnioEpi"
+										onstart="statusDialog.show();"
+										oncomplete="statusDialog.hide();"
+										update="panControl grdVisitas panCapa1Button grwMensaje" />
+							 </h:selectOneMenu>
+							 
+							 <h:outputLabel for="cboMunicipio" styleClass="lblDefault"
+								value="Municipio:"
+								style="position:absolute; left:420px; top:35px;" />
+							<h:selectOneMenu id="cboMunicipio" styleClass="txtDefault cboDefault"
+								disabled="#{visitaPuestoBean.capaActiva==2}"
+								style="position:absolute; left:480px;top:35px;width:300px;"
+								value="#{visitaPuestoBean.municipioSelectedId}">
+								<f:selectItem itemValue=" " itemLabel=" " />
+								<f:selectItems var="muni" itemValue="#{muni.divisionPoliticaId}"
+									itemLabel="#{muni.nombre}"
+									value="#{visitaPuestoBean.municipios}" />
+								<p:ajax event="change" process="cboMunicipio"
+									onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+									listener="#{visitaPuestoBean.cambiarMunicipio}"
+									update="grdVisitas panCapa1Button grwMensaje" />
+							</h:selectOneMenu>
+						</p:panel>
+						
+						<!-- Inicio capa 1 -->	
+						<p:panel id="capa1" styleClass="panDefault" visible="#{visitaPuestoBean.capaActiva==1}">
+							<!-- Tabla de Visitas a Puesto de Notificación -->
+							<div style="position: absolute; top: 60px; left: 10px; width: 980px; height: 235px;">
+	
+								<p:dataTable id="grdVisitas" var="visita"
+									widgetVar="tablaVisitas"
+									rowKey="#{muestreo.muestreoHematicoId}" selectionMode="single"
+									selection="#{visitaPuestoBean.visitaPuestoSelected}"
+									loadingMessage="Cargando registros ..."
+									errorMessage="Se ha presentado un error al cargar los datos"
+									styleClass="panDetail" lazy="true" paginator="true" rows="12"
+									paginatorPosition="top" paginatorAlwaysVisible="true"
+									emptyMessage="No existen Visitas a Puestos de Notificación que mostrar"
+									style="width:980px;"
+									value="#{visitaPuestoBean.visitasPuestos}">
+	
+									<p:ajax event="rowSelect" process="@this"
+										listener="#{visitaPuestoBean.onMuestreoHematicoSelected}"
+										update=":frmVisita:panControl ,:frmVisita:capa1, :frmVisita:capa2, :frmVisita:grwMensaje" />
+									
+									<p:column headerText="Semana Epidemiológica" style="text-align:left; width:80px;">
+										<h:outputText value="#{visita.semanaEpidemiologica}">
+										</h:outputText>
+									</p:column>
+									
+									<p:column headerText="Fecha Inicio Inspección" style="text-align:left; width:80px;">
+										<h:outputText value="#{visita.fechaEntrada}" >
+											<f:convertDateTime pattern="dd/MM/yyyy"/>
+										</h:outputText>
+									</p:column>
+									
+									<p:column headerText="Fecha Fin Inspección" style="text-align:left; width:80px;">
+										<h:outputText value="#{visita.fechaSalida}" >
+											<f:convertDateTime pattern="dd/MM/yyyy"/>
+										</h:outputText>
+									</p:column>
+									
+									<p:column headerText="Clave" style="text-align:left; width:80px;">
+										<h:outputText value="#{visita.clave}">
+										</h:outputText>
+									</p:column>
+									
+								</p:dataTable>
+							</div>
+							<p:panel id="panCapa1Button" styleClass="panButton" 
+								 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">							 
+								<p:commandButton  value="Agregar" styleClass="btnDefault" 
+											 disabled="#{visitaPuestoBean.autorizadoEnEntidadSelected==0 or visitaPuestoBean.municipioSelectedId==0}"
+											 style="font-size:11px;" 
+											 process="@this"
+											 update="capa1 capa2 txtClave panControl"
+											 actionListener="#{visitaPuestoBean.agregar}"/> 
+								
+								<p:commandButton value="Salir" styleClass="btnDefault" 
+											 style="font-size:11px;" 
+											 process="@this" 
+											 onclick="document.location.replace('../inicio.xhtml');" />
+							</p:panel>
+						</p:panel>
+						<!-- fin capa 1 -->	
+						
+						<!-- Inicio capa 2 -->	
+						<p:panel id="capa2" style="hight:335px"  styleClass="panDefault"  visible="#{visitaPuestoBean.capaActiva==2}" >
+							<p:panel id="panPuesto" 
+							 style="position:absolute; top:300px; left:5px; height:90px; width:960px;" 
+						 	 styleClass="panDetail">
+								<h:outputLabel for="cboUnidad" styleClass="lblDefaultSmall" 
+							    value="Unidad de Salud que notifica o recibe la notificación:" 
+							    style="position:absolute; left:220px; top:8px;"/>
+								<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault" 												   
+												 style="position:absolute; left:220px;top:23px;width:340px;" 
+												 value="#{visitaPuestoBean.unidadSelectedId}"> 
+										<f:selectItem itemValue="0" itemLabel=" " /> 
+										<f:selectItems var="unidad" 
+													   itemValue="#{unidad.unidadId}" 
+													   itemLabel="#{unidad.nombre}" 
+													   value="#{visitaPuestoBean.unidades}" />
+										<p:ajax event="change" process="cboUnidad" 
+												onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+												listener="#{visitaPuestoBean.cambiarUnidad}" 
+												update="txtClave,grwMensaje"/>
+								</h:selectOneMenu>
+					
+								<h:outputLabel for="txtColVol" styleClass="lblDefaultSmall" 
+												   value="Nombre del Colaborador Voluntario:" 
+												   style="position:absolute; left:220px; top:50px;"/>
+							    <h:inputText id="txtColVol" style="position:absolute; left:220px; top:65px; width:312px;"
+										value="#{visitaPuestoBean.nombreColVol}"
+										disabled="true"
+										styleClass="txtDefault" > 
+								</h:inputText>
+								
+								<p:commandButton id="btnBuscarColVol" 
+												 icon="icon-dbase" ajax="true"
+												 title="Haga clic para búsqueda de colaboradores voluntarios"
+												 style="position:absolute; left:540px;top:65px;width:21px;height:21px;"
+												 onstart="statusDialog.show();" actionListener="#{visitaPuestoBean.listarColVoles}"
+					        					 oncomplete="statusDialog.hide();dlgColVol.show();"
+					        					 update="frmVisita:grdColVoles,frmVisita:txtFiltroColVol,frmVisita:panButtonColVol,grwMensaje"  
+					        				 	 process="@this,cboUnidad" />
+					
+								<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
+										value="Clave:" 
+										style="position:absolute; left:570px; top:8px;"/>
+								<h:inputText id="txtClave" style="position:absolute; left:570px; top:23px; width:110px; height:60px; font-size:30px !important;"
+										value="#{visitaPuestoBean.clave}"
+										styleClass="txtDefault" >
+					
+									<p:ajax event="change" process="@this" 
+											listener="#{visitaPuestoBean.cambiarClave}" 
+											onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
+											update="@form"/>
+											
+								</h:inputText>
+							</p:panel>
+						</p:panel>
+						
+						
+						<!-- Modal para vincular colvoles  -->
+						<p:dialog id="dlgColVol" header="Colaboradores Voluntarios asociados a la Unidad de Salud"  
+								  modal="true" 
+								  widgetVar="dlgColVol" 
+								  height="475" width="680" 
+								  styleClass="txtDefault"
+								  resizable="false">
+							
+							<div style="float: left; overflow: auto; position:relative; top:5px;left:0px; width:652px; height:410px; border:1px solid rgb(211,211,211); border-radius:5px 5px 5px 5px;">
+							
+								<p:dataTable id="grdColVoles" var="colVolPuesto" rowKey="#{colVolPuesto.puestoNotificacionId}"
+											 styleClass="panDetail" 
+											 widgetVar="tablaColVoles"
+											 selectionMode="single" 
+											 selection="#{visitaPuestoBean.colVolPuestoSelected}"
+											 emptyMessage="Sin resultados" 
+											 style="width:650px;"  
+										 	 value="#{visitaPuestoBean.colVolPuestos}" 
+									 		 scrollable="true" scrollHeight="357" scrollWidth="650">
+									
+									<p:ajax event="rowSelect" update=":frmVisita:panButtonColVol" />
+									<p:ajax event="rowUnselect" update=":frmVisita:panButtonColVol" />
+							
+									<f:facet name="header">
+										<p:outputPanel>
+				        	        		<h:outputText value="&nbsp;" />
+				            	    	</p:outputPanel>
+				            		</f:facet>
+									
+									<p:column headerText="Clave" style="text-align:left;width:50px;">
+										<h:outputText value="#{colVolPuesto.clave}" />
+									</p:column>
+				
+									<p:column headerText="Nombre Colaborador Voluntario" style="text-align:left;width:350px">
+										<h:outputText value="#{colVolPuesto.nombreColVol}" />
+									</p:column>
+									
+								</p:dataTable>
+							</div>
+							
+							<!-- Busqueda de ColVoles -->
+				
+				         	<h:outputText value="Buscar:" style="position:absolute; top:15px;left:310px;color:#ffffff; font-weight:bold;"  />
+				         	<h:inputText id="txtFiltroColVol" value="#{visitaPuestoBean.filtroColVol}" 
+				         			  onkeydown="if (event.keyCode==13) {event.keyCode=9; document.getElementById('lnkBuscarColVol').click(); return event.keyCode}"
+				         			  style="width:200px; position: absolute; top: 15px; left: 380px;" />
+				                    
+					        <h:outputLink id="lnkBuscarColVol" value="javascript:void(0)" 
+									styleClass="navDelLink"    
+				            		style="position: absolute; top: 15px; left: 590px;cursor:pointer;border:0.08em solid #9d9d9d;" >
+								<h:graphicImage height="17" title="Haga clic para iniciar búsqueda"  
+									style="position: absolute; top: 0px; left:0px; border:0px;"
+									url="/images/buscar.gif">
+								</h:graphicImage>
+								<p:ajax event="click" process="@this,txtFiltroColVol"
+									listener="#{visitaPuestoBean.buscarColVol}"
+									onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
+									update="grdColVoles,panButtonColVol,grwMensaje">
+								</p:ajax>
+							</h:outputLink>
+				
+				        	<h:outputLink id="lnkQuitarFiltroColVol" value="javascript:void(0)" 
+								styleClass="navDelLink"    
+				            	style="position: absolute; top: 15px; left: 613px;cursor:pointer;border: 0.08em solid #9d9d9d;" >
+								<h:graphicImage height="17" title="Haga clic para limpiar filtro de búsqueda"  
+									style="position: absolute; top: 0px; left:0px; border:0px;"
+									url="/images/edit-clear.png">
+								</h:graphicImage>
+								<p:ajax event="click" process="@this,txtFiltroColVol"
+									listener="#{visitaPuestoBean.quitarFiltroColVol}" 
+									update=":frmVisita:txtFiltroColVol,:frmVisita:grdColVoles,:frmVisita:panButtonColVol,:frmVisita:grwMensaje">
+								</p:ajax>
+							</h:outputLink>
+							
+							<p></p>
+							<p:panel id="panButtonColVol" style="position:absolute; top:425px; width: 652px; left:9px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
+								<p:commandButton id="btnAceptarColVol" 
+												 disabled="#{empty visitaPuestoBean.colVolPuestoSelected}" 
+												 value="Aceptar" 
+												 process="@this" ajax="true" immediate="true" 
+												 styleClass="btnDefault" style="font-size:11px;"
+												 update="txtColVol,txtClave,grwMensaje" 
+												 actionListener="#{visitaPuestoBean.aceptarColVol}"  
+												 oncomplete="dlgColVol.hide()">
+								</p:commandButton>
+								
+								<p:commandButton value="Cancelar" onclick="dlgColVol.hide()"
+												 style="font-size:11px;"
+												 type="button" styleClass="btnDefault"/>
+							</p:panel>
+							
+						</p:dialog>
+					
+				</h:form>
+			</f:view>
+		</ui:define>
+	</ui:composition>
+	</h:body>
+</html>

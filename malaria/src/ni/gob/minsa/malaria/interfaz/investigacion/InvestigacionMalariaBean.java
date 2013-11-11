@@ -1834,7 +1834,6 @@ private static final long serialVersionUID = 1L;
 	 * Métodos de acceso a propiedades
 	 **************************************************/
 	
-	
 	public long getEntidadSelectedId() {
 		return entidadSelectedId;
 	}

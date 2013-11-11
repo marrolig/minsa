@@ -9,6 +9,7 @@ import java.util.List;
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 import ni.gob.minsa.malaria.modelo.estructura.UnidadAcceso;
+import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.vigilancia.PuestoNotificacion;
 import ni.gob.minsa.malaria.modelo.vigilancia.noEntidad.ColVolPuesto;
 
@@ -63,6 +64,18 @@ public interface PuestoNotificacionService {
 
 	public List<PuestoNotificacion> ListarPuestosPorUnidad(long pUnidadId, String pNombre, boolean pSoloActivos, int pPaginaActual, int pTotalPorPagina, int pNumRegistros);
 	
+	/**
+	 * Retorna una lista de objetos {@link DivisionPolitica} donde existan puesto de notificación
+	 * coordinados por una entidad administrativa.<br>
+	 * Se considera activo a todo Puesto de Notificación cuya fecha de cierre no ha sido declarada o si la
+	 * fecha cierre es mayor que la fecha actual.
+	 * 
+	 * @param pEntidadAdtvaId Identificador de la entidad administrativa
+	 * @param pSoloActivos  <code>true</code> incluye únicamente los municipios donde existen puestos de notificación activos;
+	 * 						 <code>false</code> retorna todos los municipios con puestos de notificacion;
+	 * @return  Lista de objetos {@link DivisionPolitica}
+	 */
+	public List<DivisionPolitica> ListarMunicipiosPorEntidad(long pEntidadAdtvaId,boolean pSoloActivos);
 	/**
 	 * Busca un objeto {@link PuestoNotificacion} en la base de datos mediante
 	 * el identificador del colaborador voluntario.  Retorna <code>null</code>
@@ -150,4 +163,7 @@ public interface PuestoNotificacionService {
 			int pTotalPorPagina, int pNumRegistros);
 	
 	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, boolean pSoloActivos);
+	
+	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, 
+			boolean pSoloActivos);
 }
