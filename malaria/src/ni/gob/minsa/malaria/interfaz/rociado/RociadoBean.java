@@ -126,7 +126,7 @@ public class RociadoBean implements Serializable {
 	
 	private short panelBusqueda = 0;
 	private short panelRociado = 0;
-	private short cmbNuevo = 0;
+	private short cmbNuevo = 1;
 	private short cmbGuardar = 0;
 	private short cmbRegresar = 0;	
 	
@@ -139,7 +139,7 @@ public class RociadoBean implements Serializable {
 		this.itemsCheckList = srvItemsListaCat.ListarActivos();
 		this.itemsEquipos = srvEquiposCat.ListarActivos();
 		this.itemsInsecticidas = srvInsecticidaCat.ListarActivos();
-		this.itemsSilais = ni.gob.minsa.malaria.reglas.Operacion.entidadesAutorizadas(Utilidades.obtenerInfoSesion().getUsuarioId(),false);
+		this.itemsSilais = ni.gob.minsa.malaria.reglas.Operacion.entidadesAutorizadas(Utilidades.obtenerInfoSesion().getUsuarioId(),null);
 		
 		
 		lazyRociados = new LazyDataModel<RociadosMalaria>() {
@@ -244,7 +244,7 @@ public class RociadoBean implements Serializable {
 				itemsMunicipio = null;
 			}
 
-			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisUbicacion);
 			if( !esPermitido ){
 				cmbGuardar = 0;
 			}else{
@@ -787,7 +787,7 @@ public class RociadoBean implements Serializable {
 		FacesMessage msg = null;
 		boolean esPermitido = false;
 		
-		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisUbicacion);
 		if( !esPermitido ){
 			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Operación no autorizada","Su usuario no tiene permisos para realizar modificaciones");
 			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);

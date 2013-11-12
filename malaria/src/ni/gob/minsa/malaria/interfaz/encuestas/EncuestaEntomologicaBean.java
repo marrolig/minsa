@@ -295,7 +295,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 	private short panelCriadero = 0;
 	private short cmbRegresar = 0;
 	private short cmbGuardar = 0;
-	private short cmbNuevo = 0;
+	private short cmbNuevo = 1;
 	
 	private boolean isCriaderoActive = false;
 	private boolean isEncuestaActive = false;
@@ -313,7 +313,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		this.itemsTiposCriaderos = srvCatTipoCriadero.ListarActivos();
 		this.itemsTurbidezAguas = srvCatTurbAgua.ListarActivos();
 		
-		this.itemsSilais = ni.gob.minsa.malaria.reglas.Operacion.entidadesAutorizadas(Utilidades.obtenerInfoSesion().getUsuarioId(),false);
+		this.itemsSilais = ni.gob.minsa.malaria.reglas.Operacion.entidadesAutorizadas(Utilidades.obtenerInfoSesion().getUsuarioId(),null);
 		this.itemsCriaderoEspecies = srvCriaderoEspecie.obtenerListaCriaderosEspecies();
 		
 		this.lazyCriaderos = new LazyDataModel<CriaderosUltimaNotificacion>() {
@@ -521,7 +521,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 				itemsMunicipio = null;
 			}
 			
-			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisUbicaCriadero);
 			if( !esPermitido ){
 				cmbGuardar = 0;
 			}else{
@@ -1770,7 +1770,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		InfoResultado oResultado = null;
 		boolean esPermitido = false;
 		
-		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisUbicaCriadero);
 		if( !esPermitido ){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Operación no autorizada","Su usuario no tiene permisos para realizar modificaciones");
 			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
