@@ -228,7 +228,7 @@
 											update="txtSemanaEpi,txtAnioEpi" />
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.fechaEntrada').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+									jQuery('.fechaEntrada').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
 								</script> 
 							    
 							    <h:outputLabel styleClass="lblDefaultSmall" 
@@ -251,31 +251,43 @@
 									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.fechaSalida').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+									jQuery('.fechaSalida').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
 								</script> 
 								
 								<h:outputLabel for="txtProximaVisita" styleClass="lblDefaultSmall" 
 							   		value="Fecha Próxima Visita:" 
-							   		style="position:absolute; left:615px; top:50px;"/>
-								<h:inputText id="txtProximaVisita" style="position:absolute; left:615px; top:65px; width:115px;"
+							   		style="position:absolute; left:745px; top:8px;"/>
+								<h:inputText id="txtProximaVisita" style="position:absolute; left:745px; top:23px; width:115px;"
 											 value="#{visitaPuestoBean.proximaVisita}"
 											 styleClass="txtDefault proximaVisita">
 									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.proximaVisita').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+									jQuery('.proximaVisita').dateEntry({dateFormat: 'dmy/'}); 
 								</script> 
 								
 								<h:outputLabel for="txtHorarioInicio" styleClass="lblDefaultSmall" 
 							   		value="Horario Inicio Atención:" 
-							   		style="position:absolute; left:745px; top:8px;"/>
-								<h:inputText id="txtHorarioInicio" style="position:absolute; left:745px; top:23px; width:115px;"
+							   		style="position:absolute; left:615px; top:50px;"/>
+								<h:inputText id="txtHorarioInicio" style="position:absolute; left:615px; top:65px; width:115px;"
 											 value="#{visitaPuestoBean.horarioInicio}"
 											 styleClass="txtDefault horarioInicio">
-									<f:convertDateTime pattern="hh:mma"></f:convertDateTime>
+									<f:convertDateTime pattern="hh:mm a"></f:convertDateTime>
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.horarioInicio').time({ampmPrefix: ''});
+									jQuery('.horarioInicio').timeEntry({ampmPrefix: ' '});
+								</script> 
+								
+								<h:outputLabel for="txtHorarioFin" styleClass="lblDefaultSmall" 
+							   		value="Horario Fin Atención:" 
+							   		style="position:absolute; left:745px; top:50px;"/>
+								<h:inputText id="txtHorarioFin" style="position:absolute; left:745px; top:65px; width:115px;"
+											 value="#{visitaPuestoBean.horarioFin}"
+											 styleClass="txtDefault horarioFin">
+									<f:convertDateTime pattern="hh:mm a"></f:convertDateTime>
+								</h:inputText>
+								<script type="text/javascript">
+									jQuery('.horarioFin').timeEntry({ampmPrefix: ' '});
 								</script> 
 							</p:panel>
 							
