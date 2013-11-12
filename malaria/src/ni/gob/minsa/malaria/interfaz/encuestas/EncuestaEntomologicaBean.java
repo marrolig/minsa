@@ -48,6 +48,7 @@ import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 import ni.gob.minsa.malaria.modelo.poblacion.DivisionPolitica;
 import ni.gob.minsa.malaria.modelo.poblacion.Sector;
+import ni.gob.minsa.malaria.reglas.Operacion;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderosEspecieServices;
 import ni.gob.minsa.malaria.servicios.encuestas.IntervencionServices;
@@ -480,6 +481,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	public void actualizarMunicipiosBusqueda(){
 		InfoResultado oResultado = new InfoResultado();
+		boolean esPermitido = false;
+		
 		try{
 			
 			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisBusqueda);
@@ -487,6 +490,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 				itemsMunicipioBusqueda = (List<DivisionPolitica>) oResultado.getObjeto();
 			}else{
 				itemsMunicipioBusqueda = null;
+			}
+			
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			if( !esPermitido ){
+				cmbNuevo = 1;
+			}else{
+				cmbNuevo = 0;
 			}
 			
 		}catch(Exception e){
@@ -500,6 +510,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	public void actualizarMunicipiosUbicacion(){
 		InfoResultado oResultado = new InfoResultado();
+		boolean esPermitido = false;
+		
 		try{
 			
 			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisUbicaCriadero);
@@ -508,6 +520,13 @@ public class EncuestaEntomologicaBean implements Serializable {
 			}else{
 				itemsMunicipio = null;
 			}
+			
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			if( !esPermitido ){
+				cmbGuardar = 0;
+			}else{
+				cmbGuardar = 1;
+			}	
 			
 		}catch(Exception e){
 			System.out.println("Error Obteniendo Listado Municipios Por Silais");
@@ -1749,6 +1768,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 
 	private void guardarEncuesta(){
 		InfoResultado oResultado = null;
+		boolean esPermitido = false;
+		
+		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		if( !esPermitido ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Operación no autorizada","Su usuario no tiene permisos para realizar modificaciones");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
 		
 		oResultado = validarFormulario();
 		if( !oResultado.isOk() ){
@@ -1938,19 +1965,23 @@ public class EncuestaEntomologicaBean implements Serializable {
 	}
 
 	public void actualizarVisibilidadPaneles(ActionEvent evt){
-
+		boolean esPermitido = false;
+		esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(), frmSom_SilaisBusqueda);
+		
 		if( evt.getComponent().getClientId().equals("frmEncEnto:cmbNuevo")
 				|| evt.getComponent().getId().equals("cmbSeleccionarCriadero") ){
 			panelBusqueda = 1;
 			panelEncuesta = 1;
 			cmbRegresar = 1;
-			cmbGuardar = 1;
+			if( !esPermitido ) cmbGuardar = 0;
+			else cmbGuardar = 1;
 			cmbNuevo = 1;
 			limpiarFormulario();
 		}else if( evt.getComponent().getClientId().equals("frmEncEnto:cmbRegresar")){
 			panelEncuesta = 0;
 			panelBusqueda = 0;
-			cmbNuevo = 0;
+			if( !esPermitido ) cmbNuevo = 1;
+			else cmbNuevo = 0;
 			cmbGuardar = 0;
 			cmbRegresar = 0;
 			limpiarFormulario();

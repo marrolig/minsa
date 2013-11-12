@@ -54,7 +54,7 @@
 		<f:selectItem itemValue="0"  itemLabel="Seleccionar" />
 		<f:selectItems value="#{rociadoBean.itemsSilais}" var="silais" itemValue="#{silais.codigo}" itemLabel="#{silais.nombre}" />
 		<p:ajax event="change" process=":frmRociado:frmSom_SilaisBusqueda" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
-		listener="#{rociadoBean.actualizarMunicipiosBusqueda}" update=":frmRociado:frmSom_MunicipioBusqueda,grwMensaje"/>
+		listener="#{rociadoBean.actualizarMunicipiosBusqueda}" update=":frmRociado:frmSom_MunicipioBusqueda,:frmRociado:cmbNuevo,grwMensaje"/>
 	</h:selectOneMenu>
  
 	<h:outputLabel for="frmSom_MunicipioBusqueda" value="Municipio:" styleClass="lblDefaultSmall" />
@@ -151,7 +151,7 @@
 			<f:selectItem itemValue="0"  itemLabel="Seleccionar" />
 			<f:selectItems value="#{rociadoBean.itemsSilais}" var="silais" itemValue="#{silais.codigo}" itemLabel="#{silais.nombre}" />
 			<p:ajax event="change" process=":frmRociado:frmSom_SilaisUbicacion" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 	
-			listener="#{rociadoBean.actualizarMunicipiosUbicacion}" update=":frmRociado:frmSom_MunicipioUbicacion,grwMensaje"/>
+			listener="#{rociadoBean.actualizarMunicipiosUbicacion}" update=":frmRociado:frmSom_MunicipioUbicacion,:frmRociado:cmbGuardar,grwMensaje"/>
 		</h:selectOneMenu>
 	</div>
 	

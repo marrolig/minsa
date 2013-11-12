@@ -30,6 +30,7 @@ import ni.gob.minsa.malaria.modelo.rociado.EquiposMalaria;
 import ni.gob.minsa.malaria.modelo.rociado.InsecticidaML;
 import ni.gob.minsa.malaria.modelo.rociado.ItemsCheckListMalaria;
 import ni.gob.minsa.malaria.modelo.rociado.RociadosMalaria;
+import ni.gob.minsa.malaria.reglas.Operacion;
 import ni.gob.minsa.malaria.servicios.encuestas.CriaderoServices;
 import ni.gob.minsa.malaria.servicios.estructura.EntidadAdtvaService;
 import ni.gob.minsa.malaria.servicios.general.CatalogoElementoService;
@@ -129,6 +130,8 @@ public class RociadoBean implements Serializable {
 	private short cmbGuardar = 0;
 	private short cmbRegresar = 0;	
 	
+	private short permiteGuardar = 0;
+	
 	private LazyDataModel<RociadosMalaria> lazyRociados = null;
 
 	public RociadoBean() {
@@ -137,6 +140,7 @@ public class RociadoBean implements Serializable {
 		this.itemsEquipos = srvEquiposCat.ListarActivos();
 		this.itemsInsecticidas = srvInsecticidaCat.ListarActivos();
 		this.itemsSilais = ni.gob.minsa.malaria.reglas.Operacion.entidadesAutorizadas(Utilidades.obtenerInfoSesion().getUsuarioId(),false);
+		
 		
 		lazyRociados = new LazyDataModel<RociadosMalaria>() {
 			
@@ -172,19 +176,25 @@ public class RociadoBean implements Serializable {
 	}
 
 	public void actualizarVisibilidadPaneles(ActionEvent evt){
+		boolean esPermitido = false;
 
+		esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(), frmSom_SilaisBusqueda);
+		
+		
 		if( evt.getComponent().getClientId().equals("frmRociado:cmbNuevo")
 				|| evt.getComponent().getId().equals("cmbSeleccionarRociado") ){
 			panelBusqueda = 1;
 			panelRociado = 1;
 			cmbRegresar = 1;
-			cmbGuardar = 1;
+			if( !esPermitido ) cmbGuardar = 0;
+			else cmbGuardar = 1;
 			cmbNuevo = 1;
 			limpiarFormularioRociado();
 		}else if( evt.getComponent().getClientId().equals("frmRociado:cmbRegresar")){;
 			panelBusqueda = 0;
 			panelRociado = 0;
-			cmbNuevo = 0;
+			if( !esPermitido ) cmbNuevo = 1;
+			else cmbNuevo = 0;
 			cmbGuardar = 0;
 			cmbRegresar = 0;
 			limpiarFormularioRociado();
@@ -195,6 +205,8 @@ public class RociadoBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	public void actualizarMunicipiosBusqueda(){
 		InfoResultado oResultado = new InfoResultado();
+		boolean esPermitido = false;
+		
 		try{
 			
 			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisBusqueda);
@@ -202,6 +214,13 @@ public class RociadoBean implements Serializable {
 				itemsMunicipioBusqueda = (List<DivisionPolitica>) oResultado.getObjeto();
 			}else{
 				itemsMunicipioBusqueda = null;
+			}
+			
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			if( !esPermitido ){
+				cmbNuevo = 1;
+			}else{
+				cmbNuevo = 0;
 			}
 			
 		}catch(Exception e){
@@ -214,6 +233,8 @@ public class RociadoBean implements Serializable {
 	@SuppressWarnings("unchecked")
 	public void actualizarMunicipiosUbicacion(){
 		InfoResultado oResultado = new InfoResultado();
+		boolean esPermitido = false;
+		
 		try{
 			
 			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisUbicacion);
@@ -222,6 +243,13 @@ public class RociadoBean implements Serializable {
 			}else{
 				itemsMunicipio = null;
 			}
+
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+			if( !esPermitido ){
+				cmbGuardar = 0;
+			}else{
+				cmbGuardar = 1;
+			}			
 			
 		}catch(Exception e){
 			System.out.println("Error Obteniendo Listado Municipios Por Silais");
@@ -757,6 +785,14 @@ public class RociadoBean implements Serializable {
 	public void guardar(ActionEvent evt){
 		InfoResultado oResultado = null;
 		FacesMessage msg = null;
+		boolean esPermitido = false;
+		
+		esPermitido = ni.gob.minsa.malaria.reglas.Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		if( !esPermitido ){
+			msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Operación no autorizada","Su usuario no tiene permisos para realizar modificaciones");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
 		
 		oResultado = validarRociado();
 		if( !oResultado.isOk() ){

@@ -58,7 +58,7 @@
 		<f:selectItem itemValue="0"  itemLabel="Seleccionar" />
 		<f:selectItems value="#{encuestaEntomologicaBean.itemsSilais}" var="silais" itemValue="#{silais.codigo}" itemLabel="#{silais.nombre}" />
 		<p:ajax event="change" process=":frmEncEnto:frmSom_SilaisBusqueda" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
-		listener="#{encuestaEntomologicaBean.actualizarMunicipiosBusqueda}" update=":frmEncEnto:frmSom_MunicipioBusqueda,grwMensaje"/>
+		listener="#{encuestaEntomologicaBean.actualizarMunicipiosBusqueda}" update=":frmEncEnto:frmSom_MunicipioBusqueda,:frmEncEnto:cmbNuevo,grwMensaje"/>
 	</h:selectOneMenu>
  
 	<h:outputLabel for="frmSom_MunicipioBusqueda" value="Municipio:" styleClass="lblDefaultSmall" />
@@ -688,7 +688,7 @@
 		<f:selectItem itemValue="0"  itemLabel="Seleccionar" />
 		<f:selectItems value="#{encuestaEntomologicaBean.itemsSilais}" var="silais" itemValue="#{silais.codigo}" itemLabel="#{silais.nombre}" />
 		<p:ajax event="change" process=":frmEncEnto:frmSom_SilaisUbicaCriadero" onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 	
-		listener="#{encuestaEntomologicaBean.actualizarMunicipiosUbicacion}" update=":frmEncEnto:frmSom_MunicipioUbicaCriadero,grwMensaje"/>
+		listener="#{encuestaEntomologicaBean.actualizarMunicipiosUbicacion}" update=":frmEncEnto:frmSom_MunicipioUbicaCriadero,:frmEncEnto:cmbGuardar,grwMensaje"/>
 	</h:selectOneMenu>
 </div>
 
