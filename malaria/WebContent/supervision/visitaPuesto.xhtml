@@ -115,7 +115,7 @@
 									value="#{visitaPuestoBean.visitasPuestos}">
 	
 									<p:ajax event="rowSelect" process="@this"
-										listener="#{visitaPuestoBean.onMuestreoHematicoSelected}"
+										listener="#{visitaPuestoBean.onVisitaSelected}"
 										update=":frmVisita:panControl ,:frmVisita:capa1, :frmVisita:capa2, :frmVisita:grwMensaje" />
 									
 									<p:column headerText="Semana Epidemiológica" style="text-align:left; width:80px;">
@@ -161,14 +161,16 @@
 						
 						<!-- Inicio capa 2 -->	
 						<p:panel id="capa2" style="hight:335px"  styleClass="panDefault"  visible="#{visitaPuestoBean.capaActiva==2}" >
+							
 							<p:panel id="panPuesto" 
-							 style="position:absolute; top:300px; left:5px; height:90px; width:960px;" 
+							 style="position:absolute; top:60px; left:5px; height:90px; width:985px;" 
 						 	 styleClass="panDetail">
 								<h:outputLabel for="cboUnidad" styleClass="lblDefaultSmall" 
 							    value="Unidad de Salud que notifica o recibe la notificación:" 
-							    style="position:absolute; left:220px; top:8px;"/>
+							    style="position:absolute; left:10px; top:8px;"/>
 								<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault" 												   
-												 style="position:absolute; left:220px;top:23px;width:340px;" 
+												 style="position:absolute; left:10px;top:23px;width:340px;" 
+												  disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
 												 value="#{visitaPuestoBean.unidadSelectedId}"> 
 										<f:selectItem itemValue="0" itemLabel=" " /> 
 										<f:selectItems var="unidad" 
@@ -183,17 +185,18 @@
 					
 								<h:outputLabel for="txtColVol" styleClass="lblDefaultSmall" 
 												   value="Nombre del Colaborador Voluntario:" 
-												   style="position:absolute; left:220px; top:50px;"/>
-							    <h:inputText id="txtColVol" style="position:absolute; left:220px; top:65px; width:312px;"
+												   style="position:absolute; left:10px; top:50px;"/>
+							    <h:inputText id="txtColVol" style="position:absolute; left:10px; top:65px; width:312px;"
 										value="#{visitaPuestoBean.nombreColVol}"
 										disabled="true"
 										styleClass="txtDefault" > 
 								</h:inputText>
 								
 								<p:commandButton id="btnBuscarColVol" 
+												 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
 												 icon="icon-dbase" ajax="true"
 												 title="Haga clic para búsqueda de colaboradores voluntarios"
-												 style="position:absolute; left:540px;top:65px;width:21px;height:21px;"
+												 style="position:absolute; left:330px;top:65px;width:21px;height:21px;"
 												 onstart="statusDialog.show();" actionListener="#{visitaPuestoBean.listarColVoles}"
 					        					 oncomplete="statusDialog.hide();dlgColVol.show();"
 					        					 update="frmVisita:grdColVoles,frmVisita:txtFiltroColVol,frmVisita:panButtonColVol,grwMensaje"  
@@ -201,20 +204,128 @@
 					
 								<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
 										value="Clave:" 
-										style="position:absolute; left:570px; top:8px;"/>
-								<h:inputText id="txtClave" style="position:absolute; left:570px; top:23px; width:110px; height:60px; font-size:30px !important;"
+										style="position:absolute; left:360px; top:8px;"/>
+								<h:inputText id="txtClave" style="position:absolute; left:360px; top:23px; width:110px; height:60px; font-size:30px !important;"
+										disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
 										value="#{visitaPuestoBean.clave}"
-										styleClass="txtDefault" >
-					
-									<p:ajax event="change" process="@this" 
+										styleClass="txtDefault">
+										<p:ajax event="change" process="@this" 
 											listener="#{visitaPuestoBean.cambiarClave}" 
 											onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
-											update="@form"/>
-											
+											update="@form"/>	
 								</h:inputText>
+								
+							    <h:outputLabel for="txtFechaEntrada" styleClass="lblDefaultSmall" 
+							   		value="Fecha Inicio Inspección:" 
+							   		style="position:absolute; left:485px; top:8px;"/>
+								<h:inputText id="txtFechaEntrada" style="position:absolute; left:485px; top:23px; width:115px;"
+											 value="#{visitaPuestoBean.fechaEntrada}"
+											 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+											 styleClass="txtDefault fechaEntrada">
+									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+									<p:ajax event="change" process="@this" 
+											listener="#{visitaPuestoBean.calcularSemana}" 
+											update="txtSemanaEpi,txtAnioEpi" />
+								</h:inputText>
+								<script type="text/javascript">
+									jQuery('.fechaEntrada').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+								</script> 
+							    
+							    <h:outputLabel styleClass="lblDefaultSmall" 
+							   		value="Semana Epidemiológica:" 
+							   		style="position:absolute; left:485px; top:50px;"/>
+								<h:inputText id="txtSemanaEpi" style="position:absolute; left:485px; top:65px; width:40px;"
+									 value="#{visitaPuestoBean.semanaEpi}" 
+							 		styleClass="txtDefault" disabled="true" />
+								<h:inputText id="txtAnioEpi" style="position:absolute; left:537px; top:65px; width:62px;"
+							 		value="#{visitaPuestoBean.anioEpi}" 
+							 		styleClass="txtDefault" disabled="true" />
+							 		
+							 	<h:outputLabel for="txtFechaSalida" styleClass="lblDefaultSmall" 
+							   		value="Fecha Fin Inspección:" 
+							   		style="position:absolute; left:615px; top:8px;"/>
+								<h:inputText id="txtFechaSalida" style="position:absolute; left:615px; top:23px; width:115px;"
+											 value="#{visitaPuestoBean.fechaSalida}"
+											 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+											 styleClass="txtDefault fechaSalida">
+									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+								</h:inputText>
+								<script type="text/javascript">
+									jQuery('.fechaSalida').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+								</script> 
+								
+								<h:outputLabel for="txtProximaVisita" styleClass="lblDefaultSmall" 
+							   		value="Fecha Próxima Visita:" 
+							   		style="position:absolute; left:615px; top:50px;"/>
+								<h:inputText id="txtProximaVisita" style="position:absolute; left:615px; top:65px; width:115px;"
+											 value="#{visitaPuestoBean.proximaVisita}"
+											 styleClass="txtDefault proximaVisita">
+									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+								</h:inputText>
+								<script type="text/javascript">
+									jQuery('.proximaVisita').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+								</script> 
+								
+								<h:outputLabel for="txtHorarioInicio" styleClass="lblDefaultSmall" 
+							   		value="Horario Inicio Atención:" 
+							   		style="position:absolute; left:745px; top:8px;"/>
+								<h:inputText id="txtHorarioInicio" style="position:absolute; left:745px; top:23px; width:115px;"
+											 value="#{visitaPuestoBean.horarioInicio}"
+											 styleClass="txtDefault horarioInicio">
+									<f:convertDateTime pattern="hh:mma"></f:convertDateTime>
+								</h:inputText>
+								<script type="text/javascript">
+									jQuery('.horarioInicio').time({ampmPrefix: ''});
+								</script> 
+							</p:panel>
+							
+							<!--   panel de botones en capa 2 -->		
+							<p:panel id="panCapa2Button" styleClass="panButton" 
+								 style="position:absolute; top:407px; width:990px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+							
+								<p:commandButton id="btnGuardar" value="Guardar" 
+											     disabled="#{investigacionMalariaBean.modo==1}"
+												 styleClass="btnDefault" style="font-size:11px;"  
+												 update="capa2 grwMensaje" 
+												 process="@this capa2" 
+												 actionListener="#{visitaPuestoBean.guardar}"/>
+								
+								<p:commandButton id="btnEliminar" value="Eliminar" 
+								 				 disabled="#{visitaPuestoBean.visitaPuestoSelectedId==0}"
+												 styleClass="btnDefault" style="font-size:11px;"  
+												 onclick="dlgEliminar.show(); return false;"/>
+												 
+								<p:commandButton id="btnRegresar" value="Regresar"
+												 onstart="statusDialog.show()" 
+												 oncomplete="statusDialog.hide();"
+												 styleClass="btnDefault" style="font-size:11px;" 
+												 actionListener="#{visitaPuestoBean.regresarCapa1}"
+												 process="@this" update="panControl capa1 capa2" />
+								
+								<p:commandButton value="Salir" styleClass="btnDefault" 
+												 style="font-size:11px;" 
+												 process="@this" 
+												 onclick="document.location.replace('../inicio.xhtml');" />
 							</p:panel>
 						</p:panel>
 						
+						<!-- Modal para confirmar la eliminación de una visita de supervisión -->
+						<p:confirmDialog message="Desea eliminar la visita de supervisión"
+								modal="true" 
+								header="Aviso" 
+								severity="alert" 
+								widgetVar="dlgEliminar">
+							<p:commandButton id="btnSiEliminar" value="Si"  
+											 process="btnSiEliminar" ajax="true"
+											 styleClass="btnDefault" style="font-size:11px;" 
+											 update="panControl capa1 capa2 grwMensaje"
+											 actionListener="#{visitaPuestoBean.eliminar}"  
+											 oncomplete="dlgEliminar.hide()">
+							</p:commandButton>
+							<p:commandButton value="No" onclick="dlgEliminar.hide()"
+											 style="font-size:11px;" styleClass="btnDefault" 
+											 type="button" /> 
+						</p:confirmDialog>
 						
 						<!-- Modal para vincular colvoles  -->
 						<p:dialog id="dlgColVol" header="Colaboradores Voluntarios asociados a la Unidad de Salud"  

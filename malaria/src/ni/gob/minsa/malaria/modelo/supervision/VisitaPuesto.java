@@ -50,7 +50,7 @@ public class VisitaPuesto implements Serializable {
 	@JoinColumn(name="ENTIDAD_ADTVA",nullable=false,referencedColumnName="CODIGO")
 	private EntidadAdtva entidadAdtva;
 
-    @Temporal( TemporalType.DATE)
+    @Temporal(TemporalType.DATE)
 	@Column(name="FECHA_ENTRADA", nullable=false)
 	private Date fechaEntrada;
 
@@ -62,11 +62,11 @@ public class VisitaPuesto implements Serializable {
 	@Column(name="FECHA_SALIDA", nullable=false)
 	private Date fechaSalida;
 
-    @Temporal( TemporalType.DATE)
+    @Temporal( TemporalType.TIME)
 	@Column(name="HORARIO_FIN", nullable=false)
 	private Date horarioFin;
 
-	@Temporal( TemporalType.DATE)
+	@Temporal( TemporalType.TIME)
 	@Column(name="HORARIO_INICIO", nullable=false)
 	private Date horarioInicio;
 
