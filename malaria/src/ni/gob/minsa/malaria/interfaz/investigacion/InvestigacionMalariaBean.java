@@ -1504,9 +1504,7 @@ private static final long serialVersionUID = 1L;
 				onMuestreoHematicoSelected(null);
 			}
 		}
-		
-		
-		
+
 		FacesMessage msg = Mensajes.enviarMensaje(oResultado);
 		if (msg!=null){
 			FacesContext.getCurrentInstance().addMessage(null, msg);

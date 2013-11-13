@@ -61,19 +61,11 @@ public class VisitaPuestoBean implements Serializable{
 	// -------------------------------------------------------------
 	// Estado
 	// 
-	// El atributo estado indica la situación en que se encuentra
-	// una vificha y por tanto es la variable que  gestionará el bloqueo y
-	// peticiones desde el interfaz al bean.
-	//
 	// Valores:
-	// 0 : Nueva ficha.  El interfaz se encuentra preparada para agregar
-	//     una nueva ficha de visita a un puesto de notificación; el usuario
-	//     debe tener permisos explícitos en la un
-	// 1 : Ficha existente sin investigación epidemiológica asociada.  
-	//     El usuario ha indicado un número de clave
-	//     y lámina, y ésta ha sido encontrada en la base de datos.  En
-	//     este caso, se visualizan los datos y se protegen aquellos que
-	//     no son modificables.
+	// 0 : El usuario es del nivel central y solo tiene permisos para consultar la 
+	//	   información de las visitas
+	// 1 : El usuario está vinculado a una entidad admministrativa, y por tanto tiene permisos
+	//	   para gestionar los datos de las visitas a los puestos de notificación.
 	// -------------------------------------------------------------
 	private int modo;
 	
@@ -87,9 +79,7 @@ public class VisitaPuestoBean implements Serializable{
 	// -------------------------------------------------------------
 	private List<EntidadAdtva> entidades;
 	private long entidadSelectedId;
-	private long autorizadoEnEntidadSelected=0;
-	
-	
+
 	// -------------------------------------------------------------
 	// Unidad de Salud
 	//
@@ -216,7 +206,7 @@ public class VisitaPuestoBean implements Serializable{
 		}
 		this.unidadSelected=this.visitaPuestoSelected.getUnidad();
 		this.unidadSelectedId=this.visitaPuestoSelected.getUnidad().getUnidadId();
-		this.clave=this.colVolPuestoSelected.getClave();
+		this.clave=this.visitaPuestoSelected.getClave();
 		this.fechaEntrada=this.visitaPuestoSelected.getFechaEntrada();
 		this.fechaSalida=this.visitaPuestoSelected.getFechaSalida();
 		this.anioEpi=this.visitaPuestoSelected.getAñoEpidemiologico();
@@ -242,12 +232,12 @@ public class VisitaPuestoBean implements Serializable{
 		 if(Utilidades.obtenerInfoSesion().isNivelCentral()){
 			 //Se comprueba si el usuario del nivel central tiene permisos para gestionar datos en la entidad seleccionada.
 			 if(Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(), this.entidadSelectedId)){
-				 this.autorizadoEnEntidadSelected = 1;
+				 this.modo = 1;
 			 }else{
-				 this.autorizadoEnEntidadSelected = 0;
+				 this.modo = 0;
 			 }
 		 }else{
-			 this.autorizadoEnEntidadSelected = 1;
+			 this.modo = 1;
 		 }
 		
 		 /* Se obtienen todos los municipios donde existan puestos de notificación
@@ -479,6 +469,8 @@ public class VisitaPuestoBean implements Serializable{
 		
 	public void agregar() {
 		this.capaActiva = 2;
+		this.visitaPuestoSelected=null;
+		this.visitaPuestoSelectedId=0;
 		iniciarCapa2();
 	}
 	
@@ -499,12 +491,14 @@ public class VisitaPuestoBean implements Serializable{
 		}
 		oVisitaPuesto.setHorarioInicio(this.horarioInicio);
 		oVisitaPuesto.setHorarioFin(this.horarioFin);
+		oVisitaPuesto.setVisibleCarnet(this.visibleCarnetSelected);
 		oVisitaPuesto.setTomaMuestras(this.tomaMuestraSelected);
 		oVisitaPuesto.setStock(this.stockSelected);
 		oVisitaPuesto.setReconocido(this.reconocidoSelected);
 		oVisitaPuesto.setAtencionPacientes(this.atencionPacienteSelected);
+		oVisitaPuesto.setDivulgacion(this.divulgacionSelected);
 		oVisitaPuesto.setProximaVisita(this.proximaVisita);
-		
+	
 		if (this.visitaPuestoSelectedId!=0) {
 			oVisitaPuesto.setVisitaPuestoId(this.visitaPuestoSelectedId);
 			oResultado=visitaPuestoService.Guardar(oVisitaPuesto);
@@ -520,6 +514,7 @@ public class VisitaPuestoBean implements Serializable{
 			}else{
 				oResultado.setMensaje(Mensajes.REGISTRO_AGREGADO);
 			}
+			this.visitaPuestoSelected = (VisitaPuesto) oResultado.getObjeto();
 			onVisitaSelected();
 		}
 		
@@ -783,10 +778,6 @@ public class VisitaPuestoBean implements Serializable{
 
 	public void setClave(String clave) {
 		this.clave = clave;
-	}
-
-	public long getAutorizadoEnEntidadSelected() {
-		return autorizadoEnEntidadSelected;
 	}
 
 	public List<Unidad> getUnidades() {

@@ -29,7 +29,7 @@ public class VisitaPuesto implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@SequenceGenerator(name="VISITA_PUESTOS_ID_GENERATOR", sequenceName="VISTASPUESTOS_SEQ")
+	@SequenceGenerator(name="VISITA_PUESTOS_ID_GENERATOR", sequenceName="VISTASPUESTOS_SEQ",allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="VISITA_PUESTOS_ID_GENERATOR")
 	@Column(name="VISITA_PUESTO_ID", unique=true, nullable=false, precision=10)
 	private long visitaPuestoId;

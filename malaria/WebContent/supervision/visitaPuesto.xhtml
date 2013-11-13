@@ -104,7 +104,7 @@
 	
 								<p:dataTable id="grdVisitas" var="visita"
 									widgetVar="tablaVisitas"
-									rowKey="#{muestreo.muestreoHematicoId}" selectionMode="single"
+									rowKey="#{visita.visitaPuestoId}" selectionMode="single"
 									selection="#{visitaPuestoBean.visitaPuestoSelected}"
 									loadingMessage="Cargando registros ..."
 									errorMessage="Se ha presentado un error al cargar los datos"
@@ -145,7 +145,7 @@
 							<p:panel id="panCapa1Button" styleClass="panButton" 
 								 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">							 
 								<p:commandButton  value="Agregar" styleClass="btnDefault" 
-											 disabled="#{visitaPuestoBean.autorizadoEnEntidadSelected==0 or visitaPuestoBean.municipioSelectedId==0}"
+											 disabled="#{visitaPuestoBean.modo==0 or visitaPuestoBean.municipioSelectedId==0}"
 											 style="font-size:11px;" 
 											 process="@this"
 											 update="capa1 capa2 txtClave panControl"
@@ -163,14 +163,14 @@
 						<p:panel id="capa2" style="hight:335px"  styleClass="panDefault"  visible="#{visitaPuestoBean.capaActiva==2}" >
 							
 							<p:panel id="panPuesto" 
-							 style="position:absolute; top:60px; left:5px; height:90px; width:985px;" 
+							 style="position:absolute; top:60px; left:5px; height:140px; width:985px;" 
 						 	 styleClass="panDetail">
 								<h:outputLabel for="cboUnidad" styleClass="lblDefaultSmall" 
 							    value="Unidad de Salud que notifica o recibe la notificación:" 
 							    style="position:absolute; left:10px; top:8px;"/>
 								<h:selectOneMenu id="cboUnidad" styleClass="txtDefault cboDefault" 												   
 												 style="position:absolute; left:10px;top:23px;width:340px;" 
-												  disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+												 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0 or visitaPuestoBean.modo==0}"
 												 value="#{visitaPuestoBean.unidadSelectedId}"> 
 										<f:selectItem itemValue="0" itemLabel=" " /> 
 										<f:selectItems var="unidad" 
@@ -193,7 +193,7 @@
 								</h:inputText>
 								
 								<p:commandButton id="btnBuscarColVol" 
-												 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+												 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0 or visitaPuestoBean.modo==0}"
 												 icon="icon-dbase" ajax="true"
 												 title="Haga clic para búsqueda de colaboradores voluntarios"
 												 style="position:absolute; left:330px;top:65px;width:21px;height:21px;"
@@ -206,7 +206,7 @@
 										value="Clave:" 
 										style="position:absolute; left:360px; top:8px;"/>
 								<h:inputText id="txtClave" style="position:absolute; left:360px; top:23px; width:110px; height:60px; font-size:30px !important;"
-										disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+										disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0 or visitaPuestoBean.modo==0}"
 										value="#{visitaPuestoBean.clave}"
 										styleClass="txtDefault">
 										<p:ajax event="change" process="@this" 
@@ -220,7 +220,7 @@
 							   		style="position:absolute; left:485px; top:8px;"/>
 								<h:inputText id="txtFechaEntrada" style="position:absolute; left:485px; top:23px; width:115px;"
 											 value="#{visitaPuestoBean.fechaEntrada}"
-											 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+											  disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0 or visitaPuestoBean.modo==0}"
 											 styleClass="txtDefault fechaEntrada">
 									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 									<p:ajax event="change" process="@this" 
@@ -228,7 +228,7 @@
 											update="txtSemanaEpi,txtAnioEpi" />
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.fechaEntrada').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+									jQuery('.fechaEntrada').dateEntry({dateFormat: 'dmy/',minDate: '-4Y',maxDate: new Date()}); 
 								</script> 
 							    
 							    <h:outputLabel styleClass="lblDefaultSmall" 
@@ -246,30 +246,32 @@
 							   		style="position:absolute; left:615px; top:8px;"/>
 								<h:inputText id="txtFechaSalida" style="position:absolute; left:615px; top:23px; width:115px;"
 											 value="#{visitaPuestoBean.fechaSalida}"
-											 disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0}"
+											  disabled="#{visitaPuestoBean.visitaPuestoSelectedId!=0 or visitaPuestoBean.modo==0}"
 											 styleClass="txtDefault fechaSalida">
 									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.fechaSalida').dateEntry({dateFormat: 'dmy/',maxDate: new Date()}); 
+									jQuery('.fechaSalida').dateEntry({dateFormat: 'dmy/',minDate: '-4Y',maxDate: new Date()}); 
 								</script> 
 								
 								<h:outputLabel for="txtProximaVisita" styleClass="lblDefaultSmall" 
 							   		value="Fecha Próxima Visita:" 
 							   		style="position:absolute; left:745px; top:8px;"/>
 								<h:inputText id="txtProximaVisita" style="position:absolute; left:745px; top:23px; width:115px;"
+											 disabled="#{visitaPuestoBean.modo==0}"
 											 value="#{visitaPuestoBean.proximaVisita}"
 											 styleClass="txtDefault proximaVisita">
 									<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 								</h:inputText>
 								<script type="text/javascript">
-									jQuery('.proximaVisita').dateEntry({dateFormat: 'dmy/'}); 
+									jQuery('.proximaVisita').dateEntry({dateFormat: 'dmy/',minDate:'+1D',maxDate:'+1Y'}); 
 								</script> 
 								
 								<h:outputLabel for="txtHorarioInicio" styleClass="lblDefaultSmall" 
 							   		value="Horario Inicio Atención:" 
 							   		style="position:absolute; left:615px; top:50px;"/>
 								<h:inputText id="txtHorarioInicio" style="position:absolute; left:615px; top:65px; width:115px;"
+											  disabled="#{visitaPuestoBean.modo==0}"
 											 value="#{visitaPuestoBean.horarioInicio}"
 											 styleClass="txtDefault horarioInicio">
 									<f:convertDateTime pattern="hh:mm a"></f:convertDateTime>
@@ -282,6 +284,7 @@
 							   		value="Horario Fin Atención:" 
 							   		style="position:absolute; left:745px; top:50px;"/>
 								<h:inputText id="txtHorarioFin" style="position:absolute; left:745px; top:65px; width:115px;"
+											 disabled="#{visitaPuestoBean.modo==0}"
 											 value="#{visitaPuestoBean.horarioFin}"
 											 styleClass="txtDefault horarioFin">
 									<f:convertDateTime pattern="hh:mm a"></f:convertDateTime>
@@ -289,21 +292,96 @@
 								<script type="text/javascript">
 									jQuery('.horarioFin').timeEntry({ampmPrefix: ' '});
 								</script> 
+								
+								<h:outputLabel for="cboVisibleCarnet" styleClass="lblDefaultSmall" 
+								    value="Tiene Visible el Puesto su Carnet de Identidad:" 
+								    style="position:absolute; left:10px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboVisibleCarnet" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:10px;top:117px;width:150px;"
+							    	disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.visibleCarnetSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+								 
+								 
+								<h:outputLabel for="cboAtencionPaciente" styleClass="lblDefaultSmall" 
+								    value="Los Pacientes son Prontamente Atendidos:" 
+								    style="position:absolute; left:175px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboAtencionPaciente" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:175px;top:117px;width:150px;"
+							 		 disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.atencionPacienteSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+								 
+								 <h:outputLabel for="cboTomaMuestra" styleClass="lblDefaultSmall" 
+								    value="Las Muestras Tomadas son Satisfactorias:" 
+								    style="position:absolute; left:340px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboTomaMuestra" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:340px;top:117px;width:150px;"
+							 		 disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.tomaMuestraSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+								 
+								 <h:outputLabel for="cboStock" styleClass="lblDefaultSmall" 
+								    value="Hay Material en Cantidad Suficiente:" 
+								    style="position:absolute; left:505px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboStock" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:505px;top:117px;width:150px;"
+							 		 disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.stockSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+								 
+								  <h:outputLabel for="cboReconocido" styleClass="lblDefaultSmall" 
+								    value="Conoce la Población Aledaña de la Existencia del Puesto:" 
+								    style="position:absolute; left:670px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboReconocido" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:670px;top:117px;width:150px;"
+							 		 disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.reconocidoSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+
+								 <h:outputLabel for="cboDivulgacion" styleClass="lblDefaultSmall" 
+								    value="Tiene divulgación del puesto de notificación:" 
+								    style="position:absolute; left:835px; top:92px;width:150px"/>
+								  <h:selectOneMenu id="cboDivulgacion" styleClass="txtDefault cboDefault"  
+							 		style="position:absolute; left:835px;top:117px;width:150px;"
+							 		 disabled="#{visitaPuestoBean.modo==0}"
+							 		value="#{visitaPuestoBean.divulgacionSelected}">
+							 			<f:selectItem itemValue=" " itemLabel=" "/>
+							 			<f:selectItem itemValue="0" itemLabel="No" /> 
+										<f:selectItem itemValue="1" itemLabel="Si" />
+								 </h:selectOneMenu>
+								 
+								 
 							</p:panel>
 							
 							<!--   panel de botones en capa 2 -->		
 							<p:panel id="panCapa2Button" styleClass="panButton" 
-								 style="position:absolute; top:407px; width:990px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
+								 style="position:absolute; top:210px; width:990px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 							
 								<p:commandButton id="btnGuardar" value="Guardar" 
-											     disabled="#{investigacionMalariaBean.modo==1}"
+											     disabled="#{visitaPuestoBean.modo==0}"
 												 styleClass="btnDefault" style="font-size:11px;"  
 												 update="capa2 grwMensaje" 
 												 process="@this capa2" 
 												 actionListener="#{visitaPuestoBean.guardar}"/>
 								
 								<p:commandButton id="btnEliminar" value="Eliminar" 
-								 				 disabled="#{visitaPuestoBean.visitaPuestoSelectedId==0}"
+								 				 disabled="#{visitaPuestoBean.visitaPuestoSelectedId==0 or visitaPuestoBean.modo==0}"
 												 styleClass="btnDefault" style="font-size:11px;"  
 												 onclick="dlgEliminar.show(); return false;"/>
 												 

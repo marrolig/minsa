@@ -132,18 +132,15 @@ public class VisitaPuestoDA implements VisitaPuestoService {
 		try{
 			VisitaPuesto oDetachedVisitaPuesto= (VisitaPuesto) oEM.find(VisitaPuesto.class, pVisitaPuesto.getVisitaPuestoId());
 			VisitaPuesto oVisitaPuesto = oEM.merge(oDetachedVisitaPuesto);
-			oVisitaPuesto.setFechaEntrada(pVisitaPuesto.getFechaEntrada());
-			oVisitaPuesto.setFechaSalida(pVisitaPuesto.getFechaSalida());
 			oVisitaPuesto.setDivulgacion(pVisitaPuesto.getDivulgacion());
 			oVisitaPuesto.setVisibleCarnet(pVisitaPuesto.getVisibleCarnet());
 			oVisitaPuesto.setAtencionPacientes(pVisitaPuesto.getAtencionPacientes());
-			oVisitaPuesto.setAtencionPacientes(pVisitaPuesto.getAtencionPacientes());
+			oVisitaPuesto.setReconocido(pVisitaPuesto.getReconocido());
 			oVisitaPuesto.setHorarioInicio(pVisitaPuesto.getHorarioInicio());
 			oVisitaPuesto.setHorarioFin(pVisitaPuesto.getHorarioFin());
 			oVisitaPuesto.setTomaMuestras(pVisitaPuesto.getTomaMuestras());
 			oVisitaPuesto.setStock(pVisitaPuesto.getStock());
-			oVisitaPuesto.setReconocido(oVisitaPuesto.getReconocido());
-			oVisitaPuesto.setProximaVisita(oVisitaPuesto.getProximaVisita());
+			oVisitaPuesto.setProximaVisita(pVisitaPuesto.getProximaVisita());
 			
 			oEM.getTransaction().commit();
 	    	oResultado.setFilasAfectadas(1);

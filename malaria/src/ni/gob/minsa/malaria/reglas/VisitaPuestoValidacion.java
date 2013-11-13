@@ -57,6 +57,28 @@ public class VisitaPuestoValidacion {
 			return oResultado;
 		}
 		
+		if(pVisitaPuesto.getPuestoNotificacion().getFechaApertura()!=null){
+			if (pVisitaPuesto.getFechaEntrada().before(pVisitaPuesto.getPuestoNotificacion().getFechaApertura())) {
+				oResultado.setOk(false);
+				oResultado.setMensaje("La fecha en la cual se inicia la inspección no puede ser anterior a la fecha de apertura");
+				return oResultado;
+			}
+		}
+		
+		if(pVisitaPuesto.getPuestoNotificacion().getFechaCierre()!=null){
+			if(pVisitaPuesto.getFechaEntrada().after(pVisitaPuesto.getPuestoNotificacion().getFechaCierre())){
+				oResultado.setOk(false);
+				oResultado.setMensaje("La fecha en la cual se inicia la inspección no puede posterior la fecha de cierre del puesto.");
+				return oResultado;
+			}
+			
+			if(pVisitaPuesto.getFechaSalida().after(pVisitaPuesto.getPuestoNotificacion().getFechaCierre())){
+				oResultado.setOk(false);
+				oResultado.setMensaje("La fecha en la cual finaliza la inspección no puede posterior la fecha de cierre del puesto.");
+				return oResultado;
+			}
+		}
+		
 		if(pVisitaPuesto.getHorarioInicio()==null || pVisitaPuesto.getHorarioFin()==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar el hora en que inicia y finaliza regularmente la atención");
@@ -69,7 +91,7 @@ public class VisitaPuestoValidacion {
 			return oResultado;
 		}
 		
-		if(pVisitaPuesto.getReconocido()==null){
+		if(pVisitaPuesto.getVisibleCarnet()==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar si el puesto tiene visible su carnet de identidad");
 			return oResultado;
@@ -93,6 +115,12 @@ public class VisitaPuestoValidacion {
 			return oResultado;
 		}
 		
+		if(pVisitaPuesto.getReconocido()==null){
+			oResultado.setOk(false);
+			oResultado.setMensaje("Debe indicar si la poblaciónaledaña conoce de la existencia del puesto:");
+			return oResultado;
+		}
+		
 		if(pVisitaPuesto.getDivulgacion()==null){
 			oResultado.setOk(false);
 			oResultado.setMensaje("Debe indicar si el puesto tiene divulgación");
@@ -101,27 +129,37 @@ public class VisitaPuestoValidacion {
 	
 		
 		if(pVisitaPuesto.getProximaVisita()!=null){
-			if( pVisitaPuesto.getPuestoNotificacion().getFechaCierre()!=null){
-				if(pVisitaPuesto.getProximaVisita().after(pVisitaPuesto.getPuestoNotificacion().getFechaCierre())){
+			if(pVisitaPuesto.getPuestoNotificacion().getFechaApertura()!=null){
+				if (pVisitaPuesto.getProximaVisita().before(pVisitaPuesto.getPuestoNotificacion().getFechaApertura())) {
 					oResultado.setOk(false);
-					oResultado.setMensaje("La fecha estimada de próxima visita es posterior a la fecha de cierre del puesto. Por favor una fecha igual o anterior.");
+					oResultado.setMensaje("La fecha estimada de próxima visita es posterior a la fecha de cierre del puesto. Por favor indicar una fecha igual o anterior.");
 					return oResultado;
 				}
 			}
 			
-			if(pVisitaPuesto.getProximaVisita().before(pVisitaPuesto.getFechaEntrada())){
+			if(pVisitaPuesto.getPuestoNotificacion().getFechaCierre()!=null){
+				if(pVisitaPuesto.getProximaVisita().after(pVisitaPuesto.getPuestoNotificacion().getFechaCierre())){
+					oResultado.setOk(false);
+					oResultado.setMensaje("La fecha estimada de próxima visita es posterior a la fecha de cierre del puesto. Por favor indicar una fecha igual o anterior.");
+					return oResultado;
+				}
+			}
+
+			if(pVisitaPuesto.getProximaVisita().equals(pVisitaPuesto.getFechaEntrada())){
 				oResultado.setOk(false);
-				oResultado.setMensaje("La fecha estimada de próxima visita no puede ser anterior a la fecha de entrada");
+				oResultado.setMensaje("La fecha estimada de próxima visita no puede ser igual a la fecha de cierre. Por favor indicar una fecha posterior");
 				return oResultado;
 			}
 		}
-
-		if (pVisitaPuesto.getProximaVisita().before(pVisitaPuesto.getPuestoNotificacion().getFechaApertura())) {
+		
+	
+		if(pVisitaPuesto.getProximaVisita().before(pVisitaPuesto.getFechaEntrada())){
 			oResultado.setOk(false);
-			oResultado.setMensaje("La fecha estimada de próxima visita es posterior a la fecha de cierre del puesto. Por favor una fecha igual o anterior.");
+			oResultado.setMensaje("La fecha estimada de próxima visita no puede ser anterior a la fecha de entrada");
 			return oResultado;
 		}
 		
+
 		oResultado.setOk(true);
 		return oResultado;
 	}
