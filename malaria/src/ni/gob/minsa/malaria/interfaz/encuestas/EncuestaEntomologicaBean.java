@@ -514,14 +514,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		try{
 			
-			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisUbicaCriadero);
+			oResultado = srvCriadero.obtenerMunicipiosPorSilais(frmSom_SilaisBusqueda);
 			if( oResultado.isOk() && oResultado.getObjeto() != null ){
 				itemsMunicipio = (List<DivisionPolitica>) oResultado.getObjeto();
 			}else{
 				itemsMunicipio = null;
 			}
 			
-			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisUbicaCriadero);
+			esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
 			if( !esPermitido ){
 				cmbGuardar = 0;
 			}else{
@@ -618,12 +618,12 @@ public class EncuestaEntomologicaBean implements Serializable {
 			return oResultado;			
 		}		
 		
-		if( frmSom_SilaisUbicaCriadero == null || frmSom_SilaisUbicaCriadero.equals("0")){
-			oResultado.setOk(false);
-			oResultado.setMensaje("Completar Silais de Ubicacion");
-			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
-			return oResultado;			
-		}	
+//		if( frmSom_SilaisUbicaCriadero == null || frmSom_SilaisUbicaCriadero.equals("0")){
+//			oResultado.setOk(false);
+//			oResultado.setMensaje("Completar Silais de Ubicacion");
+//			oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+//			return oResultado;			
+//		}	
 		
 		if( frmSom_MunicipioUbicaCriadero == null || frmSom_MunicipioUbicaCriadero.equals("0")){
 			oResultado.setOk(false);
@@ -1416,6 +1416,15 @@ public class EncuestaEntomologicaBean implements Serializable {
 	
 	public void agregarIntervencion(){
 		long auxId = 0;
+		boolean esPermitido = false;
+		
+		esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		if( !esPermitido ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"No es posible agregar la Inspeccion","No cuenta con privilegios suficientes para realizar esta operación");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
+		
 		
 		if( frmCal_Intv_FechaIntervencion == null ){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"Completar Fecha Intervencion","");
@@ -1582,6 +1591,14 @@ public class EncuestaEntomologicaBean implements Serializable {
 	
 	public void agregarPosInspeccion(){
 		long auxId = 0;
+		boolean esPermitido = false;
+		
+		esPermitido = Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(),frmSom_SilaisBusqueda);
+		if( !esPermitido ){
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"No es posible agregar la PosInspeccion","No cuenta con privilegios suficientes para realizar esta operación");
+			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
+		}
 				
 		if( frmCal_PosIns_FechaInspeccion == null ){
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN,"Completar Fecha Inspeccion","");

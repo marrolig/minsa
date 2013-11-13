@@ -3,6 +3,9 @@ package ni.gob.minsa.malaria.modelo.encuesta;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+
+import org.eclipse.persistence.annotations.Cache;
+
 import ni.gob.minsa.malaria.modelo.poblacion.Comunidad;
 
 import java.math.BigDecimal;
@@ -14,7 +17,9 @@ import java.util.Date;
  * 
  */
 @Entity
-@Table(name="CRIADEROS")
+@Table(name="CRIADEROS",schema="SIVE",
+		uniqueConstraints=@UniqueConstraint(columnNames={"CODIGO"}))
+		@Cache(alwaysRefresh=true,disableHits=true)
 public class Criadero implements Serializable {
 	private static final long serialVersionUID = 1L;
 
