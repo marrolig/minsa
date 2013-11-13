@@ -1500,7 +1500,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 			if( !oResultado.isOk() || oResultado.isExcepcion() ){
 				if( auxId == 0) oSelIntervencion = null;
 				msg = Mensajes.enviarMensaje(oResultado);
-				if( msg != null ) FacesContext.getCurrentInstance();
+				if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
 				return;
 			}
 			oSelIntervencion = (CriaderosIntervencion) oResultado.getObjeto();
@@ -1779,7 +1779,7 @@ public class EncuestaEntomologicaBean implements Serializable {
 		
 		oResultado = validarFormulario();
 		if( !oResultado.isOk() ){
-			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, oResultado.getMensaje(), oResultado.getMensajeDetalle());
 			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
@@ -1787,7 +1787,8 @@ public class EncuestaEntomologicaBean implements Serializable {
 		oResultado = null;
 		oResultado = guardar();
 		if( !oResultado.isOk() || oResultado.isExcepcion() ){
-			FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			//FacesMessage msg = Mensajes.enviarMensaje(oResultado);
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, oResultado.getMensaje(), oResultado.getMensajeDetalle());
 			if( msg != null ) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;			
 		}

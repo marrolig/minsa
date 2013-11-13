@@ -173,7 +173,7 @@ public class CriaderoDA implements CriaderoServices {
 		}
 		
 		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
-					+ "	Select " 
+					+ "	Select  distinct " 
 					+ "	  Cr.Criadero_Id, "
 					+ "	  cr.codigo, "
 					+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
@@ -347,7 +347,7 @@ public class CriaderoDA implements CriaderoServices {
 		}
 		
 		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
-					+ "	Select " 
+					+ "	Select  distinct " 
 					+ "	  Cr.Criadero_Id, "
 					+ "	  cr.codigo, "
 					+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
@@ -517,7 +517,7 @@ public class CriaderoDA implements CriaderoServices {
 		}
 		
 		String strSQL = "With Params As ( Select ? As Psilais, ? As Pmuni, ? As Pcomu From Dual ) "
-			+ "	Select " 
+			+ "	Select distinct " 
 			+ "	  Cr.Criadero_Id, "
 			+ "	  cr.codigo, "
 			+ "	  Ps.Fecha_Notificacion Fecha_Ult_Notif, "
@@ -708,6 +708,7 @@ public class CriaderoDA implements CriaderoServices {
     		ConstraintViolation<?> oConstraintViolation = iExcepcion.getConstraintViolations().iterator().next();
     		oResultado.setMensaje(oConstraintViolation.getMessage());
     		oResultado.setFuenteError(oConstraintViolation.getPropertyPath().toString());
+    		oResultado.setMensajeDetalle(iExcepcion.getMessage());
     		oResultado.setOk(false);
     		oResultado.setGravedad(InfoResultado.SEVERITY_ERROR);
     		oResultado.setFilasAfectadas(0);
