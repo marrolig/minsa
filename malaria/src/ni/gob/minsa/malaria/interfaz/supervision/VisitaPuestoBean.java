@@ -574,10 +574,8 @@ public class VisitaPuestoBean implements Serializable{
 	    // asociadas de forma explícita al usuario, lo que le dará en consecuencia permisos para
 	    // agregar o guardar registros.
 	    if(this.infoSesion.isNivelCentral()){
-	    	this.modo=1;
 	    	this.entidades=Operacion.entidadesAutorizadas(this.infoSesion.getUsuarioId(),null);
 	    }else{
-	    	this.modo=0;
 	    	this.entidades=Operacion.entidadesAutorizadas(this.infoSesion.getUsuarioId(),true);
 	    }
 	    	
@@ -585,6 +583,16 @@ public class VisitaPuestoBean implements Serializable{
 	    //seleccionada.
 		if ((this.entidades!=null) && (this.entidades.size()>0)) {
 			this.entidadSelectedId=this.entidades.get(0).getEntidadAdtvaId();
+			 if(Utilidades.obtenerInfoSesion().isNivelCentral()){
+				 //Se comprueba si el usuario del nivel central tiene permisos para gestionar datos en la entidad seleccionada.
+				 if(Operacion.esEntidadAutorizada(Utilidades.obtenerInfoSesion().getUsuarioId(), this.entidadSelectedId)){
+					 this.modo = 1;
+				 }else{
+					 this.modo = 0;
+				 }
+			 }else{
+				 this.modo = 1;
+			 }
 			obtenerMunicipios();
 		}
 	    
