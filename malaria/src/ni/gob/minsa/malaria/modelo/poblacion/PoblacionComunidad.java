@@ -82,7 +82,7 @@ public class PoblacionComunidad implements Serializable {
 	@Column(nullable=false)
 	private BigDecimal año;
 
-    @ManyToOne(targetEntity=Comunidad.class)
+    @ManyToOne(targetEntity=Comunidad.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="COMUNIDAD",referencedColumnName="CODIGO",nullable=false)
 	private Comunidad comunidad;
 

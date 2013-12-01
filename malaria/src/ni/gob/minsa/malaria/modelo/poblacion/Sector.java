@@ -70,7 +70,7 @@ public class Sector implements Serializable {
 	private Date fechaRegistro;
 
 	// asociación bi-direccional muchos a uno con DivisionPolitica
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="MUNICIPIO",referencedColumnName="CODIGO_NACIONAL")
 	private DivisionPolitica municipio;
 
@@ -90,7 +90,7 @@ public class Sector implements Serializable {
 	private String sede;
 
 	// asociación bi-direccional muchos a uno con Unidad
-    @ManyToOne(targetEntity=Unidad.class)
+    @ManyToOne(targetEntity=Unidad.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="UNIDAD",referencedColumnName="CODIGO")
 	private Unidad unidad;
 

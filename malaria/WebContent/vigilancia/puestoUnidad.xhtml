@@ -86,6 +86,7 @@
 			<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:235px;">
 				<p:dataTable id="grdPuestosUnidades" var="puestoNotificacion" widgetVar="tablPuestosUnidades" 
 							 rowKey="#{puestoNotificacion.puestoNotificacionId}"
+							 rowStyleClass="#{puestoNotificacion.pasivo?'rowNonActive':null}"
 							 selectionMode="single" selection="#{puestoUnidadBean.puestoNotificacionSelected}" 
 							 loadingMessage="Cargando registros ..." 
 							 errorMessage="Se ha presentado un error al cargar los datos"
@@ -110,6 +111,17 @@
 			
 				</p:dataTable>
 			</div>
+			
+			<h:outputLabel styleClass="lblDefault" 
+							   value="Mostrar solo activos" 
+							   style="position:absolute; left:825px; top:68px;"/>
+			<h:selectBooleanCheckbox id="chkSoloActivos" 
+							   styleClass="txtDefault" 
+							   style="position:absolute; left:930px; top:65px;"
+				 			   value="#{puestoUnidadBean.mostrarSoloActivos}">
+				       <p:ajax event="change" process="@this"  
+				 			   update="chkSoloActivos grdPuestosUnidades grwMensaje"></p:ajax>
+			</h:selectBooleanCheckbox>
 
 			<p:panel id="panButton1" styleClass="panButton" 
 				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
@@ -235,6 +247,7 @@
 							   style="position:absolute; left:10px; top:163px;"/>
 				<h:inputText id="txtClave" style="position:absolute; left:10px; top:178px; width:100px;"
 							 value="#{puestoUnidadBean.clave}" 
+							 disabled="#{puestoUnidadBean.puestoConActividad or puestoUnidadBean.unidadActiva}"
 							 required="true" maxlength="5" 
 							 requiredMessage="La Clave del Puesto de Notificación es requerida"
 							 styleClass="txtDefault" />
@@ -249,7 +262,7 @@
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaApertura').dateEntry({dateFormat: 'dmy/'}); 
+						jQuery('.fechaApertura').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script> 			
 
 				<h:outputLabel for="txtFechaCierre" styleClass="lblDefaultSmall" 
@@ -261,7 +274,7 @@
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/'}); 
+						jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script>
 				
 				<p:commandButton id="btnComunidades" icon="icon-house"

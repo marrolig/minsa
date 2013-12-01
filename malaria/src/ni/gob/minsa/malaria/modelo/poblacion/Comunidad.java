@@ -106,7 +106,7 @@ public class Comunidad implements Serializable {
 	private BigDecimal longitud;
 
 	// asociación bi-direccional muchos a uno con Sectores
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="SECTOR",referencedColumnName="CODIGO")
 	private Sector sector;
 

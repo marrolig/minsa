@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.faces.bean.NoneScoped;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 import org.eclipse.persistence.config.QueryHints;
@@ -120,6 +121,27 @@ public class UsuarioUnidadDA implements ni.gob.minsa.malaria.servicios.poblacion
         }finally{
             em.close();
         }
+	}
+
+	@Override
+	public UsuarioUnidad Encontrar(long pUsuarioId, long pUnidadId) {
+
+        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+        try{
+            Query query = em.createQuery("select uu from UsuarioUnidad uu " +
+                    		" where uu.unidad.unidadId=:pUnidadId and " +
+                             "uu.usuario.usuarioId = :pUsuarioId ");
+
+            query.setParameter("pUnidadId", pUnidadId);
+            query.setParameter("pUsuarioId",pUsuarioId);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            return (UsuarioUnidad)query.getSingleResult();
+        } catch (NoResultException iExcepcion) {
+			return null;
+        }
+        finally{
+            em.close();
+        }			
 	}
 
 }

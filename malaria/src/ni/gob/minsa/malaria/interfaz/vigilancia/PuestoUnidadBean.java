@@ -37,6 +37,7 @@ import ni.gob.minsa.malaria.datos.general.ParametroDA;
 import ni.gob.minsa.malaria.datos.general.TipoUnidadDA;
 import ni.gob.minsa.malaria.datos.poblacion.ComunidadDA;
 import ni.gob.minsa.malaria.datos.poblacion.DivisionPoliticaDA;
+import ni.gob.minsa.malaria.datos.vigilancia.MuestreoHematicoDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoComunidadDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoNotificacionDA;
 import ni.gob.minsa.malaria.modelo.estructura.EntidadAdtva;
@@ -60,6 +61,7 @@ import ni.gob.minsa.malaria.servicios.general.ParametroService;
 import ni.gob.minsa.malaria.servicios.general.TipoUnidadService;
 import ni.gob.minsa.malaria.servicios.poblacion.ComunidadService;
 import ni.gob.minsa.malaria.servicios.poblacion.DivisionPoliticaService;
+import ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoComunidadService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoNotificacionService;
 import ni.gob.minsa.malaria.soporte.NivelZoom;
@@ -86,6 +88,8 @@ public class PuestoUnidadBean implements Serializable {
 	private int capaActiva;
 	
 	private int modo;
+	// el puesto de notificación tiene muestreos hemáticos vinculados
+	private boolean puestoConActividad;
 	
 	// objetos para poblar el combo de entidades administrativas
 	private List<EntidadAdtva> entidades;
@@ -97,9 +101,14 @@ public class PuestoUnidadBean implements Serializable {
 	private Unidad unidadSelected;
 	private long unidadSelectedId;
 
+	// true si la unidad se encuentra activa
+	private boolean unidadActiva;
+
 	// lista de objetos para la grilla de colvoles
 	private List<PuestoNotificacion> puestosNotificacion;
 	private PuestoNotificacion puestoNotificacionSelected;
+	
+	private boolean mostrarSoloActivos;
 
 	// literal utilizada para filtrar a las unidades en la grilla de búsqueda
 	private String filtroUnidad;
@@ -194,6 +203,8 @@ public class PuestoUnidadBean implements Serializable {
 	private static MarcadorService marcadorService = new MarcadorDA();
 	private static ParametroService parametroService = new ParametroDA();
 	
+	private static MuestreoHematicoService muestreoHematicoService = new MuestreoHematicoDA();
+	
 	private static PuestoNotificacionService puestoNotificacionService = new PuestoNotificacionDA();
 	private static DivisionPoliticaService divisionPoliticaService = new DivisionPoliticaDA();
 	private static EntidadAdtvaService entidadAdtvaService=new EntidadAdtvaDA();
@@ -212,6 +223,8 @@ public class PuestoUnidadBean implements Serializable {
 		this.unidadSelectedId=0;
 
 		this.urlMarcadorPuesto="";
+		
+		this.puestoConActividad=false;
 		
 		InfoResultado oResultadoParametro=parametroService.Encontrar("MAPA_PUESTO_UNIDAD");
 		if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
@@ -349,7 +362,7 @@ public class PuestoUnidadBean implements Serializable {
 			return;
 		}
 		
-		this.puestosNotificacion=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, false);
+		this.puestosNotificacion=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, 0);
 
 		iniciarCapa1();
 		
@@ -365,6 +378,16 @@ public class PuestoUnidadBean implements Serializable {
 		this.capaActiva=2;
 		this.puestoNotificacionId=this.puestoNotificacionSelected.getPuestoNotificacionId();
 		
+		this.puestoConActividad=false;
+		
+		// verifica si el puesto tiene muestreos hemáticos vinculados
+		int iCuentaMuestreos = muestreoHematicoService.ContarPorPuesto(this.puestoNotificacionId, 0, 0);
+		if (iCuentaMuestreos>0) {
+			this.puestoConActividad=true;
+			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "El puesto de notificación tiene datos vinculados por lo que algunos datos no pueden ser modificados.","Número de muestreos hemáticos vinculados: "+String.valueOf(iCuentaMuestreos));
+			if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
+
 		if (this.puestoNotificacionSelected.getUnidad().getUnidadAcceso()!=null) {
 			
 			if (this.puestoNotificacionSelected.getUnidad().getUnidadAcceso().getTipoTransporte()!=null) {
@@ -413,7 +436,20 @@ public class PuestoUnidadBean implements Serializable {
 		this.fechaCierre=this.puestoNotificacionSelected.getFechaCierre();
 		this.observaciones=this.puestoNotificacionSelected.getObservaciones();
 		this.puestosComunidades=this.puestoNotificacionSelected.getComunidadesPuesto();
-			
+		
+		// si al seleccionar una unidad declarada como puesto de notificación éste se encuentra
+		// pasivo y si dicha unidad al mismo tiempo está declarada como un puesto de notificación
+		// activo, el puesto de notificación pasivo no puede ser modificado.
+		
+		if (this.puestoNotificacionSelected.getFechaCierre()!=null && this.puestoNotificacionSelected.getFechaCierre().before(Calendar.getInstance().getTime())) {
+			PuestoNotificacion oPuestoNotificacion = puestoNotificacionService.EncontrarPorUnidad(this.unidadSelectedId, 1);
+			if (oPuestoNotificacion!=null && oPuestoNotificacion.getUnidad().getUnidadId()!=this.unidadSelectedId) {
+				this.unidadActiva=true;
+				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La unidad de salud se encuentra registrada como Puesto de Notificación ACTIVO; el registro actual no puede ser modificado.","");
+				if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			}
+		}
+		
 		FacesContext context = FacesContext.getCurrentInstance();
 		UIComponent componentDetalle = null; 
 		UIViewRoot root = context.getViewRoot( ); 
@@ -436,7 +472,7 @@ public class PuestoUnidadBean implements Serializable {
         this.centroMapa="0,0";
         this.zoom=nivelZoom.PAIS;
         
-        List<PuestoNotificacion> oPuestos=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, true);
+        List<PuestoNotificacion> oPuestos=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, 1);
 		for (PuestoNotificacion oPuestoNotificacion:oPuestos) {
 			Unidad oUnidad=oPuestoNotificacion.getUnidad();
 			if (oUnidad.getLatitud()!=null && oUnidad.getLongitud()!=null) {
@@ -532,7 +568,7 @@ public class PuestoUnidadBean implements Serializable {
 		// si es un nuevo registro de puesto de notificación, debe verificarse que 
 		// la unidad no exista como tal. 
 		if (this.puestoNotificacionId==0) {
-			PuestoNotificacion oPuestoNotificacion=puestoNotificacionService.EncontrarPorUnidad(this.unidadSelectedId,0);
+			PuestoNotificacion oPuestoNotificacion=puestoNotificacionService.EncontrarPorUnidad(this.unidadSelectedId,1);
 			if (oPuestoNotificacion!=null) {
 				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La unidad de salud ya se encuentra registrada como puesto de notificación","");
 				if (msg!=null)
@@ -635,7 +671,7 @@ public class PuestoUnidadBean implements Serializable {
 		if (msg!=null)
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		
-		this.puestosNotificacion=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, false);
+		this.puestosNotificacion=puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, 0);
 		
 	}
 	
@@ -706,7 +742,7 @@ public class PuestoUnidadBean implements Serializable {
 	public void obtenerUnidades() {
 	
 		if (this.entidadSelectedId!=0) {
-			this.setPuestosNotificacion(puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, false));
+			this.setPuestosNotificacion(puestoNotificacionService.ListarUnidadesPorEntidad(this.entidadSelectedId, 0));
 			this.cambioEntidad=true;
 		}
 	}
@@ -1153,5 +1189,35 @@ public class PuestoUnidadBean implements Serializable {
 
 	public boolean isCambioEntidad() {
 		return cambioEntidad;
+	}
+
+	/**
+	 * @return the puestoConActividad
+	 */
+	public boolean isPuestoConActividad() {
+		return puestoConActividad;
+	}
+
+	/**
+	 * @param puestoConActividad the puestoConActividad to set
+	 */
+	public void setPuestoConActividad(boolean puestoConActividad) {
+		this.puestoConActividad = puestoConActividad;
+	}
+
+	public void setMostrarSoloActivos(boolean mostrarSoloActivos) {
+		this.mostrarSoloActivos = mostrarSoloActivos;
+	}
+
+	public boolean isMostrarSoloActivos() {
+		return mostrarSoloActivos;
+	}
+
+	public void setUnidadActiva(boolean unidadActiva) {
+		this.unidadActiva = unidadActiva;
+	}
+
+	public boolean isUnidadActiva() {
+		return unidadActiva;
 	}
 }

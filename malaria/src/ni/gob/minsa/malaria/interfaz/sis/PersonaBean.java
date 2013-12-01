@@ -96,14 +96,18 @@ public class PersonaBean implements Serializable {
 	
 	private long tipoIdentificacionSelectedId;
 	private List<TipoIdentificacion> tiposIdentificaciones;
+	private List<TipoIdentificacion> tiposIdentificacionesInicial;
 	
 	private long sexoSelectedId;
 	private List<Sexo> sexos;
+	private List<Sexo> sexosInicial;
 	
 	private long etniaSelectedId;
+	private List<Etnia> etniasInicial;
 	private List<Etnia> etnias;
 	
 	private long estadoCivilSelectedId;
+	private List<EstadoCivil> estadosCivilesInicial;
 	private List<EstadoCivil> estadosCiviles;
 	
 	private long paisNacimientoSelectedId;
@@ -126,10 +130,12 @@ public class PersonaBean implements Serializable {
 	private Comunidad comunidadResidenciaSelected;
 
 	private long escolaridadSelectedId;
+	private List<Escolaridad> escolaridadesInicial;
 	private List<Escolaridad> escolaridades;
 
 	private long tipoAseguradoSelectedId;
 	private List<TipoAsegurado> tiposAsegurados;
+	private List<TipoAsegurado> tiposAseguradosInicial;
 
 	private Ocupacion ocupacionSelected;
 	private long ocupacionSelectedId;
@@ -166,6 +172,12 @@ public class PersonaBean implements Serializable {
 		this.infoSesion=Utilidades.obtenerInfoSesion();
 
 		this.paisesNacimiento=paisService.listarPaises();
+		this.etniasInicial=etniaService.ListarActivos();
+		this.escolaridadesInicial=escolaridadService.ListarActivos();
+		this.tiposAseguradosInicial=tipoAseguradoService.ListarActivos();
+		this.sexosInicial=sexoService.ListarActivos();
+		this.tiposIdentificacionesInicial=tipoIdentificacionService.ListarActivos();
+		this.estadosCivilesInicial=estadoCivilService.ListarActivos();
 		
 		InfoResultado oResultadoParametro=parametroService.Encontrar("CODIGOALFA2_PAIS");
 		if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
@@ -242,12 +254,12 @@ public class PersonaBean implements Serializable {
 		// si no existe una persona vinculada al colaborador voluntario entonces
 		// se permitirá al usuario realizar la búsqueda de personas, en este
 		// caso no importará el valor del atributo searchMode del componente
-		FacesContext facesContext = FacesContext.getCurrentInstance();
-		ELContext elContext = facesContext.getELContext();
-		//ValueExpression vePersona = facesContext.getApplication().getExpressionFactory().createValueExpression(elContext, "#{cc.attrs.value}", Persona.class);
-		ValueExpression veModoBuscar = facesContext.getApplication().getExpressionFactory().createValueExpression(elContext, "#{cc.attrs.searchMode}", Boolean.class);
+		
+		// FacesContext facesContext = FacesContext.getCurrentInstance();
+		// ELContext elContext = facesContext.getELContext();
+		// ValueExpression veModoBuscar = facesContext.getApplication().getExpressionFactory().createValueExpression(elContext, "#{cc.attrs.searchMode}", Boolean.class);
 
-		this.modo=((Boolean)veModoBuscar.getValue(elContext)).booleanValue()?BUSCAR_PERSONA:EDITAR_PERSONA;
+		// this.modo=((Boolean)veModoBuscar.getValue(elContext)).booleanValue()?BUSCAR_PERSONA:EDITAR_PERSONA;
 		
 		if (this.personaSelected==null) {
 			this.setModo(BUSCAR_PERSONA);
@@ -469,31 +481,71 @@ public class PersonaBean implements Serializable {
 		this.edadEnAnios=this.personaSelected.getEdadEnAnios().toString();
 		this.tipoIdentificacionSelectedId=this.personaSelected.getIdentId();
 		if (this.tipoIdentificacionSelectedId!=0) {
-			this.tiposIdentificaciones=tipoIdentificacionService.ListarActivos(this.personaSelected.getIdentCodigo());
+			boolean oEncontrado=false;
+			for(TipoIdentificacion s: this.tiposIdentificacionesInicial){
+				if(s.getCodigo()==this.personaSelected.getIdentCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.tiposIdentificaciones=tipoIdentificacionService.ListarActivos(this.personaSelected.getIdentCodigo());
+			} else {
+				this.tiposIdentificaciones=this.tiposIdentificacionesInicial;
+			}
 		} else {
-			this.tiposIdentificaciones=tipoIdentificacionService.ListarActivos();
+			this.tiposIdentificaciones=this.tiposIdentificacionesInicial;
 		}
 		
 		this.identNumero=this.personaSelected.getIdentNumero();
 		this.sexoSelectedId=this.personaSelected.getSexoId();
 		if (this.sexoSelectedId!=0) {
-			this.sexos=sexoService.ListarActivos(this.personaSelected.getSexoCodigo());
+			boolean oEncontrado=false;
+			for(Sexo s: this.sexosInicial){
+				if(s.getCodigo()==this.personaSelected.getSexoCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.sexos=sexoService.ListarActivos(this.personaSelected.getSexoCodigo());
+			} else {
+				this.sexos=this.sexosInicial;
+			}
 		} else {
-			this.sexos=sexoService.ListarActivos();
+			this.sexos=this.sexosInicial;
 		}
 		
 		this.etniaSelectedId=this.personaSelected.getEtniaId();
 		if (this.etniaSelectedId!=0) {
-			this.etnias=etniaService.ListarActivos(this.personaSelected.getEtniaCodigo());
+			boolean oEncontrado=false;
+			for(Etnia s: this.etniasInicial){
+				if(s.getCodigo()==this.personaSelected.getEtniaCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.etnias=etniaService.ListarActivos(this.personaSelected.getEtniaCodigo());
+			} else {
+				this.etnias=this.etniasInicial;
+			}
 		} else {
-			this.etnias=etniaService.ListarActivos();
+			this.etnias=this.etniasInicial;
 		}
 		
 		this.estadoCivilSelectedId=this.personaSelected.getEstadoCivilId();
 		if (this.estadoCivilSelectedId!=0) {
-			this.estadosCiviles=estadoCivilService.ListarActivos(this.personaSelected.getEstadoCivilCodigo());
+			boolean oEncontrado=false;
+			for(EstadoCivil s: this.estadosCivilesInicial){
+				if(s.getCodigo()==this.personaSelected.getEstadoCivilCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.estadosCiviles=estadoCivilService.ListarActivos(this.personaSelected.getEstadoCivilCodigo());
+			} else {
+				this.estadosCiviles=this.estadosCivilesInicial;
+			}
 		} else {
-			this.estadosCiviles=estadoCivilService.ListarActivos();
+			this.estadosCiviles=this.estadosCivilesInicial;
 		}
 		
 		this.paisNacimientoSelectedId=this.personaSelected.getPaisNacId();
@@ -554,9 +606,19 @@ public class PersonaBean implements Serializable {
 
 		this.escolaridadSelectedId=this.personaSelected.getEscolaridadId();
 		if (this.escolaridadSelectedId!=0) {
-			this.escolaridades=escolaridadService.ListarActivos(this.personaSelected.getEscolaridadCodigo());
+			boolean oEncontrado=false;
+			for(Escolaridad s: this.escolaridadesInicial){
+				if(s.getCodigo()==this.personaSelected.getEscolaridadCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.escolaridades=escolaridadService.ListarActivos(this.personaSelected.getEscolaridadCodigo());
+			} else {
+				this.escolaridades=this.escolaridadesInicial;
+			}
 		} else {
-			this.escolaridades=escolaridadService.ListarActivos();
+			this.escolaridades=this.escolaridadesInicial;
 		}
 
 		this.ocupacionSelectedId=this.personaSelected.getOcupacionId();
@@ -569,9 +631,19 @@ public class PersonaBean implements Serializable {
 		
 		this.tipoAseguradoSelectedId=this.personaSelected.getTipoAsegId();
 		if (this.tipoAseguradoSelectedId!=0) {
-			this.tiposAsegurados=tipoAseguradoService.ListarActivos(this.personaSelected.getTipoAsegCodigo());
+			boolean oEncontrado=false;
+			for(TipoAsegurado s: this.tiposAseguradosInicial){
+				if(s.getCodigo()==this.personaSelected.getTipoAsegCodigo()) {
+					oEncontrado=true;
+				}
+			}
+			if (!oEncontrado) {
+				this.tiposAsegurados=tipoAseguradoService.ListarActivos(this.personaSelected.getTipoAsegCodigo());
+			} else {
+				this.tiposAsegurados=this.tiposAseguradosInicial;
+			}
 		} else {
-			this.tiposAsegurados=tipoAseguradoService.ListarActivos();
+			this.tiposAsegurados=this.tiposAseguradosInicial;
 		}
 		
 		this.numeroAsegurado=this.personaSelected.getAseguradoNumero();
@@ -602,7 +674,7 @@ public class PersonaBean implements Serializable {
 		this.sexoSelectedId=0;
 		this.sexos=sexoService.ListarActivos();
 		this.etniaSelectedId=0;
-		this.etnias=etniaService.ListarActivos();
+		this.etnias=this.etniasInicial;
 		this.estadoCivilSelectedId=0;
 		this.estadosCiviles=estadoCivilService.ListarActivos();
 		this.paisNacimientoSelectedId=0;
@@ -622,13 +694,13 @@ public class PersonaBean implements Serializable {
 		this.telefonoMovil=null;
 
 		this.escolaridadSelectedId=0;
-		this.escolaridades=escolaridadService.ListarActivos();
+		this.escolaridades=this.escolaridadesInicial;
 
 		this.ocupacionSelectedId=0;
 		this.ocupacionSelected=null;
 		
 		this.tipoAseguradoSelectedId=0;
-		this.tiposAsegurados=tipoAseguradoService.ListarActivos();
+		this.tiposAsegurados=this.tiposAseguradosInicial;
 		
 		this.numeroAsegurado=null;
 		this.verificado=false;
@@ -1108,6 +1180,38 @@ public class PersonaBean implements Serializable {
 
 	public Boolean getVerificado() {
 		return verificado;
+	}
+
+	public void setEtniasInicial(List<Etnia> etniasInicial) {
+		this.etniasInicial = etniasInicial;
+	}
+
+	public List<Etnia> getEtniasInicial() {
+		return etniasInicial;
+	}
+
+	public void setEscolaridadesInicial(List<Escolaridad> escolaridadesInicial) {
+		this.escolaridadesInicial = escolaridadesInicial;
+	}
+
+	public List<Escolaridad> getEscolaridadesInicial() {
+		return escolaridadesInicial;
+	}
+
+	public void setTiposAseguradosInicial(List<TipoAsegurado> tiposAseguradosInicial) {
+		this.tiposAseguradosInicial = tiposAseguradosInicial;
+	}
+
+	public List<TipoAsegurado> getTiposAseguradosInicial() {
+		return tiposAseguradosInicial;
+	}
+
+	public void setSexosInicial(List<Sexo> sexosInicial) {
+		this.sexosInicial = sexosInicial;
+	}
+
+	public List<Sexo> getSexosInicial() {
+		return sexosInicial;
 	}
 
 }

@@ -67,7 +67,7 @@
 					<p:ajax event="change" process="cboEntidad" 
 							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
 							listener="#{muestreoHematicoBean.obtenerUnidades}" 
-							update="panControl,grwMensaje,panButton"/>
+							update="@form"/>
 			</h:selectOneMenu>
 
 			<h:outputLabel for="cboUnidad" styleClass="lblDefaultSmall" 
@@ -85,7 +85,7 @@
 					<p:ajax event="change" process="cboUnidad" 
 							onstart="statusDialog.show();" oncomplete="statusDialog.hide();"
 							listener="#{muestreoHematicoBean.cambiarUnidad}" 
-							update="panControl,grwMensaje,panButton"/>
+							update="@form"/>
 			</h:selectOneMenu>
 
 			<h:outputLabel for="txtColVol" styleClass="lblDefaultSmall" 
@@ -96,6 +96,16 @@
 					disabled="true"
 					styleClass="txtDefault" > 
 			</h:inputText>
+
+			<h:outputLink id="btnQuitarColVol" 
+							      rendered="#{(!empty muestreoHematicoBean.colVolPuestoSelected) and (muestreoHematicoBean.estado==0)}"
+								  styleClass="navLinkInside" value="javascript:void(0)"
+								  style="position:absolute; left:520px; top:67px;">
+						<h:graphicImage url="../images/delete.gif" width="14" height="14" style="right:0px; border:0px;"  />
+						<p:ajax event="click" listener="#{muestreoHematicoBean.quitarColVol}" 
+								update="@form" process="@this"
+								onstart="statusDialog.show();" oncomplete="statusDialog.hide();" />
+			</h:outputLink>
 			
 			<p:commandButton id="btnBuscarColVol" 
 							 icon="icon-dbase" ajax="true"
@@ -127,16 +137,16 @@
 					style="position:absolute; left:693px; top:8px;"/>
 			<h:inputText id="txtLamina" style="position:absolute; left:693px; top:23px; width:87px; height:60px; font-size:30px !important;"
 					value="#{muestreoHematicoBean.numeroLamina}"
-					disabled="#{muestreoHematicoBean.estado!=0}"
+					disabled="#{muestreoHematicoBean.estado!=0 or muestreoHematicoBean.puestoNotificacionId==0}"
 					styleClass="txtDefault" >
-				<p:ajax event="change" process="@this"  
+				<!-- la actualización se gestiona en el bean -->
+				<p:ajax event="change" process="@this" update="@form"  
 						listener="#{muestreoHematicoBean.comprobarLamina}"
-						onstart="statusDialog.show();" oncomplete="statusDialog.hide();document.getElementById('frmMuestreo:txtFechaMuestra').focus();" 
-						update="@form"/>
+						onstart="statusDialog.show();" oncomplete="statusDialog.hide();document.getElementById('frmMuestreo:txtFechaMuestra').focus();" />
 			</h:inputText>
 
 			<h:outputLink id="lnkAceptarLamina" value="javascript:void(0)" 
-					styleClass="btLinkControl" rendered="#{muestreoHematicoBean.estado==0}"
+					styleClass="btLinkControl" rendered="#{muestreoHematicoBean.estado==0 and muestreoHematicoBean.puestoNotificacionId!=0}"
             		style="position: absolute; width:40px; height:11px; top: 7px; left: 730px;cursor:pointer;text-decoration:none;" >
 				 <h:graphicImage height="11" 
 				 					style="position: absolute; top: 1px; left:1px;"
@@ -161,12 +171,12 @@
 							   style="position:absolute; left:790px; top:8px;"/>
 			<h:inputText id="txtFechaMuestra" style="position:absolute; left:790px; top:23px; width:115px;"
 						 value="#{muestreoHematicoBean.muestreoHematicoSelected.fechaToma}"
-						 disabled="#{muestreoHematicoBean.estado!=0 and muestreoHematicoBean.estado!=1}"
+						 disabled="#{(muestreoHematicoBean.estado!=0 and muestreoHematicoBean.estado!=1) or muestreoHematicoBean.puestoNotificacionId==0 or !muestreoHematicoBean.autorizado}"
 						 styleClass="txtDefault fechaMuestra">
 				<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				<p:ajax event="change" process="@this" 
 						listener="#{muestreoHematicoBean.calcularSemana}" 
-						update="txtSemanaEpi,txtAnioEpi" />
+						update="txtSemanaEpi,txtAnioEpi,grwMensaje" />
 			</h:inputText>
 			<script type="text/javascript">
 				jQuery('.fechaMuestra').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
@@ -199,16 +209,16 @@
 							 value="#{muestreoHematicoBean.muestreoHematicoSelected.añoEpidemiologico}" 
 							 styleClass="txtDefault" disabled="true" />
 							 
-			<h:outputLink disabled="#{muestreoHematicoBean.puestoNotificacionId==0 and muestreoHematicoBean.unidadSelectedId==0}" 
-						 	onclick="dlgListaMuestras.show()" 
+			<h:outputLink disabled="#{muestreoHematicoBean.unidadSelectedId==0 or muestreoHematicoBean.estado!=0}" 
 				 			value="javascript:void(0)" 
-				 			style="position:absolute; top:55px; left:915px; width:46px; height:28px; padding-top:1px;padding-bottom:1px;padding-left:7px;padding-right:7px;" 
+				 			style="position:absolute; top:55px; left:915px; width:46px; height:28px; padding-top:4px;padding-bottom:1px;padding-left:7px;padding-right:7px; border: thin solid silver;" 
 				 			styleClass="navDelLink">
-				 	<h:outputText value="Consultar Muestras"/>
-				 	<f:ajax event="click"  
-				 			listener="#{muestreoHematicoBean.obtenerMuestras}" 
-				 			render="@this">
-					</f:ajax>
+				 	<h:outputText value="Consultar Muestras" style="color:#{(muestreoHematicoBean.unidadSelectedId==0 or muestreoHematicoBean.estado!=0)?'silver':'#29405B'};"/>
+				 	<p:ajax event="click"
+				 			onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgMuestreo.show()" 
+				 			process="@this" update="grwMensaje,grdMuestreos,panButtonMuestreo,cboAnioEpi"   
+				 			listener="#{muestreoHematicoBean.obtenerMuestras}"> 
+					</p:ajax>
 			</h:outputLink>
 		
         </p:panel>
@@ -225,7 +235,8 @@
 							 styleClass="txtDefault" disabled="true" />
 
 				<p:commandButton id="btnEditarPersona" icon="icon-user" ajax="true" 
-						 title="Haga clic para seleccionar o agregar al paciente"
+						 title="Haga clic para seleccionar o agregar al paciente" 
+						 disabled="#{muestreoHematicoBean.puestoNotificacionId==0}" 
 						 style="position:absolute; left:323px;top:23px;width:21px;height:21px;"
         				 oncomplete="#{empty muestreoHematicoBean.personaSelected?'dlgBusquedaPersona.show()':'dlgPersona.show()'};"  
         				 process="@this panPaciente" />
@@ -271,7 +282,6 @@
 						 	value="Embarazada:" 
 					   	 	style="position:absolute; left:917px; top:8px;"/>
 				<h:selectOneMenu id="cboEmbarazada" styleClass="txtDefault cboDefault"
-							disabled="#{muestreoHematicoBean.personaSelected.sexoCodigo!='SEXO|F'}"  
 						 	style="position:absolute; left:917px;top:23px;width:60px;" 
 						 	value="#{muestreoHematicoBean.muestreoHematicoSelected.embarazada}">
 					<f:selectItem itemLabel="" itemValue="" />
@@ -310,7 +320,7 @@
 								 value="#{muestreoHematicoBean.manzanaCodigo}" 
 								 styleClass="txtDefault" />
 					<h:outputLink id="btnQuitarManzana" 
-							      rendered="#{!empty muestreoHematicoBean.manzanaCodigo}"
+							      rendered="#{!empty muestreoHematicoBean.manzanaCodigo and muestreoHematicoBean.autorizado}"
 								  styleClass="navLinkInside" value="javascript:void(0)"
 								  title="Elimina la asociación con la manzana"
 								  style="position:absolute; left:158px; top:109px;">
@@ -319,6 +329,7 @@
 								render="panManzana" execute="@this" />
 					</h:outputLink>
 					<p:commandButton id="btnSeleccionManzana" 
+							 disabled="#{!muestreoHematicoBean.autorizado}"
 							 icon="icon-dbase" ajax="true" rendered="#{!empty muestreoHematicoBean.personaSelected.comuResiCodigo}" 
 							 title="Haga clic para seleccionar una manzana de la comunidad"
 							 style="position:absolute; left:179px;top:107px;width:21px;height:21px;"
@@ -336,7 +347,7 @@
 								 value="#{muestreoHematicoBean.viviendaCodigo}" 
 								 styleClass="txtDefault" />
 					<h:outputLink id="btnQuitarVivienda" 
-						      rendered="#{!empty muestreoHematicoBean.viviendaCodigo}"
+						      rendered="#{!empty muestreoHematicoBean.viviendaCodigo and muestreoHematicoBean.autorizado}"
 							  styleClass="navLinkInside" value="javascript:void(0)"
 							  title="Elimina la asociación con la vivienda"
 							  style="position:absolute; left:266px; top:109px;">
@@ -346,6 +357,7 @@
 					</h:outputLink>
 					<p:commandButton id="btnSeleccionVivienda" 
 							 icon="icon-dbase" ajax="true"
+							 disabled="#{!muestreoHematicoBean.autorizado}"
 							 rendered="#{!empty muestreoHematicoBean.personaSelected.comuResiCodigo}" 
 							 title="Haga clic para seleccionar la vivienda"
 							 style="position:absolute; left:286px;top:107px;width:21px;height:21px;"
@@ -403,6 +415,7 @@
 
 				<p:commandButton id="btnReferente" icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente?'icon-form-add':'icon-form-edit'}" ajax="true"
 						 title="Haga clic para agregar o editar los datos del referente"
+						 disabled="#{!muestreoHematicoBean.autorizado or muestreoHematicoBean.puestoNotificacionId==0}"
 						 style="position:absolute; left:200px;top:41px;width:21px;height:21px;"
         				 oncomplete="dlgReferente.show();"
         				 update="frmMuestreo:panDetalleReferente frmMuestreo:panButtonReferente" 
@@ -422,7 +435,8 @@
 							   value="Inicio de Síntomas:" 
 							   style="position:absolute; left:10px; top:26px;"/>
 				<h:inputText id="txtInicioSintomas" style="position:absolute; left:10px; top:41px; width:95px;"
-							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioSintomas}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioSintomas}"
+							 disabled="#{muestreoHematicoBean.puestoNotificacionId==0}" 
 							 styleClass="txtDefault iniSintomas" >	
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 						<f:ajax event="blur" 
@@ -446,7 +460,8 @@
 				<h:outputLabel for="cboManejoClinico" styleClass="lblDefaultSmall" 
 						 	value="Manejo Clínico:" 
 					   	 	style="position:absolute; left:124px; top:26px;"/>
-				<h:selectOneMenu id="cboManejoClinico" styleClass="txtDefault cboDefault"  
+				<h:selectOneMenu id="cboManejoClinico" styleClass="txtDefault cboDefault"
+							disabled="#{muestreoHematicoBean.puestoNotificacionId==0}"  
 						 	style="position:absolute; left:124px;top:41px;width:85px;" 
 						 	value="#{muestreoHematicoBean.muestreoHematicoSelected.manejoClinico}">
 					<f:selectItem itemLabel="Ambulatorio" itemValue="0" />
@@ -457,7 +472,8 @@
 							   value="Inicio de Tratamiento:" 
 							   style="position:absolute; left:221px; top:26px;"/>
 				<h:inputText id="txtInicioTratamiento" style="position:absolute; left:221px; top:41px; width:95px;"
-							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}" 
+							 value="#{muestreoHematicoBean.muestreoHematicoSelected.inicioTratamiento}"
+							 disabled="#{muestreoHematicoBean.puestoNotificacionId==0}" 
 							 styleClass="txtDefault iniTratamiento">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 						<f:ajax event="blur" listener="#{muestreoHematicoBean.cambiarTratamiento}" 
@@ -575,6 +591,7 @@
 							   style="position:absolute; left:10px; top:8px; font-weight:bold;"/>
 
 				<p:commandButton id="btnEditarPRM" 
+						 disabled="#{!muestreoHematicoBean.autorizado or muestreoHematicoBean.puestoNotificacionId==0}"
 						 icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida?'icon-form-add':'icon-form-edit'}" ajax="true"
 						 title="Haga clic para agregar o editar los datos de la prueba rápida de malaria"
 						 style="position:absolute; left:335px;top:8px;width:21px;height:21px;"
@@ -626,7 +643,8 @@
 
 				<p:commandButton id="btnEditarPGG" 
 						 icon="#{empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico?'icon-form-add':'icon-form-edit'}" ajax="true"
-						 title="Haga clic para agregar o editar los datos de la prueba de gota gruesa"
+						 title="Haga clic para agregar o editar los datos de la prueba de gota gruesa" 
+						 disabled="#{!muestreoHematicoBean.autorizado or muestreoHematicoBean.puestoNotificacionId==0}"
 						 style="position:absolute; left:590px;top:8px;width:21px;height:21px;"
         				 oncomplete="dlgPGG.show();" update="panDetallePGG panButtonPGG"  
         				 process="@this" />
@@ -721,15 +739,18 @@
 				 style="position:absolute; top:407px; width:985px; left:5px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 			
 				<p:commandButton id="btnGuardar" value="Guardar" ajax="true"
-								 styleClass="btnDefault" style="font-size:11px;"  
+								 styleClass="btnDefault" style="font-size:11px;"
 								 update="@form" 
-								 process="@this,panControl,panPaciente,panTratamiento" 
+								 disabled="#{!muestreoHematicoBean.autorizado or muestreoHematicoBean.puestoNotificacionId==0}"
+								 process="@this,panControl,panPaciente,panTratamiento"
+								 onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
 								 actionListener="#{muestreoHematicoBean.guardar}" />
 
 				<p:commandButton id="btnEliminar" value="Eliminar"  
-								 disabled="#{muestreoHematicoBean.estado!=1}"
-								 oncomplete="dlgEliminarMuestra.show()"
+								 disabled="#{muestreoHematicoBean.estado!=1 or !muestreoHematicoBean.autorizado or muestreoHematicoBean.puestoNotificacionId==0}"
+								 oncomplete="statusDialog.hide();dlgEliminarMuestra.show()"
 								 process="@this" 
+								 onstart="statusDialog.show();" 
 							     styleClass="btnDefault" style="font-size:11px;"/>
 
 				<p:commandButton value="Salir" styleClass="btnDefault" 
@@ -752,6 +773,7 @@
 				<p:dataTable id="grdColVoles" var="colVolPuesto" rowKey="#{colVolPuesto.puestoNotificacionId}"
 							 styleClass="panDetail" 
 							 widgetVar="tablaColVoles"
+							 rowStyleClass="#{colVolPuesto.pasivo?'rowNonActive':null}"
 							 selectionMode="single" 
 							 selection="#{muestreoHematicoBean.colVolPuestoSelected}"
 							 emptyMessage="Sin resultados" 
@@ -772,9 +794,22 @@
 						<h:outputText value="#{colVolPuesto.clave}" />
 					</p:column>
 
-					<p:column headerText="Nombre Colaborador Voluntario" style="text-align:left;width:350px">
+					<p:column headerText="Colaborador Voluntario" style="text-align:left;width:250px">
 						<h:outputText value="#{colVolPuesto.nombreColVol}" />
 					</p:column>
+					
+					<p:column headerText="Apertura" style="text-align:left;width:50px">
+						<h:outputText value="#{colVolPuesto.fechaApertura}" >
+							<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Cierre" style="text-align:left;width:50px">
+						<h:outputText value="#{colVolPuesto.fechaCierre}" >
+							<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+					
 					
 				</p:dataTable>
 			</div>
@@ -820,7 +855,7 @@
 								 value="Aceptar" 
 								 process="@this" ajax="true" immediate="true" 
 								 styleClass="btnDefault" style="font-size:11px;"
-								 update="txtColVol,txtClave,grwMensaje" 
+								 update="panControl,grwMensaje" 
 								 actionListener="#{muestreoHematicoBean.aceptarColVol}"  
 								 oncomplete="dlgColVol.hide()">
 				</p:commandButton>
@@ -957,6 +992,123 @@
 			
 		</p:dialog>
 
+		<!-- Modal para mostrar e2  -->
+
+		<p:dialog id="dlgMuestreo" header="Muestreos hemáticos realizados"  
+				  modal="true" 
+				  widgetVar="dlgMuestreo" 
+				  height="495" width="875" 
+				  styleClass="txtDefault"
+				  resizable="false">
+
+			<h:outputLabel styleClass="lblDefaultSmall" 
+						   value="Filtrar por Situación:" 
+					   	 	style="position:absolute; left:10px; top:7px;"/>
+			<h:selectOneMenu id="cboSituacion" styleClass="txtDefault cboDefault"
+						 	style="position:absolute; left:100px;top:5px;width:300px;" 
+						 	value="#{muestreoHematicoBean.situacion}">
+					<f:selectItem itemLabel="Pendiente de Investigación" itemValue="1" />
+					<f:selectItem itemLabel="Investigación en curso sin confirmación" itemValue="2" />
+					<f:selectItem itemLabel="Investigación en curso con confirmación" itemValue="3" />
+					<f:selectItem itemLabel="Investigación finalizada" itemValue="4" />
+				<p:ajax event="change" process="cboSituacion,cboAnioEpi"
+                    onstart="statusDialog.show();"
+					oncomplete="statusDialog.hide();"
+                    update="grdMuestreos,panButtonMuestreo,grwMensaje" />
+			</h:selectOneMenu>
+			
+			<h:outputText value="Año epidemiológico:" styleClass="lblDefault"
+            	style="position:absolute;  left:660px; top:7px;" />
+            <h:selectOneMenu id="cboAnioEpi"
+            		disabled="#{investigacionMalariaBean.capaActiva==2}"
+                	styleClass="txtDefault cboDefault"
+                	style="position:absolute; left:750px;top:5px;width:100px;"
+                	value="#{muestreoHematicoBean.anioEpiSelected}">
+                <f:selectItems value="#{muestreoHematicoBean.aniosEpidemiologicos}" />
+				<p:ajax event="change" process="cboSituacion,cboAnioEpi"
+                    onstart="statusDialog.show();"
+					oncomplete="statusDialog.hide();"
+                    update="grdMuestreos,panButtonMuestreo,grwMensaje" />
+			</h:selectOneMenu>
+			
+			<div style="float: left; overflow: auto; position:relative; top:25px;left:0px; width:852px; height:410px; border:1px solid rgb(211,211,211); border-radius:5px 5px 5px 5px;">
+				<p:dataTable id="grdMuestreos" var="muestreo" rowKey="#{muestreo.muestreoHematicoId}"
+							 styleClass="panDetail" paginatorPosition="top" 
+							 widgetVar="tablaMuestreos"
+							 selectionMode="single" 
+							 selection="#{muestreoHematicoBean.muestreoHematicoSelectedTmp}"
+							 emptyMessage="No existen muestreos hemáticos" 
+							 style="width:850px;"  
+						 	 value="#{muestreoHematicoBean.muestreosHematicos}" 
+					 		 paginatorAlwaysVisible="true" 
+						 	 paginator="true" rows="14" >
+					
+					<p:ajax event="rowSelect" update=":frmMuestreo:panButtonMuestreo" />
+					<p:ajax event="rowUnselect" update=":frmMuestreo:panButtonMuestreo" />
+					
+					<p:column headerText="Clave" style="text-align:left;width:40px;">
+						<h:outputText value="#{muestreo.clave}" />
+					</p:column>
+					
+					<p:column headerText="Puesto de Notificacion" style="text-align:left;width:220px" 
+							  rendered="#{empty muestro.puestoNotificacion.colVol}">
+						<h:outputText value="#{empty muestreo.puestoNotificacion.colVol?muestreo.puestoNotificacion.unidad.nombre:muestreo.puestoNotificacion.colVol.sisPersona.nombreCompleto}" />
+					</p:column>
+
+					<p:column headerText="Paciente" style="text-align:left;width:#{empty muestro.puestoNotificacion.colVol?'240px':'460px'}">
+						<h:outputText value="#{muestreo.sisPersona.nombreCompleto}" />
+					</p:column>
+					
+					<p:column headerText="Sexo" style="text-align:left; width:50px;">
+						<h:outputText value="#{muestreo.sisPersona.sexo.valor}" />
+					</p:column>
+
+					<p:column headerText="Lámina" style="text-align:left;width:60px">
+						<h:outputText value="#{muestreo.numeroLamina}" >
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Fecha Toma" style="text-align:left;width:60px">
+						<h:outputText value="#{muestreo.fechaToma}" >
+							<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Sem." style="text-align:left;width:30px">
+						<h:outputText value="#{muestreo.semanaEpidemiologica}" >
+						</h:outputText>
+					</p:column>
+					
+					<p:column headerText="Resultado" style="text-align:left;width:60px">
+						<h:outputText rendered="#{empty muestreo.diagnostico}"
+									  value="Pendiente" style="font-style:italic;color:silver;">
+						</h:outputText>
+						<h:outputText rendered="#{!empty muestreo.diagnostico}" 
+									  value="#{(empty muestreo.diagnostico.resultado?'N/D':(muestreo.diagnostico.resultado==0?'Negativo':'Positivo'))}"
+									  style="color:#{(empty muestreo.diagnostico.resultado?'black':(muestreo.diagnostico.resultado==0?'green':'red'))};">
+						</h:outputText>
+					</p:column>
+					
+				</p:dataTable>
+			</div>
+			<p></p>
+			<p:panel id="panButtonMuestreo" style="position:absolute; top:445px; width: 852px; left:9px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
+				<p:commandButton id="btnAceptarMuestreo" 
+								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected}" 
+								 value="Aceptar" 
+								 process="@this" ajax="true" immediate="true" 
+								 styleClass="btnDefault" style="font-size:11px;"
+								 update="@form" onstart="statusDialog.show();" oncomplete="statusDialog.hide();dlgMuestreo.hide();"
+								 actionListener="#{muestreoHematicoBean.aceptarMuestreo}" >
+				</p:commandButton>
+				
+				<p:commandButton value="Cancelar" onclick="dlgMuestreo.hide()"
+								 style="font-size:11px;"
+								 type="button" styleClass="btnDefault"/>
+			</p:panel>
+			
+		</p:dialog>
+
 		<!-- Modal para vincular persona   -->
 
 		<p:dialog id="dlgReferente" header="Información de la Persona Referente"  
@@ -990,7 +1142,8 @@
 			
 			<p:panel id="panButtonReferente" style="position:absolute; top:85px; width: 470px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
 				<p:commandButton id="btnAceptarReferente" 
-								 value="Aceptar" 
+								 value="Aceptar"
+								 rendered="#{muestreoHematicoBean.autorizado}" 
 								 process="@this panDetalleReferente" ajax="true"  
 								 styleClass="btnDefault" style="font-size:11px;"
 								 update="panReferente,grwMensaje" 
@@ -1000,6 +1153,7 @@
 				
 				<p:commandButton id="btnEliminarReferente" 
 								 value="Eliminar" process="@this" 
+								 rendered="#{muestreoHematicoBean.autorizado}"
 								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.personaReferente}"
 								 styleClass="btnDefault" style="font-size:11px;"
 								 onclick="dlgReferente.hide();dlgConfirmarEliminarReferente.show();">
@@ -1076,6 +1230,7 @@
 			<p:panel id="panButtonPRM" style="position:absolute; top:140px; width: 405px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;" styleClass="panButton" > 
 				<p:commandButton id="btnAceptarPRM" 
 								 value="Aceptar" 
+								 rendered="#{muestreoHematicoBean.autorizado}"
 								 process="@this panDetallePRM" ajax="true"  
 								 styleClass="btnDefault" style="font-size:11px;"
 								 update="panPRM grwMensaje" 
@@ -1085,6 +1240,7 @@
 				
 				<p:commandButton id="btnEliminarPRM" 
 								 value="Eliminar" process="@this"
+								 rendered="#{muestreoHematicoBean.autorizado}"
 								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.pruebaRapida}"
 								 styleClass="btnDefault" style="font-size:11px;"
 								 onclick="dlgPRM.hide();dlgConfirmarEliminarPRM.show();">
@@ -1186,7 +1342,7 @@
 
 				<h:selectOneMenu id="cboDensidadPVivax" 
 							styleClass="txtDefault cboDefault"
-							disabled="#{muestreoHematicoBean.muestreoDiagnosticoSelected.positivoPVivax!=1}"  
+							disabled="#{!muestreoHematicoBean.positivoPVivax}"  
 						 	style="position:absolute; left:400px;top:45px;width:85px;" 
 						 	value="#{muestreoHematicoBean.densidadPVivaxSelectedId}">
 					<f:selectItem itemValue="0" itemLabel="" /> 
@@ -1338,6 +1494,7 @@
 			<p:panel id="panButtonPGG" style="position:absolute; top:325px; width: 685px; left:10px;" styleClass="panButton" > 
 				<p:commandButton id="btnAceptarPGG" 
 								 value="Aceptar" 
+								 rendered="#{muestreoHematicoBean.autorizado}"
 								 process="@this panDetallePGG" ajax="true"  
 								 styleClass="btnDefault" style="font-size:11px;"
 								 update="panPGG grwMensaje" 
@@ -1347,6 +1504,7 @@
 				
 				<p:commandButton id="btnEliminarPGG" 
 								 value="Eliminar" process="@this"
+								 rendered="#{muestreoHematicoBean.autorizado}"
 								 disabled="#{empty muestreoHematicoBean.muestreoHematicoSelected.diagnostico}"
 								 styleClass="btnDefault" style="font-size:11px;"
 								 onclick="dlgPGG.hide();dlgConfirmarEliminarPGG.show();">

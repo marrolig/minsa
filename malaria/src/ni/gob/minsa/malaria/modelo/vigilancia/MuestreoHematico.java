@@ -44,12 +44,8 @@ import org.eclipse.persistence.annotations.Cache;
 	@NamedQuery(
 			name="MuestreoHematico.encontrarPorLamina",
 			query="select mh from MuestreoHematico mh " +
-				    "where mh.clave=:pClave and " +
+				    "where mh.entidadNotificacion.entidadAdtvaId=:pEntidadId AND mh.clave=:pClave AND " +
 				    "      mh.numeroLamina=:pNumeroLamina "),
-	@NamedQuery(
-			name="MuestreoHematico.listarPorClave",
-			query="select mh from MuestreoHematico mh " +
-					"where mh.clave=:pClave"),
 	@NamedQuery(
 			name="MuestreoHematico.listarPorPersona",
 			query="select mh from MuestreoHematico mh " +

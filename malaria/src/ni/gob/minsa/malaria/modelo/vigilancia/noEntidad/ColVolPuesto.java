@@ -1,6 +1,8 @@
 package ni.gob.minsa.malaria.modelo.vigilancia.noEntidad;
 
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Clase de soporte para la presentación de los colaboradores voluntarios
@@ -18,6 +20,9 @@ public class ColVolPuesto implements Serializable {
 	private long puestoNotificacionId;
 	private String nombreColVol;
 	private String clave;
+	private Date fechaApertura;
+	private Date fechaCierre;
+	private boolean pasivo;
              
 	public ColVolPuesto() {}
 
@@ -43,6 +48,32 @@ public class ColVolPuesto implements Serializable {
 
 	public String getClave() {
 		return clave;
+	}
+
+	public void setFechaApertura(Date fechaApertura) {
+		this.fechaApertura = fechaApertura;
+	}
+
+	public Date getFechaApertura() {
+		return fechaApertura;
+	}
+
+	public void setFechaCierre(Date fechaCierre) {
+		this.fechaCierre = fechaCierre;
+	}
+
+	public Date getFechaCierre() {
+		return fechaCierre;
+	}
+
+	public void setPasivo(boolean pasivo) {
+		this.pasivo = pasivo;
+	}
+
+	public boolean isPasivo() {
+		if (fechaApertura.after(Calendar.getInstance().getTime())) return true;
+		if (fechaCierre!=null && fechaCierre.before(Calendar.getInstance().getTime())) return true;
+		return false;
 	}
 
 	

@@ -1,6 +1,7 @@
 package ni.gob.minsa.malaria.datos.vigilancia;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import javax.naming.InitialContext;
@@ -260,6 +261,7 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         			}
         		}
         		oMuestreoHematico.setDiagnostico(null);
+        		
         	} else {
         		
         		// tanto para el diagnóstico como para el motivo de la falta de diagnóstico, la fecha de recepción es requerida, 
@@ -278,40 +280,40 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         			// si el identificador del objeto del diagnóstico es diferente de cero, implica que ya existía un
         			// diagnóstico declarado en la base de datos, por tanto, obtiene el objeto para persistir los cambios,
         			// caso contrario, únicamente actualiza los datos
-        			
+        		
         			if (pMuestreoHematico.getDiagnostico().getMuestreoDiagnosticoId()!=0) {
         				
-        				MuestreoDiagnostico oMuestreoDiagnostico = (MuestreoDiagnostico)oEM.find(MuestreoDiagnostico.class, oMuestreoHematico.getDiagnostico().getMuestreoDiagnosticoId());
+        				MuestreoDiagnostico oMuestreoDiagnostico = (MuestreoDiagnostico)oEM.find(MuestreoDiagnostico.class, pMuestreoHematico.getDiagnostico().getMuestreoDiagnosticoId());
         				oMuestreoDiagnostico.setFechaRecepcion(pMuestreoHematico.getDiagnostico().getFechaRecepcion());
         				oMuestreoDiagnostico.setFechaDiagnostico(pMuestreoHematico.getDiagnostico().getFechaDiagnostico());
         				oMuestreoDiagnostico.setResultado(pMuestreoHematico.getDiagnostico().getResultado());
-						oMuestreoDiagnostico.setPositivoPVivax(pMuestreoHematico.getDiagnostico().getPositivoPVivax());
-						oMuestreoDiagnostico.setPositivoPFalciparum(pMuestreoHematico.getDiagnostico().getPositivoPFalciparum());
+        				oMuestreoDiagnostico.setPositivoPVivax(pMuestreoHematico.getDiagnostico().getPositivoPVivax());
+        				oMuestreoDiagnostico.setPositivoPFalciparum(pMuestreoHematico.getDiagnostico().getPositivoPFalciparum());
 						
-						if (pMuestreoHematico.getDiagnostico().getDensidadPVivax()!=null) {
-							DensidadCruces oDensidadPVivax = (DensidadCruces)oEM.find(DensidadCruces.class, pMuestreoHematico.getDiagnostico().getDensidadPVivax().getCatalogoId());
-							oMuestreoDiagnostico.setDensidadPVivax(oDensidadPVivax);
-						} else {
-							oMuestreoDiagnostico.setDensidadPVivax(null);
-						}
+        				if (pMuestreoHematico.getDiagnostico().getDensidadPVivax()!=null) {
+        					DensidadCruces oDensidadPVivax = (DensidadCruces)oEM.find(DensidadCruces.class, pMuestreoHematico.getDiagnostico().getDensidadPVivax().getCatalogoId());
+        					oMuestreoDiagnostico.setDensidadPVivax(oDensidadPVivax);
+        				} else {
+        					oMuestreoDiagnostico.setDensidadPVivax(null);
+        				}
 						
-						if (pMuestreoHematico.getDiagnostico().getDensidadPFalciparum()!=null) {
-							DensidadCruces oDensidadPFalciparum = (DensidadCruces)oEM.find(DensidadCruces.class, pMuestreoHematico.getDiagnostico().getDensidadPFalciparum().getCatalogoId());
-							oMuestreoDiagnostico.setDensidadPFalciparum(oDensidadPFalciparum);
-						} else {
-							oMuestreoDiagnostico.setDensidadPFalciparum(null);
-						}
+        				if (pMuestreoHematico.getDiagnostico().getDensidadPFalciparum()!=null) {
+        					DensidadCruces oDensidadPFalciparum = (DensidadCruces)oEM.find(DensidadCruces.class, pMuestreoHematico.getDiagnostico().getDensidadPFalciparum().getCatalogoId());
+        					oMuestreoDiagnostico.setDensidadPFalciparum(oDensidadPFalciparum);
+        				} else {
+        					oMuestreoDiagnostico.setDensidadPFalciparum(null);
+        				}
+        				
+        				if (pMuestreoHematico.getDiagnostico().getEstadioPFalciparum()!=null) {
+        					EstadioPFalciparum oEstadioPFalciparum = (EstadioPFalciparum)oEM.find(EstadioPFalciparum.class, pMuestreoHematico.getDiagnostico().getEstadioPFalciparum().getCatalogoId());
+        					oMuestreoDiagnostico.setEstadioPFalciparum(oEstadioPFalciparum);
+        				} else {
+        					oMuestreoDiagnostico.setEstadioPFalciparum(null);
+        				}
 
-						if (pMuestreoHematico.getDiagnostico().getEstadioPFalciparum()!=null) {
-							EstadioPFalciparum oEstadioPFalciparum = (EstadioPFalciparum)oEM.find(EstadioPFalciparum.class, pMuestreoHematico.getDiagnostico().getEstadioPFalciparum().getCatalogoId());
-							oMuestreoDiagnostico.setEstadioPFalciparum(oEstadioPFalciparum);
-						} else {
-							oMuestreoDiagnostico.setEstadioPFalciparum(null);
-						}
-
-    					oMuestreoDiagnostico.setEstadiosAsexuales(pMuestreoHematico.getDiagnostico().getEstadiosAsexuales());
-    					oMuestreoDiagnostico.setGametocitos(pMuestreoHematico.getDiagnostico().getGametocitos());
-    					oMuestreoDiagnostico.setLeucocitos(pMuestreoHematico.getDiagnostico().getLeucocitos());
+        				oMuestreoDiagnostico.setEstadiosAsexuales(pMuestreoHematico.getDiagnostico().getEstadiosAsexuales());
+        				oMuestreoDiagnostico.setGametocitos(pMuestreoHematico.getDiagnostico().getGametocitos());
+        				oMuestreoDiagnostico.setLeucocitos(pMuestreoHematico.getDiagnostico().getLeucocitos());
         				
         				if (pMuestreoHematico.getDiagnostico().getMotivoFaltaDiagnostico()!=null) {
             				MotivoFaltaDiagnostico oMotivoFaltaDiagnostico = (MotivoFaltaDiagnostico)oEM.find(MotivoFaltaDiagnostico.class, pMuestreoHematico.getDiagnostico().getMotivoFaltaDiagnostico().getCatalogoId());
@@ -343,6 +345,10 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
             			
         				oMuestreoDiagnostico.setLaboratorista(pMuestreoHematico.getDiagnostico().getLaboratorista()!=null && !pMuestreoHematico.getDiagnostico().getLaboratorista().isEmpty()?pMuestreoHematico.getDiagnostico().getLaboratorista():null);
         				oMuestreoHematico.setDiagnostico(oMuestreoDiagnostico);
+        				
+        			} else {
+        				
+        				oMuestreoHematico.setDiagnostico(pMuestreoHematico.getDiagnostico());
         				
         			}
         		}
@@ -404,7 +410,7 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
         			}
             	}
         	}
-        	
+
             oEM.getTransaction().commit();
             personaUTMService.commitTransaccion();
     		oResultado.setFilasAfectadas(1);
@@ -650,11 +656,12 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 
 
 	@Override
-	public MuestreoHematico EncontrarPorLamina(String pClave,BigDecimal pNumeroLamina) {
+	public MuestreoHematico EncontrarPorLamina(long pEntidadId, String pClave,BigDecimal pNumeroLamina) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         try{
             Query query = em.createNamedQuery("MuestreoHematico.encontrarPorLamina");
+            query.setParameter("pEntidadId", pEntidadId);
             query.setParameter("pClave", pClave);
             query.setParameter("pNumeroLamina",pNumeroLamina);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -684,17 +691,201 @@ public class MuestreoHematicoDA implements MuestreoHematicoService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<MuestreoHematico> ListarPorClave(String pClave) {
+	public List<MuestreoHematico> ListarPorPuesto(long pPuestoNotificacionId, Integer pAnioEpidemiologico, Integer pSituacion, int pPaginaActual, int pTotalPorPagina, int pNumRegistros) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         try{
-            Query query = em.createNamedQuery("MuestreoHematico.listarPorClave");
-            query.setParameter("pClave", pClave);
+
+        	Query query = null;
+        	
+        	// situacion:1
+        	// incluye todos los muestreos hemáticos vinculados al puesto de notificación y que no tienen investigación asociada
+        	if (pSituacion==1) {
+            	query = em.createQuery("select tm " +
+                                             " from MuestreoHematico tm " +
+                                             " where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+                                                      "tm.añoEpidemiologico = :pAnioEpidemiologico ");
+            } 
+        	
+        	// TODO Faltan otras situaciones
+
+            query.setParameter("pPuestoNotificacionId", pPuestoNotificacionId);
+            query.setParameter("pAnioEpidemiologico", pAnioEpidemiologico);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            
+            if (pNumRegistros<=pPaginaActual) pPaginaActual-=pNumRegistros;
+            pPaginaActual=pNumRegistros<=pPaginaActual ? 0: pPaginaActual;
+            query.setFirstResult(pPaginaActual);
+            query.setMaxResults(pTotalPorPagina);
             return(query.getResultList());
+            
         } finally{
             em.close();
         }			
 	}
 	
+	@Override
+	public int ContarPorPuesto(long pPuestoNotificacionId, Integer pAnioEpidemiologico, Integer pSituacion) {
+		
+		 EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+         int totalMuestras=0;
+         try{
+        	 Query query =null;
+        	 // situación=0, omite el filtre de situación
+        	 if (pSituacion==0) {
+        		 query = em.createQuery("select count(tm) " +
+                                         " from MuestreoHematico tm " +
+                                         " where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+                                                  ":pAnioEpidemiologico=0 or tm.añoEpidemiologico = :pAnioEpidemiologico ");
+        	 } 
+
+        	 if (pSituacion==1) {
+        		 query = em.createQuery("select count(tm) " +
+                                         " from MuestreoHematico tm " +
+                                         " where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+                                                  ":pAnioEpidemiologico=0 or tm.añoEpidemiologico = :pAnioEpidemiologico ");
+                         
+        	 } 
+             query.setParameter("pPuestoNotificacionId", pPuestoNotificacionId);
+             query.setParameter("pAnioEpidemiologico", pAnioEpidemiologico);
+             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+             totalMuestras = ((Long)query.getSingleResult()).intValue();
+         }finally{
+             em.close();
+         }
+        
+        return totalMuestras;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<MuestreoHematico> ListarPorUnidad(long pUnidadId, Integer pAnioEpidemiologico, Integer pSituacion, int pPaginaActual, int pTotalPorPagina, int pNumRegistros) {
+		
+        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+        try{
+        	Query query =null;
+
+        	// situacion:1
+        	// incluye todos los muestreos hemáticos notificados por la unidad y que no tienen investigación asociada
+        	if (pSituacion==1) {
+            	query = em.createQuery("select tm " +
+                                             " from MuestreoHematico tm " +
+                                             " where tm.unidadNotificacion.unidadId=:pUnidadId and " +
+                                                      "tm.añoEpidemiologico = :pAnioEpidemiologico ");
+            } 
+        	
+        	// TODO Faltan otras situaciones
+        	
+            query.setParameter("pUnidadId", pUnidadId);
+            query.setParameter("pAnioEpidemiologico", pAnioEpidemiologico);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            
+            if (pNumRegistros<=pPaginaActual) pPaginaActual-=pNumRegistros;
+            pPaginaActual=pNumRegistros<=pPaginaActual ? 0: pPaginaActual;
+            query.setFirstResult(pPaginaActual);
+            query.setMaxResults(pTotalPorPagina);
+            return(query.getResultList());
+            
+        } finally{
+            em.close();
+        }			
+	}	
+	
+    @Override
+	public int ContarPorUnidad(long pUnidadId, Integer pAnioEpidemiologico, Integer pSituacion) {
+    		
+    	EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+        int totalMuestras=0;
+        try{
+        	Query query =null;
+            if (pSituacion==1) {
+            	query = em.createQuery("select count(tm) " +
+                                             " from MuestreoHematico tm " +
+                                             " where tm.unidadNotificacion.unidadId=:pUnidadId and " +
+                                                      "tm.añoEpidemiologico = :pAnioEpidemiologico ");
+                             
+            } 
+            query.setParameter("pUnidadId", pUnidadId);
+            query.setParameter("pAnioEpidemiologico", pAnioEpidemiologico);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            totalMuestras = ((Long)query.getSingleResult()).intValue();
+        }finally{
+        	em.close();
+        }
+            
+        return totalMuestras;
+	}
+        
+    @SuppressWarnings("unchecked")
+	public List<Integer> ListarAñosConMuestreoUnidad(long pUnidadId, Integer pAnioEpidemiologico) {
+    
+        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+        try{
+        	Query query =null;
+        	query = em.createQuery("select distinct tm.añoEpidemiologico " +
+            								" from MuestreoHematico tm " +
+            								" where tm.unidadNotificacion.unidadId=:pUnidadId and " +
+            									" tm.añoEpidemiologico >= :pAnioEpidemiologico " +
+                         					" order by tm.añoEpidemiologico asc ");
+            query.setParameter("pUnidadId",pUnidadId);
+            query.setParameter("pAnioEpidemiologico",pAnioEpidemiologico);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            return (query.getResultList());
+
+        } finally{
+        	em.close();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+	public List<Integer> ListarAñosConMuestreoPuesto(long pPuestoNotificacionId, Integer pAnioEpidemiologico) {
+    
+        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+        try{
+        	Query query =null;
+        	query = em.createQuery("select distinct tm.añoEpidemiologico " +
+            								" from MuestreoHematico tm " +
+            								" where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+            									" tm.añoEpidemiologico >= :pAnioEpidemiologico " +
+                         					" order by tm.añoEpidemiologico asc ");
+            query.setParameter("pPuestoNotificacionId",pPuestoNotificacionId);
+            query.setParameter("pAnioEpidemiologico",pAnioEpidemiologico);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            return (query.getResultList());
+
+        } finally{
+        	em.close();
+        }
+        
+    }
+
+	@Override
+	public int ContarPorPuestoFecha(long pPuestoNotificacionId, Date pFecha, int pModo) {
+		
+		 EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+         int totalMuestras=0;
+         try{
+        	 Query query =null;
+        	 if (pModo==1) {
+        		 query = em.createQuery("select count(tm) " +
+        				 					" from MuestreoHematico tm " +
+        				 						"where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+                                                "tm.fechaToma>:pFecha");
+        	 } else {
+        		 query = em.createQuery("select count(tm) " +
+		 									" from MuestreoHematico tm " +
+		 										"where tm.puestoNotificacion.puestoNotificacionId=:pPuestoNotificacionId and " +
+                               					"tm.fechaToma<:pFecha");
+        	 }
+             query.setParameter("pPuestoNotificacionId", pPuestoNotificacionId);
+             query.setParameter("pFecha", pFecha);
+             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+             totalMuestras = ((Long)query.getSingleResult()).intValue();
+         }finally{
+             em.close();
+         }
+        
+        return totalMuestras;
+	}
+
 }

@@ -38,6 +38,7 @@ import ni.gob.minsa.malaria.datos.general.MarcadorDA;
 import ni.gob.minsa.malaria.datos.general.ParametroDA;
 import ni.gob.minsa.malaria.datos.poblacion.ComunidadDA;
 import ni.gob.minsa.malaria.datos.vigilancia.ColVolDA;
+import ni.gob.minsa.malaria.datos.vigilancia.MuestreoHematicoDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoComunidadDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoNotificacionDA;
 import ni.gob.minsa.malaria.interfaz.sis.PersonaBean;
@@ -59,6 +60,7 @@ import ni.gob.minsa.malaria.servicios.general.MarcadorService;
 import ni.gob.minsa.malaria.servicios.general.ParametroService;
 import ni.gob.minsa.malaria.servicios.poblacion.ComunidadService;
 import ni.gob.minsa.malaria.servicios.vigilancia.ColVolService;
+import ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoComunidadService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoNotificacionService;
 import ni.gob.minsa.malaria.soporte.NivelZoom;
@@ -86,6 +88,9 @@ public class ColVolBean implements Serializable {
 	
 	private int modo;
 	
+	// el puesto de notificación tiene muestreos hemáticos vinculados
+	private boolean puestoConActividad;
+	
 	// objetos para poblar el combo de entidades administrativas
 	private List<EntidadAdtva> entidades;
 	
@@ -97,9 +102,14 @@ public class ColVolBean implements Serializable {
 	private Unidad unidadSelected;
 	private long unidadSelectedId;
 
+	private boolean mostrarSoloActivos;
+	
 	// lista de objetos para la grilla de colvoles
 	private LazyDataModel<ColVol> colVoles;
 	private ColVol colVolSelected;
+	
+	// true si el colVol se encuentra activo y la persona no puede ser declarada nuevamente
+	private boolean colVolActivo;
 	private long colVolId;
 
 	// literal utilizada para filtrar a los colaboradores voluntarios en la grilla
@@ -142,9 +152,11 @@ public class ColVolBean implements Serializable {
 	private String puntoReferencia;
 	
 	private List<TipoTransporte> tiposTransportes;
+	private List<TipoTransporte> tiposTransportesActivos;
 	private long tipoTransporteSelectedId;
 	
 	private List<ClaseAccesibilidad> clasesAccesibilidad;
+	private List<ClaseAccesibilidad> clasesAccesibilidadActivos;
 	private long claseAccesibilidadSelectedId;
 	
 	private BigDecimal distancia;
@@ -191,11 +203,15 @@ public class ColVolBean implements Serializable {
 	private static ParametroService parametroService = new ParametroDA();
 	
 	private static PuestoNotificacionService puestoNotificacionService = new PuestoNotificacionDA();
+	private static MuestreoHematicoService muestreoHematicoService = new MuestreoHematicoDA();
 	
 	public ColVolBean() {
 		
 		this.nivelZoom=new NivelZoom();
 		this.capaActiva=1;
+		this.colVolActivo=false;
+		this.puestoConActividad=false;
+		this.mostrarSoloActivos=true;
 		
 		this.infoSesion=Utilidades.obtenerInfoSesion();
 		this.entidades= new ArrayList<EntidadAdtva>();
@@ -205,9 +221,12 @@ public class ColVolBean implements Serializable {
 		this.entidadSelectedId=0;
 		this.unidadSelectedId=0;
 
+		this.tiposTransportesActivos=tipoTransporteService.ListarActivos();
+		this.clasesAccesibilidad=claseAccesibilidadService.ListarActivos();
+
 		this.urlMarcadorColVolM="";
 		this.urlMarcadorColVolF="";
-		
+
 		InfoResultado oResultadoParametro=parametroService.Encontrar("MAPA_COLVOL_HOMBRE");
 		if (oResultadoParametro!=null && oResultadoParametro.isOk()) {
 			Parametro oParametro=(Parametro)oResultadoParametro.getObjeto();
@@ -260,8 +279,8 @@ public class ColVolBean implements Serializable {
 				List<ColVol> colVolList=null;
 				numRegistros=0;
 			
-				numRegistros=colVolService.ContarPorUnidad(unidadSelectedId, filtroColVol.trim(), false);
-				colVolList=colVolService.ListarPorUnidad(unidadSelectedId, filtroColVol.trim(),false,first, pageSize,numRegistros);
+				numRegistros=colVolService.ContarPorUnidad(unidadSelectedId, filtroColVol.trim(), mostrarSoloActivos);
+				colVolList=colVolService.ListarPorUnidad(unidadSelectedId, filtroColVol.trim(),mostrarSoloActivos, first, pageSize,numRegistros);
 
 				if (!(colVolList!=null && colVolList.size()>0)) {
 					FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_INFO, "No se encontraron comunidades con los parámetros de búsqueda seleccionados","Verifique la literal de búsqueda, el municipio y/o sector");
@@ -286,6 +305,7 @@ public class ColVolBean implements Serializable {
 		FacesContext context = FacesContext.getCurrentInstance();
 		PersonaBean personaBean = (PersonaBean)context.getApplication().evaluateExpressionGet(context, "#{personaBean}", PersonaBean.class);
 		personaBean.setPersonaSelected(null);
+		personaBean.setModo(0);
 		personaBean.setTextoBusqueda("");
 		personaBean.setPersonaListaSelected(null);
 
@@ -329,12 +349,14 @@ public class ColVolBean implements Serializable {
 		this.clave=null;
 		this.fechaApertura=null;
 		this.fechaCierre=null;
+		this.puestoConActividad=false;
+		this.colVolActivo=false;
 		
 		this.tipoTransporteSelectedId=0;
-		this.tiposTransportes=tipoTransporteService.ListarActivos();
+		this.tiposTransportes=this.tiposTransportesActivos;
 
 		this.claseAccesibilidadSelectedId=0;
-		this.clasesAccesibilidad=claseAccesibilidadService.ListarActivos();
+		this.clasesAccesibilidad=this.clasesAccesibilidadActivos;
 		
 		this.comunidadPuestoSelected=null;
 	
@@ -378,6 +400,7 @@ public class ColVolBean implements Serializable {
 		iniciarCapa1();
 		
 	}
+	
 	
 	public void iniciarColVoles() {
 		
@@ -423,14 +446,14 @@ public class ColVolBean implements Serializable {
 				this.tipoTransporteSelectedId=this.colVolSelected.getColVolAcceso().getTipoTransporte().getCatalogoId();
 				this.tiposTransportes=tipoTransporteService.ListarActivos(this.colVolSelected.getColVolAcceso().getTipoTransporte().getCodigo());
 			} else {
-				this.tiposTransportes=tipoTransporteService.ListarActivos();
+				this.tiposTransportes=this.tiposTransportesActivos;
 			}
 			
 			if (this.colVolSelected.getColVolAcceso().getClaseAccesibilidad()!=null) {
 				this.claseAccesibilidadSelectedId=this.colVolSelected.getColVolAcceso().getClaseAccesibilidad().getCatalogoId();
 				this.clasesAccesibilidad=claseAccesibilidadService.ListarActivos(this.colVolSelected.getColVolAcceso().getClaseAccesibilidad().getCodigo());
 			} else {
-				this.clasesAccesibilidad=claseAccesibilidadService.ListarActivos();
+				this.clasesAccesibilidad=this.clasesAccesibilidadActivos;
 			}
 			
 			this.comoLlegar=this.colVolSelected.getColVolAcceso().getComoLlegar();
@@ -449,27 +472,30 @@ public class ColVolBean implements Serializable {
 		}
 		
 		// obtiene los datos vinculados al puesto de notificación
-		
+
 		this.puestoNotificacionId=0;
 		this.clave=null;
 		this.fechaApertura=null;
 		this.fechaCierre=null;
 		
-		// se verifica si existe un municipio de residencia asociado, ya que
-		// podría darse el caso que desde otro módulo se elimine
-		
+		this.puestoConActividad=false;
 		this.comunidadPuestoSelected=null;
 
-		if (this.colVolId!=0) {
-			PuestoNotificacion oPuestoNotificacion = puestoNotificacionService.EncontrarPorColVol(this.colVolId);
-			if (oPuestoNotificacion!=null) {
-				this.puestoNotificacionId=oPuestoNotificacion.getPuestoNotificacionId();
-				this.clave=oPuestoNotificacion.getClave();
-				this.fechaApertura=oPuestoNotificacion.getFechaApertura();
-				this.fechaCierre=oPuestoNotificacion.getFechaCierre();
-				this.puestosComunidades=oPuestoNotificacion.getComunidadesPuesto();
+		if (this.colVolSelected.getPuestoNotificacion()!=null) {
+			this.puestoNotificacionId=this.colVolSelected.getPuestoNotificacion().getPuestoNotificacionId();
+			this.clave=this.colVolSelected.getPuestoNotificacion().getClave();
+			this.fechaApertura=this.colVolSelected.getPuestoNotificacion().getFechaApertura();
+			this.fechaCierre=this.colVolSelected.getPuestoNotificacion().getFechaCierre();
+			this.puestosComunidades=this.colVolSelected.getPuestoNotificacion().getComunidadesPuesto();
+
+			// verifica si el puesto tiene muestreos hemáticos vinculados
+			int iCuentaMuestreos = muestreoHematicoService.ContarPorPuesto(this.puestoNotificacionId, 0, 0);
+			if (iCuentaMuestreos>0) {
+				this.puestoConActividad=true;
+				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "El puesto de notificación tiene datos vinculados por lo que algunos datos no pueden ser modificados.","Número de muestreos hemáticos vinculados: "+String.valueOf(iCuentaMuestreos));
+				if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			}
-			
+
 		}
 	
 		this.observaciones=this.colVolSelected.getObservaciones();
@@ -478,10 +504,27 @@ public class ColVolBean implements Serializable {
 		this.fechaInicio=this.colVolSelected.getFechaInicio();
 		this.fechaFin=this.colVolSelected.getFechaFin();
 		
+		// si al seleccionar un colVol, éste se encuentra pasivo, verifica 
+		// si la persona asociada a éste se encuentra declarada nuevamente como 
+		// colVol activo, en cuyo caso el registro no puede ser modificado.
+		
+		if (this.colVolSelected.getFechaFin()!=null && this.colVolSelected.getFechaFin().before(Calendar.getInstance().getTime())) {
+			// el colvol seleccionado tiene fecha fin declarada y la fecha es anterior a la fecha actual
+			// por lo que se considera pasivo
+			ColVol oColVol = colVolService.EncontrarPorPersona(this.personaId);
+			if (oColVol!=null && oColVol.getColVolId()!=this.colVolId) {
+				// implica que encontro otro registro de la misma persona como colaborador activo
+				this.colVolActivo=true;
+				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La persona se encuentra registrada como Colaborador Voluntario ACTIVO; el registro actual no puede ser modificado.","La unidad de la cual depende dicho ColVol es " + oColVol.getUnidad().getNombre() + " en " + oColVol.getUnidad().getMunicipio().getNombre());
+				if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			}
+		}
+		
 		// inicializa las variables del componente de personas
 		FacesContext context = FacesContext.getCurrentInstance();
 		PersonaBean personaBean = (PersonaBean)context.getApplication().evaluateExpressionGet(context, "#{personaBean}", PersonaBean.class);
 		personaBean.setPersonaSelected(this.personaSelected);
+		personaBean.setModo(1);
 		personaBean.iniciarPropiedades();
 		
 		UIComponent componentDetalle = null; 
@@ -609,38 +652,27 @@ public class ColVolBean implements Serializable {
 		
 		if (this.personaSelected==null) {
 			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La declaración de la persona a la cual se asocia el colaborador voluntario es requerida","");
-			if (msg!=null)
-				FacesContext.getCurrentInstance().addMessage(null, msg);
+			if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
 			return;
 		}
 		
-		// En vista de que a un colVol existente no puede modificarse a la persona
-		// asociada, si es un nuevo registro de colVol, debe verificarse que la persona
-		// no posea registros asociados de colVol
-		if (this.colVolId==0) {
-			ColVolService colVolService = new ColVolDA();
-			ColVol oColVol=colVolService.EncontrarPorPersona(this.personaSelected.getPersonaId());
-			if (oColVol!=null) {
-				FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La persona ya se encuentra registrada como Colaborador Voluntario","La unidad de la cual depende dicho ColVol es " + oColVol.getUnidad().getNombre() + " en " + oColVol.getUnidad().getMunicipio().getNombre());
-				if (msg!=null)
-					FacesContext.getCurrentInstance().addMessage(null, msg);
-				return;
-			}
-		}
-
-		InfoResultado oResultado = new InfoResultado();
-		ColVol oColVol = new ColVol();
-		if (this.fechaInicio!=null) {
-			oColVol.setFechaInicio(this.fechaInicio);
-		}
-		if (this.fechaFin!=null) {
-			oColVol.setFechaFin(this.fechaFin); 
+		// La persona solo puede declararse nuevamente como colVol si no se encuentra
+		// activa, por lo que si se encuentra activa tampoco puede declararse como puesto de notificación
+		ColVolService colVolService = new ColVolDA();
+		ColVol oColVolExistente=colVolService.EncontrarPorPersona(this.personaSelected.getPersonaId());
+		if (oColVolExistente!=null && oColVolExistente.getColVolId()!=this.colVolId) {
+			FacesMessage msg = Mensajes.enviarMensaje(FacesMessage.SEVERITY_WARN, "La persona se encuentra registrada como Colaborador Voluntario ACTIVO","La unidad de la cual depende dicho ColVol es " + oColVolExistente.getUnidad().getNombre() + " en " + oColVolExistente.getUnidad().getMunicipio().getNombre());
+			if (msg!=null) FacesContext.getCurrentInstance().addMessage(null, msg);
+			return;
 		}
 		
+		InfoResultado oResultado = new InfoResultado();
+		ColVol oColVol = new ColVol();
+		oColVol.setFechaInicio(this.fechaInicio);
+		oColVol.setFechaFin(this.fechaFin); 
 		oColVol.setLatitud(this.latitud);
 		oColVol.setLongitud(this.longitud);
 		oColVol.setObservaciones(this.observaciones!=null && !this.observaciones.trim().isEmpty()?this.observaciones:null);
-
 		oColVol.setUnidad((Unidad)unidadService.Encontrar(this.unidadSelectedId).getObjeto());
 
 		ColVolAcceso oColVolAcceso = new ColVolAcceso();
@@ -1179,5 +1211,52 @@ public class ColVolBean implements Serializable {
 
 	public long getPuestoComunidadSelectedId() {
 		return puestoComunidadSelectedId;
+	}
+
+	public void setColVolActivo(boolean colVolActivo) {
+		this.colVolActivo = colVolActivo;
+	}
+
+	public boolean isColVolActivo() {
+		return colVolActivo;
+	}
+
+	/**
+	 * @return the puestoConActividad
+	 */
+	public boolean isPuestoConActividad() {
+		return puestoConActividad;
+	}
+
+	/**
+	 * @param puestoConActividad the puestoConActividad to set
+	 */
+	public void setPuestoConActividad(boolean puestoConActividad) {
+		this.puestoConActividad = puestoConActividad;
+	}
+
+	public void setTiposTransportesActivos(List<TipoTransporte> tiposTransportesActivos) {
+		this.tiposTransportesActivos = tiposTransportesActivos;
+	}
+
+	public List<TipoTransporte> getTiposTransportesActivos() {
+		return tiposTransportesActivos;
+	}
+
+	public void setClasesAccesibilidadActivos(
+			List<ClaseAccesibilidad> clasesAccesibilidadActivos) {
+		this.clasesAccesibilidadActivos = clasesAccesibilidadActivos;
+	}
+
+	public List<ClaseAccesibilidad> getClasesAccesibilidadActivos() {
+		return clasesAccesibilidadActivos;
+	}
+
+	public void setMostrarSoloActivos(boolean mostrarSoloActivos) {
+		this.mostrarSoloActivos = mostrarSoloActivos;
+	}
+
+	public boolean isMostrarSoloActivos() {
+		return mostrarSoloActivos;
 	}
 }

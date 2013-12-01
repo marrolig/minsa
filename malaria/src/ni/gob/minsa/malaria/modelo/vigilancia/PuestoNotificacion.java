@@ -4,6 +4,7 @@
 package ni.gob.minsa.malaria.modelo.vigilancia;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -36,8 +37,8 @@ import org.eclipse.persistence.annotations.Cache;
 	@NamedQuery(
 			name="PuestoNotificacion.listarUnidadesPorEntidad",
 			query="select pn from PuestoNotificacion pn " +
-					"where (pn.unidad IS NOT NULL AND pn.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) AND " +
-					"      (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>CURRENT_DATE))) " +
+					"where (pn.colVol IS NULL AND pn.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) AND " +
+					"      (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>:pFechaMin))) " +
 					"order by pn.unidad.municipio.nombre, " +
 					"		  pn.unidad.nombre"),
 	@NamedQuery(
@@ -71,8 +72,10 @@ import org.eclipse.persistence.annotations.Cache;
 					"where pn.colVol IS NOT NULL and pn.colVol.colVolId=:pColVolId"),
 	@NamedQuery(
 			name="PuestoNotificacion.encontrarPorClave",
-			query="select pn from PuestoNotificacion pn " +
-					"where pn.clave=:pClave AND (pn.fechaCierre IS NULL OR pn.fechaCierre>CURRENT_DATE)")
+			query="select pn1 from PuestoNotificacion pn1 " +
+					"LEFT JOIN pn1.unidad u LEFT JOIN pn1.colVol c LEFT JOIN u.entidadAdtva eu LEFT JOIN c.unidad uc LEFT JOIN uc.entidadAdtva ec " +
+					"where pn1.clave=:pClave AND (eu.entidadAdtvaId=:pEntidadId OR ec.entidadAdtvaId=:pEntidadId) AND "+ 
+					"     (pn1.fechaCierre IS NULL OR pn1.fechaCierre>=CURRENT_DATE)")
 })				
 public class PuestoNotificacion extends BaseEntidadCreacion implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -112,6 +115,9 @@ public class PuestoNotificacion extends BaseEntidadCreacion implements Serializa
 			   targetEntity=PuestoComunidad.class,
 			   fetch=FetchType.LAZY)
 	private List<PuestoComunidad> comunidadesPuesto;
+	
+	@Transient
+	private boolean pasivo;
     
 	
     public PuestoNotificacion() {
@@ -184,5 +190,11 @@ public class PuestoNotificacion extends BaseEntidadCreacion implements Serializa
 	@Override
 	public String toString() {
 		return String.valueOf(puestoNotificacionId);
+	}
+
+	public boolean isPasivo() {
+		if (fechaApertura.after(Calendar.getInstance().getTime())) return true;
+		if (fechaCierre!=null && fechaCierre.before(Calendar.getInstance().getTime())) return true;
+		return false;
 	}
 }

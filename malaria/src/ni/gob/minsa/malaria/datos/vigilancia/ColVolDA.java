@@ -588,7 +588,7 @@ public class ColVolDA implements ColVolService {
             em.close();
         }			
 	}
-
+	
 	@Override
 	public int ContarPorUnidad(long pUnidadId, String pNombre, boolean pSoloActivos) {
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();

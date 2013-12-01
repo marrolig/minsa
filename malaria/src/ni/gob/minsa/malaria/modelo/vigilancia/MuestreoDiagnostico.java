@@ -54,26 +54,22 @@ public class MuestreoDiagnostico extends BaseEntidadCreacion implements Serializ
 	@Column(name="FECHA_RECEPCION",nullable=false)
 	private Date fechaRecepcion;
 
-	@NotNull(message="La fecha de emisión del diagnóstico es requerida")
 	@Temporal( TemporalType.TIMESTAMP)
-	@Column(name="FECHA_DIAGNOSTICO",nullable=false)
+	@Column(name="FECHA_DIAGNOSTICO",nullable=true)
 	private Date fechaDiagnostico;
 	
-	@NotNull(message="Debe indicarse el resultado: Positivo o Negativo")
 	@DecimalMin(value="0",message="Resultado inválido. Debe ser Positivo o Negativo")
 	@DecimalMax(value="1",message="Resultado inválido. Debe ser Positivo o Negativo")
 	@Digits(integer=1,fraction=0,message="Resultado inválido. Debe ser Positivo o Negativo")
 	@Column(nullable=true,precision=1,scale=0)
 	private BigDecimal resultado;
 
-	@NotNull(message="Debe indicarse si el resultado es positivo o no para el P.Vivax")
 	@DecimalMin(value="0",message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Vivax")
 	@DecimalMax(value="1",message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Vivax")
 	@Digits(integer=1,fraction=0,message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Vivax")
 	@Column(name="POSITIVO_PVIVAX",nullable=true,precision=1,scale=0)
 	private BigDecimal positivoPVivax;
 
-	@NotNull(message="Debe indicarse si el resultado es positivo o no para el P.Falciparum")
 	@DecimalMin(value="0",message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Falciparum")
 	@DecimalMax(value="1",message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Falciparum")
 	@Digits(integer=1,fraction=0,message="Valor no válido. Debe indicarse si el resultado es positivo o no para el P.Falciparum")
@@ -102,7 +98,7 @@ public class MuestreoDiagnostico extends BaseEntidadCreacion implements Serializ
 	private BigDecimal leucocitos;
 
 	@ManyToOne
-	@JoinColumn(name="MOTIVO_FALTA_DIAGNOSTICO",referencedColumnName="CODIGO")
+	@JoinColumn(name="MOTIVO_FALTA_DIAGNOSTICO",referencedColumnName="CODIGO",nullable=true)
 	private MotivoFaltaDiagnostico motivoFaltaDiagnostico;
 
     @NotNull(message="La entidad administrativa a la cual pertenece la unidad de salud que emitió el diagnóstico es requerida")

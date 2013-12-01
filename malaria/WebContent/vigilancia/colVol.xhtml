@@ -104,7 +104,8 @@
 			<!-- Tabla de Colaboradores -->
 			<div style="float:left; position:absolute; top:60px; left:10px; width:980px; height:235px;">
 				<p:dataTable id="grdColVoles" var="colVol" widgetVar="tablaColVoles" 
-							 rowKey="#{colVol.colVolId}"
+							 rowKey="#{colVol.colVolId}" 
+							 rowStyleClass="#{colVol.puestoNotificacion.pasivo?'rowNonActive':null}"
 							 selectionMode="single" selection="#{colVolBean.colVolSelected}" 
 							 loadingMessage="Cargando registros ..." 
 							 errorMessage="Se ha presentado un error al cargar los datos"
@@ -114,6 +115,7 @@
 							 style="width:980px;" value="#{colVolBean.colVoles}">
 
 					<p:ajax event="rowSelect" process="@this" 
+							onstart="statusDialog.show();" oncomplete="statusDialog.hide();" 
 							listener="#{colVolBean.onColVolSelected}"   
         	    	        update=":frmColVol:capa1 :frmColVol:capa2 :frmColVol:panControl :frmColVol:panPersona:panDatosPersona :frmColVol:panPersona:panBotonesEdicion :frmColVol:grwMensaje :frmColVol:grdComunidades" />  
 
@@ -132,6 +134,17 @@
 			
 				</p:dataTable>
 			</div>
+			
+			<h:outputLabel styleClass="lblDefault" 
+							   value="Mostrar solo activos" 
+							   style="position:absolute; left:825px; top:68px;"/>
+			<h:selectBooleanCheckbox id="chkSoloActivos" 
+							   styleClass="txtDefault" 
+							   style="position:absolute; left:930px; top:65px;"
+				 			   value="#{colVolBean.mostrarSoloActivos}">
+				       <p:ajax event="change" process="@this"  
+				 			   update="chkSoloActivos grdColVoles grwMensaje"></p:ajax>
+			</h:selectBooleanCheckbox>
 
 			<p:panel id="panButton1" styleClass="panButton" 
 				 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
@@ -166,6 +179,7 @@
 
 				<p:commandButton id="btnEditarPersona" icon="icon-user" ajax="true" 
 						 title="Haga clic para modificar los datos de la persona"
+						 disabled="#{colVolBean.colVolActivo}"
 						 style="position:absolute; left:337px;top:43px;width:21px;height:21px;"
         				 oncomplete="dlgPersona.show();"  
         				 process="@this panDetalle" />
@@ -224,11 +238,12 @@
 							   style="position:absolute; left:10px; top:118px;"/>
 				<h:inputText id="txtFechaInicio" style="position:absolute; left:10px; top:133px; width:100px;"
 							 value="#{colVolBean.fechaInicio}" 
+							 disabled="#{colVolBean.puestoConActividad or colVolBean.colVolActivo}" 
 							 styleClass="txtDefault fechaInicio">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaInicio').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+						jQuery('.fechaInicio').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script> 
 
 				<h:outputLabel for="txtFechaFin" styleClass="lblDefaultSmall" 
@@ -236,11 +251,12 @@
 							   style="position:absolute; left:130px; top:118px;"/>
 				<h:inputText id="txtFechaFin" style="position:absolute; left:130px; top:133px; width:100px;"
 							 value="#{colVolBean.fechaFin}" 
+							 disabled="#{!empty colVolBean.fechaFin and (colVolBean.puestoConActividad or colVolBean.colVolActivo)}"
 							 styleClass="txtDefault fechaFin">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaFin').dateEntry({dateFormat: 'dmy/',minDate: '-7300', maxDate: new Date()}); 
+						jQuery('.fechaFin').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script> 
 				
 				<h:outputLabel for="txtLatitud"
@@ -249,7 +265,7 @@
 						 style="position:absolute; left:250px; top:118px;"/>
 				<h:inputText id="txtLatitud" style="position:absolute; left:250px; top:133px; width:100px;" 
 						     value="#{colVolBean.latitud}" 
-						     title="GPS Y"
+						     title="GPS Y" disabled="#{colVolBean.colVolActivo}"
 						     styleClass="txtDefault gpsY" size="57" />
 				<script type="text/javascript">
 						jQuery(".gpsY").format({precision: 6,allow_negative:false,autofix:true});
@@ -261,7 +277,7 @@
 						 style="position:absolute; left:370px; top:118px;"/>
 				<h:inputText id="txtLongitud" style="position:absolute; left:370px; top:133px; width:100px;" 
 						     value="#{colVolBean.longitud}" 
-						     title="GPS X"
+						     title="GPS X" disabled="#{colVolBean.colVolActivo}"
 						     styleClass="txtDefault gpsX" size="57" />
 				<script type="text/javascript">
 					jQuery(".gpsX").format({precision: 6,allow_negative:true,autofix:true});
@@ -274,14 +290,15 @@
 				<h:inputTextarea id="txtObservacion" style="position:absolute; left:500px; top:133px; width:470px; overflow:auto; resize: none; height:65px;" 
 						 value="#{colVolBean.observaciones}" styleClass="txtAreaDefault"  
 						 onkeypress="ValidarCaracteres(this, 500);return (ValidarEnter(this, event));"
-						 onkeyup="ValidarCaracteres(this, 500);" 
+						 onkeyup="ValidarCaracteres(this, 500);" disabled="#{colVolBean.colVolActivo}"
 						 cols="56" rows="2" label="Observaciones"/>
 				
 				<h:outputLabel for="txtClave" styleClass="lblDefaultSmall" 
 							   value="Puesto (Clave) :" 
 							   style="position:absolute; left:10px; top:163px;"/>
 				<h:inputText id="txtClave" style="position:absolute; left:10px; top:178px; width:100px;"
-							 value="#{colVolBean.clave}" maxlength="5"
+							 value="#{colVolBean.clave}" maxlength="5" 
+							 disabled="#{colVolBean.puestoConActividad or colVolBean.colVolActivo}"
 							 styleClass="txtDefault" />
 
 				<h:outputLabel for="txtFechaApertura" styleClass="lblDefaultSmall" 
@@ -289,11 +306,12 @@
 							   style="position:absolute; left:130px; top:163px;"/>
 				<h:inputText id="txtFechaApertura" style="position:absolute; left:130px; top:178px; width:100px;"
 							 value="#{colVolBean.fechaApertura}"  
+							 disabled="#{!empty colVolBean.fechaApertura and colVolBean.colVolActivo}"
 							 styleClass="txtDefault fechaApertura">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaApertura').dateEntry({dateFormat: 'dmy/'}); 
+						jQuery('.fechaApertura').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script> 			
 
 				<h:outputLabel for="txtFechaCierre" styleClass="lblDefaultSmall" 
@@ -301,11 +319,12 @@
 							   style="position:absolute; left:250px; top:163px;"/>
 				<h:inputText id="txtFechaCierre" style="position:absolute; left:250px; top:178px; width:100px;"
 							 value="#{colVolBean.fechaCierre}"  
+							 disabled="#{!empty colVolBean.fechaCierre and colVolBean.colVolActivo}"
 							 styleClass="txtDefault fechaApertura">
 						<f:convertDateTime pattern="dd/MM/yyyy"></f:convertDateTime>
 				</h:inputText>
 				<script type="text/javascript">
-						jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/'}); 
+						jQuery('.fechaCierre').dateEntry({dateFormat: 'dmy/',minDate: '-3m', maxDate: new Date()}); 
 				</script>
 				
 				<p:commandButton id="btnComunidades" icon="icon-house"
@@ -323,20 +342,20 @@
 				<h:inputTextarea id="txtComoLlegar" style="position:absolute; left:10px; top:223px; width:475px; overflow:auto; resize: none; height:65px;" 
 						 value="#{colVolBean.comoLlegar}" styleClass="txtAreaDefault"  
 						 onkeypress="ValidarCaracteres(this, 500);return (ValidarEnter(this, event));"
-						 onkeyup="ValidarCaracteres(this, 500);" 
+						 onkeyup="ValidarCaracteres(this, 500);" disabled="#{colVolBean.colVolActivo}"
 						 cols="56" rows="2" label="Observaciones"/>
 
 				<h:outputLabel for="txtPuntoReferencia" styleClass="lblDefaultSmall" 
 							   value="Punto de Referencia:" 
 							   style="position:absolute; left:500px; top:208px;"/>
 				<h:inputText id="txtPuntoReferencia" style="position:absolute; left:500px; top:223px; width:470px;"
-							 value="#{colVolBean.puntoReferencia}"
+							 value="#{colVolBean.puntoReferencia}" disabled="#{colVolBean.colVolActivo}"
 							 styleClass="txtDefault" />
 
     	     	<h:outputLabel for="cboTipoTransporte" styleClass="lblDefaultSmall" 
 					   		value="Tipo de Transporte:" 
 					   		style="position:absolute; left:500px; top:253px;"/>
-				<h:selectOneMenu id="cboTipoTransporte" styleClass="txtDefault cboDefault"  
+				<h:selectOneMenu id="cboTipoTransporte" styleClass="txtDefault cboDefault"  disabled="#{colVolBean.colVolActivo}"
 						 		style="position:absolute; left:500px;top:268px;width:150px;" 
 						 		value="#{colVolBean.tipoTransporteSelectedId}">
 						<f:selectItem itemValue="0" itemLabel=" " /> 
@@ -350,7 +369,7 @@
 					   		value="Accesibilidad:" 
 					   		style="position:absolute; left:660px; top:253px;"/>
 				<h:selectOneMenu id="cboClaseAccesibilidad" styleClass="txtDefault cboDefault"  
-						 		style="position:absolute; left:660px;top:268px;width:160px;" 
+						 		style="position:absolute; left:660px;top:268px;width:160px;" disabled="#{colVolBean.colVolActivo}"
 						 		value="#{colVolBean.claseAccesibilidadSelectedId}">
 						<f:selectItem itemValue="0" itemLabel=" " /> 
 						<f:selectItems var="claseAccesibilidad" 
@@ -363,7 +382,7 @@
 					 	 		 value="Distancia (Km):" 
 						   		 style="position:absolute; left:830px; top:253px;"/>
 				<h:inputText id="txtDistancia" style="position:absolute; left:830px; top:268px; width:60px;"
-						 value="#{colVolBean.distancia}" maxlength="3"
+						 value="#{colVolBean.distancia}" maxlength="3" disabled="#{colVolBean.colVolActivo}"
 						 styleClass="txtDefault dist" />
 				<script type="text/javascript">
 						jQuery(".dist").format({precision: 0,allow_negative:false,autofix:true});
@@ -373,7 +392,7 @@
 					 	 		 value="Tiempo (min):" 
 						   		 style="position:absolute; left:908px; top:253px;"/>
 				<h:inputText id="txtTiempo" style="position:absolute; left:908px; top:268px; width:60px;"
-						 value="#{colVolBean.tiempo}" maxlength="3"
+						 value="#{colVolBean.tiempo}" maxlength="3" disabled="#{colVolBean.colVolActivo}"
 						 styleClass="txtDefault tiempo" />
 				<script type="text/javascript">
 						jQuery(".tiempo").format({precision: 0,allow_negative:false,autofix:true});
@@ -387,13 +406,14 @@
 					 style="position:absolute; top:407px; width:980px; left:10px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 			
 				<p:commandButton id="btnGuardar" value="Guardar" 
-								 styleClass="btnDefault" style="font-size:11px;"  
+								 styleClass="btnDefault" style="font-size:11px;" 
+								 disabled="#{colVolBean.colVolActivo}" 
 								 update="capa1,capa2,panControl,grwMensaje" 
 								 process="@this,panDetalle" 
 								 actionListener="#{colVolBean.guardar}" />
 
 				<p:commandButton id="btnEliminar" value="Eliminar"  
-								 disabled="#{colVolBean.colVolId==0}"
+								 disabled="#{colVolBean.puestoConActividad or colVolBean.colVolId==0}"
 								 oncomplete="dlgEliminarColVol.show()"
 								 process="@this,panDetalle" 
 							     styleClass="btnDefault" style="font-size:11px;"/>
@@ -402,7 +422,7 @@
 								 onstart="statusDialog.show()" 
 								 oncomplete="statusDialog.hide();"
 								 styleClass="btnDefault" style="font-size:11px;" 
-								 process="@this" update="panControl capa1 capa2 panPersona:panBusquedaPersona" 
+								 process="@this" update="panControl capa1 capa2 panPersona:grdResultadoBusquedaPersonas panPersona:panBusquedaPersona" 
 								 actionListener="#{colVolBean.activarPrimerCapa}" />
 								 
 				<p:commandButton value="Salir" styleClass="btnDefault" 
@@ -490,7 +510,7 @@
 					
 					<p:column style="width:40px;text-align:center;" >
 						<p:commandButton id="btnEliminarComunidad"
-								 disabled="#{colVolBean.puestosComunidades.size()==1}" 
+								 disabled="#{colVolBean.puestosComunidades.size()==1 or colVolBean.colVolActivo}" 
 								 oncomplete="dlgEliminarComunidad.show()" 
 								 styleClass="navLink button-delete" icon="icon-delete"   
 								 title="Elimina la comunidad de la lista de comunidades atendidas por el puesto de notificación" 
@@ -508,7 +528,7 @@
 				 	 style="position:absolute; top:240px; width:800px; left:8px; padding-left:0em; padding-top:0em; padding-bottom:0em;">
 				
 				<p:commandButton id="btnAgregarComunidad" type="button" 
-							 value="Agregar" process="@this" ajax="true" 
+							 value="Agregar" process="@this" ajax="true" disabled="#{colVolBean.colVolActivo}"
 							 styleClass="btnDefault" style="font-size:11px;"
 							 onclick="dlgComunidades.hide(); dlgAgregarComunidad.show();">
 				</p:commandButton>

@@ -59,7 +59,7 @@ public class EntidadAdtva implements Serializable {
 	private BigDecimal longitud;
 
 	// asociación uni-directional muchos a uno con Divisionpolitica
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="MUNICIPIO",referencedColumnName="CODIGO_NACIONAL")
 	private DivisionPolitica municipio;
 
@@ -73,7 +73,7 @@ public class EntidadAdtva implements Serializable {
 	private String usuarioRegistro;
 
 	//asociación de autoreferencia bi-direccional muchos a uno
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="DEPENDENCIA")
 	private EntidadAdtva entidadSuperior;
 
@@ -82,7 +82,7 @@ public class EntidadAdtva implements Serializable {
 	private Set<EntidadAdtva> entidadesDependientes;
 
 	//asociación bidireccional uno a muchos con Unidad
-	@OneToMany(mappedBy="entidadAdtva",targetEntity=ni.gob.minsa.malaria.modelo.estructura.Unidad.class)
+	@OneToMany(mappedBy="entidadAdtva",targetEntity=ni.gob.minsa.malaria.modelo.estructura.Unidad.class,fetch=FetchType.LAZY)
 	private Set<Unidad> unidades;
 	
     public EntidadAdtva() {

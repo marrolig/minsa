@@ -64,7 +64,7 @@ public class Vivienda extends BaseEntidadCreacion implements Serializable {
 	@Column(nullable=false,precision=1,scale=0)
 	private BigDecimal pasivo;
 
-    @ManyToOne(targetEntity=Comunidad.class)
+    @ManyToOne(targetEntity=Comunidad.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="COMUNIDAD",referencedColumnName="CODIGO",nullable=false,updatable=false)
 	private Comunidad comunidad;
 
@@ -72,7 +72,7 @@ public class Vivienda extends BaseEntidadCreacion implements Serializable {
     @Column(nullable=false,length=14,unique=true,updatable=false)
     private String codigo;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="TIPO_VIVIENDA", nullable=false, referencedColumnName="CODIGO")
 	private TipoVivienda tipoVivienda;
     

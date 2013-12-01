@@ -56,4 +56,14 @@ public interface UsuarioUnidadService {
 	 */
 	public InfoResultado Encontrar(long pUsuarioUnidadId);
 	
+	/**
+	 * Busca un objeto {@link UsuarioUnidad} en la base de datos, si el objeto
+	 * no es encontrado retorna <code>null</code>
+	 * 
+	 * @param pUsuarioId  Identificador del usuario
+	 * @param pUnidadId   Identificador de la unidad
+	 * @return
+	 */
+	public UsuarioUnidad Encontrar(long pUsuarioId, long pUnidadId);
+	
 }

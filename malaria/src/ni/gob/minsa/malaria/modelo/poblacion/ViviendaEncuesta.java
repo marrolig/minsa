@@ -63,7 +63,7 @@ public class ViviendaEncuesta extends BaseEntidadCreacion implements Serializabl
     @NotNull(message="El sistema al cual se asocia la encuesta de la vivieda, es requerido.")
 	private String sistema;
 
-    @ManyToOne(targetEntity=CondicionOcupacion.class)
+    @ManyToOne(targetEntity=CondicionOcupacion.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="CONDICION_OCUPACION", nullable=false, referencedColumnName="CODIGO")
 	private CondicionOcupacion condicionOcupacion;
     

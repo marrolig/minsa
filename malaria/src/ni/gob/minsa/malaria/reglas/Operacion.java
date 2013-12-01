@@ -142,6 +142,16 @@ public class Operacion {
 		
 	}
 	
+	public static boolean esUnidadAutorizada(long pUsuarioId, long pUnidadId) {
+		
+		UsuarioUnidadService usuarioUnidadService = new UsuarioUnidadDA();
+		if (usuarioUnidadService.Encontrar(pUsuarioId, pUnidadId)!=null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Retorna una lista de objetos {@link Unidad} que dependen a una entidad administrativa
 	 * y cuya tipología se corresponda con el indicado en el parámetro <code>pTipoUnidadId</code>.
@@ -178,9 +188,8 @@ public class Operacion {
 				
 		// si es del nivel central tiene acceso para visualizar todas las unidades
 		if (!pDirecta && infoSesion.isNivelCentral()) {
-			oUnidades=unidadService.UnidadesActivasPorEntidadYTipo(pEntidadId, pTipoUnidadId);
-			if (pPropiedad==null) return oUnidades;
-			return filtrarUnidades(oUnidades,pPropiedad);
+			if (pPropiedad==null) return unidadService.UnidadesActivasPorEntidadYTipo(pEntidadId, pTipoUnidadId);;
+			return obtenerUnidadesPorPropiedad(pEntidadId,pPropiedad);
 		}
 		
 		// si se solicitan únicamente las unidades de salud con autorización directa
@@ -188,9 +197,8 @@ public class Operacion {
 		// entidad administrativa de acceso ímplicito
 			
 		if (!pDirecta && esEntidadAutorizada(pUsuarioId,pEntidadId)) {
-			oUnidades=unidadService.UnidadesActivasPorEntidadYTipo(pEntidadId, pTipoUnidadId);
-			if (pPropiedad==null) return oUnidades;
-			return filtrarUnidades(oUnidades,pPropiedad);
+			if (pPropiedad==null) return unidadService.UnidadesActivasPorEntidadYTipo(pEntidadId, pTipoUnidadId);
+			return obtenerUnidadesPorPropiedad(pEntidadId,pPropiedad);
 		}
 		
 		// se verifica si tiene unidades autorizadas de forma expresa
@@ -204,9 +212,20 @@ public class Operacion {
 		return filtrarUnidades(oUnidades, pPropiedad);
 	}
 	
+	private static List<Unidad> obtenerUnidadesPorPropiedad(long pEntidadId, String pPropiedad) {
+
+		PuestoNotificacionService puestoNotificacionService = new PuestoNotificacionDA();
+		PropiedadUnidadService propiedadUnidadService = new PropiedadUnidadDA();
+		
+		if (pPropiedad.contains(Utilidades.ES_PUESTO_NOTIFICACION)) {
+			return puestoNotificacionService.ListarUnidadesVigilanciaEntidad(pEntidadId, 2);
+		}
+
+		return null;
+	}
+
 	private static List<Unidad> filtrarUnidades(List<Unidad> pUnidades, String pPropiedad) {
 
-		if (pPropiedad==null) return pUnidades;
 		PuestoNotificacionService puestoNotificacionService = new PuestoNotificacionDA();
 		PropiedadUnidadService propiedadUnidadService = new PropiedadUnidadDA();
 		
@@ -227,10 +246,10 @@ public class Operacion {
 				}
 			}
 		}
-		
+	
 		return oUnidades;
 	}
-	
+
 	/**
 	 * Retorna el objeto {@link Persona} a partir del objeto {@link SisPersona}.
 	 * No se efectúa ninguna validación en este proceso.  La validación debe ser

@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
 import ni.gob.minsa.malaria.datos.general.ParametroDA;
+import ni.gob.minsa.malaria.datos.vigilancia.MuestreoHematicoDA;
 import ni.gob.minsa.malaria.datos.vigilancia.PuestoNotificacionDA;
 import ni.gob.minsa.malaria.modelo.estructura.Unidad;
 import ni.gob.minsa.malaria.modelo.estructura.UnidadAcceso;
@@ -15,6 +16,7 @@ import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoHematico;
 import ni.gob.minsa.malaria.modelo.vigilancia.MuestreoPruebaRapida;
 import ni.gob.minsa.malaria.modelo.vigilancia.PuestoNotificacion;
 import ni.gob.minsa.malaria.servicios.general.ParametroService;
+import ni.gob.minsa.malaria.servicios.vigilancia.MuestreoHematicoService;
 import ni.gob.minsa.malaria.servicios.vigilancia.PuestoNotificacionService;
 import ni.gob.minsa.malaria.soporte.Utilidades;
 
@@ -53,7 +55,13 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("La fecha final de actividad del colaborador voluntario debe ser superior o igual que la fecha de inicio");
 			return oResultado;
 		}
-		
+
+		if (pColVol.getFechaFin()!=null && pColVol.getFechaFin().after(Calendar.getInstance().getTime())) {
+			oResultado.setOk(false);
+			oResultado.setMensaje("La fecha final de actividad del colaborador voluntario debe ser superior o igual que la fecha actual");
+			return oResultado;
+		}
+
 		if (pColVol.getColVolAcceso()!=null) {
 
 			if (pColVol.getColVolAcceso().getComoLlegar()==null || pColVol.getColVolAcceso().getComoLlegar().trim().isEmpty()) {
@@ -124,7 +132,7 @@ public class VigilanciaValidacion {
 		
 		if (control.equals("00") && pPuestoNotificacion.getFechaCierre()!=null) {
 			oResultado.setOk(false);
-			oResultado.setMensaje("No debe declararse una fecha de cierre para el puesto de notificación");
+			oResultado.setMensaje("No debe declararse una fecha de cierre para el puesto de notificación si no ha declarado la fecha de inicio");
 			return oResultado;
 		}
 		
@@ -140,7 +148,7 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("La fecha de inicio del puesto de notificación debe ser igual o superior a la fecha de inicio del colaborador voluntario");
 			return oResultado;
 		}
-		
+
 		if (control.equals("11") && pColVol.getFechaFin()!=null &&
 				pPuestoNotificacion.getFechaCierre()!=null &&
 				pColVol.getFechaFin().before(pPuestoNotificacion.getFechaCierre())) {
@@ -154,27 +162,90 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("La fecha de cierre del puesto de notificación es requerida si declara una fecha final de la actividad del colaborador voluntario");
 			return oResultado;
 		}
-		
+
+		if (control.equals("11") && pPuestoNotificacion.getFechaCierre()!=null && 
+				pPuestoNotificacion.getFechaCierre().after(Calendar.getInstance().getTime())) {
+			oResultado.setOk(false);
+			oResultado.setMensaje("La fecha de cierre del puesto de notificación debe ser igual o inferior a la fecha actual");
+			return oResultado;
+		}
+
 		// La clave declarada no debe corresponder a ningun otro
 		// colaborador voluntario vinculado a un puesto de notificación con la misma
 		// clave que aún se encuentra activa, i.e. sin fecha de cierre o fecha de cierre
 		// posterior a la fecha actual.
 		
 		if (control.equals("11")) {
-			PuestoNotificacionService puestoNotificacionService=new PuestoNotificacionDA();
-			PuestoNotificacion oPuestoNotificacion=puestoNotificacionService.EncontrarPorClave(pPuestoNotificacion.getClave().trim());
-			if (oPuestoNotificacion!=null && oPuestoNotificacion.getClave().equals(pPuestoNotificacion.getClave().trim()) && oPuestoNotificacion.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
-				oResultado.setOk(false);
-				oResultado.setMensaje("La clave del puesto de notificación aún se encuentra activa y no puede ser utilizada");
-				if (oPuestoNotificacion.getColVol()!=null) {
-					oResultado.setMensajeDetalle("La clave está asociada al colaborador voluntario " + oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto() + " que reside en la comunidad " + oPuestoNotificacion.getColVol().getSisPersona().getComunidadResidencia().getNombre() + " bajo la coordinación de la unidad " + oPuestoNotificacion.getColVol().getUnidad().getNombre());
-				} else {
-					oResultado.setMensajeDetalle("La clave está asociada a la unidad de salud " + oPuestoNotificacion.getUnidad().getNombre() + " ubicada en el municipio " + oPuestoNotificacion.getUnidad().getMunicipio().getNombre());
+			if (pPuestoNotificacion.getClave()!=null && !pPuestoNotificacion.getClave().isEmpty()) {
+				PuestoNotificacionService puestoNotificacionService=new PuestoNotificacionDA();
+				// si no se ha declarado fecha de cierre, implica que el puesto de notificación declarado
+				// corresponde a un puesto activo, por lo que no puede existir otro puesto activo con la misma clave
+				PuestoNotificacion oPuestoExistente=null;
+
+				if (!pPuestoNotificacion.isPasivo()) {
+					oPuestoExistente = puestoNotificacionService.EncontrarPorClave(pPuestoNotificacion.getClave(),pColVol.getUnidad().getEntidadAdtva().getEntidadAdtvaId());
+					if (oPuestoExistente!=null && oPuestoExistente.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
+						// implica que existe un puesto con la misma clave
+						String iParteMensaje="";
+						oResultado.setOk(false);
+						oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+						if (oPuestoExistente.getColVol()!=null) {
+							iParteMensaje="al colaborador "+oPuestoExistente.getColVol().getSisPersona().getNombreCompleto()+" de la unidad "+oPuestoExistente.getColVol().getUnidad().getNombre()+" en el Municipio " + oPuestoExistente.getColVol().getUnidad().getMunicipio().getNombre();
+						} else {
+							iParteMensaje="a la unidad de salud "+oPuestoExistente.getUnidad().getNombre()+ " en el municipio "+oPuestoExistente.getUnidad().getMunicipio().getNombre();
+						}
+						oResultado.setMensaje("La clave especificada ya está registrada a un puesto de notificación ACTIVO y está asignada "+iParteMensaje);
+						return oResultado;
+					}
 				}
+				
+				oPuestoExistente = puestoNotificacionService.EncontrarClaveEntreFechas(pPuestoNotificacion.getClave(), pColVol.getUnidad().getEntidadAdtva().getEntidadAdtvaId(), pPuestoNotificacion.getFechaApertura(), pPuestoNotificacion.getFechaCierre());
+				if (oPuestoExistente!=null && oPuestoExistente.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
+					// implica que existe un puesto con la misma clave con solapamiento de fechas
+					String iParteMensaje="";
+					oResultado.setOk(false);
+					oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+					if (oPuestoExistente.getColVol()!=null) {
+						iParteMensaje="al colaborador "+oPuestoExistente.getColVol().getSisPersona().getNombreCompleto()+" de la unidad "+oPuestoExistente.getColVol().getUnidad().getNombre()+" en el Municipio " + oPuestoExistente.getColVol().getUnidad().getMunicipio().getNombre();
+					} else {
+						iParteMensaje="a la unidad de salud "+oPuestoExistente.getUnidad().getNombre()+ " en el municipio "+oPuestoExistente.getUnidad().getMunicipio().getNombre();
+					}
+					oResultado.setMensaje("La fecha de apertura y/o cierre se solapa con las declaradas para el puesto de notificación que posee la misma clave y está asignada a "+iParteMensaje);
+					return oResultado;
+				}
+
+			}
+
+		}
+
+		// si se trata de un puesto de notificación existente 
+		// debe validarse que la fecha de apertura sea superior o igual
+		// a cualquier fecha de muestreo hemático declarada
+		if (pPuestoNotificacion.getPuestoNotificacionId()!=0) {
+			
+			MuestreoHematicoService oMuestreo = new MuestreoHematicoDA();
+			if (oMuestreo.ContarPorPuestoFecha(pPuestoNotificacion.getPuestoNotificacionId(), pPuestoNotificacion.getFechaApertura(),0)>0) {
+				oResultado.setOk(false);
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				oResultado.setMensaje("Existen muestreos hemáticos registrados anteriores a la fecha de apertura indicada.");
 				return oResultado;
 			}
 		}
 		
+		// si se trata de un puesto de notificación existente y se ha declarado una
+		// fecha de cierre, debe validarse que la fecha de cierre sea anterior o igual
+		// a cualquier fecha de muestreo hemático declarada
+		if (pPuestoNotificacion.getPuestoNotificacionId()!=0) {
+			
+			MuestreoHematicoService oMuestreo = new MuestreoHematicoDA();
+			if (oMuestreo.ContarPorPuestoFecha(pPuestoNotificacion.getPuestoNotificacionId(), pPuestoNotificacion.getFechaCierre(),1)>0) {
+				oResultado.setOk(false);
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				oResultado.setMensaje("Existen muestreos hemáticos registrados posteriores a la fecha de cierre indicada.");
+				return oResultado;
+			}
+		}
+
 		oResultado.setOk(true);
 		
 		return oResultado;
@@ -214,20 +285,75 @@ public class VigilanciaValidacion {
 		
 		// La clave declarada no debe corresponder a ninguna otra unidad de salud
 		// o colaborador voluntario que se vincule a un puesto de notificación 
-		// con la misma clave que aún se encuentra activa, i.e. sin fecha de 
-		// cierre o fecha de cierre posterior a la fecha actual.
+		// con la misma clave que aún se encuentra activa o que este activa entre
+		// la fecha de apertura y cierre declaradas
 		
-		PuestoNotificacionService puestoNotificacionService=new PuestoNotificacionDA();
-		PuestoNotificacion oPuestoNotificacion=puestoNotificacionService.EncontrarPorClave(pPuestoNotificacion.getClave().trim());
-		if (oPuestoNotificacion!=null && oPuestoNotificacion.getClave().equals(pPuestoNotificacion.getClave().trim()) && oPuestoNotificacion.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
-			oResultado.setOk(false);
-			oResultado.setMensaje("La clave del puesto de notificación aún se encuentra activa y no puede ser utilizada");
-			if (oPuestoNotificacion.getColVol()!=null) {
-				oResultado.setMensajeDetalle("La clave está asociada al colaborador voluntario " + oPuestoNotificacion.getColVol().getSisPersona().getNombreCompleto() + " que reside en la comunidad " + oPuestoNotificacion.getColVol().getSisPersona().getComunidadResidencia().getNombre() + " bajo la coordinación de la unidad " + oPuestoNotificacion.getColVol().getUnidad().getNombre());
-			} else {
-				oResultado.setMensajeDetalle("La clave está asociada a la unidad de salud " + oPuestoNotificacion.getUnidad().getNombre() + " ubicada en el municipio " + oPuestoNotificacion.getUnidad().getMunicipio().getNombre());
+		if (pPuestoNotificacion.getClave()!=null) {
+			PuestoNotificacionService puestoNotificacionService=new PuestoNotificacionDA();
+			// si no se ha declarado fecha de cierre, implica que el puesto de notificación declarado
+			// corresponde a un puesto activo, por lo que no puede existir otro puesto activo con la misma clave
+			PuestoNotificacion oPuestoExistente=null;
+			
+			if (!pPuestoNotificacion.isPasivo()) {
+				oPuestoExistente = puestoNotificacionService.EncontrarPorClave(pPuestoNotificacion.getClave(),pPuestoNotificacion.getUnidad().getEntidadAdtva().getEntidadAdtvaId());
+				if (oPuestoExistente!=null && oPuestoExistente.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
+					// implica que existe un puesto con la misma clave
+					String iParteMensaje="";
+					oResultado.setOk(false);
+					oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+					if (oPuestoExistente.getColVol()!=null) {
+						iParteMensaje="al colaborador "+oPuestoExistente.getColVol().getSisPersona().getNombreCompleto()+" de la unidad "+oPuestoExistente.getColVol().getUnidad().getNombre()+" en el Municipio " + oPuestoExistente.getColVol().getUnidad().getMunicipio().getNombre();
+					} else {
+						iParteMensaje="a la unidad de salud "+oPuestoExistente.getUnidad().getNombre()+ " en el municipio "+oPuestoExistente.getUnidad().getMunicipio().getNombre();
+					}
+					oResultado.setMensaje("La clave especificada ya está registrada a un puesto de notificación ACTIVO y está asignada "+iParteMensaje);
+					return oResultado;
+				}
 			}
-			return oResultado;
+
+			oPuestoExistente = puestoNotificacionService.EncontrarClaveEntreFechas(pPuestoNotificacion.getClave(), pPuestoNotificacion.getUnidad().getEntidadAdtva().getEntidadAdtvaId(), pPuestoNotificacion.getFechaApertura(), pPuestoNotificacion.getFechaCierre());
+			if (oPuestoExistente!=null && oPuestoExistente.getPuestoNotificacionId()!=pPuestoNotificacion.getPuestoNotificacionId()) {
+				// implica que existe un puesto con la misma clave con solapamiento de fechas
+				String iParteMensaje="";
+				oResultado.setOk(false);
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				if (oPuestoExistente.getColVol()!=null) {
+					iParteMensaje="al colaborador "+oPuestoExistente.getColVol().getSisPersona().getNombreCompleto()+" de la unidad "+oPuestoExistente.getColVol().getUnidad().getNombre()+" en el Municipio " + oPuestoExistente.getColVol().getUnidad().getMunicipio().getNombre();
+				} else {
+					iParteMensaje="a la unidad de salud "+oPuestoExistente.getUnidad().getNombre()+ " en el municipio "+oPuestoExistente.getUnidad().getMunicipio().getNombre();
+				}
+				oResultado.setMensaje("La fecha de apertura y/o cierre se solapa con las declaradas para el puesto de notificación que posee la misma clave y está asignada a "+iParteMensaje);
+				return oResultado;
+			}
+
+		}
+
+		// si se trata de un puesto de notificación existente 
+		// debe validarse que la fecha de apertura sea superior o igual
+		// a cualquier fecha de muestreo hemático declarada
+		if (pPuestoNotificacion.getPuestoNotificacionId()!=0) {
+			
+			MuestreoHematicoService oMuestreo = new MuestreoHematicoDA();
+			if (oMuestreo.ContarPorPuestoFecha(pPuestoNotificacion.getPuestoNotificacionId(), pPuestoNotificacion.getFechaApertura(),0)>0) {
+				oResultado.setOk(false);
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				oResultado.setMensaje("Existen muestreos hemáticos registrados anteriores a la fecha de apertura indicada.");
+				return oResultado;
+			}
+		}
+
+		// si se trata de un puesto de notificación existente y se ha declarado una
+		// fecha de cierre, debe validarse que la fecha de cierre sea anterior o igual
+		// a cualquier fecha de muestreo hemático declarada
+		if (pPuestoNotificacion.getPuestoNotificacionId()!=0) {
+			
+			MuestreoHematicoService oMuestreo = new MuestreoHematicoDA();
+			if (oMuestreo.ContarPorPuestoFecha(pPuestoNotificacion.getPuestoNotificacionId(), pPuestoNotificacion.getFechaCierre(),1)>0) {
+				oResultado.setOk(false);
+				oResultado.setGravedad(InfoResultado.SEVERITY_WARN);
+				oResultado.setMensaje("Existen muestreos hemáticos registrados posteriores a la fecha de cierre indicada.");
+				return oResultado;
+			}
 		}
 		
 		oResultado.setOk(true);
@@ -291,6 +417,12 @@ public class VigilanciaValidacion {
 		
 		Calendar cFechaActual = Calendar.getInstance();
 
+		// Debe especificar un puesto de notificación
+		if (pMuestreoHematico.getPuestoNotificacion()==null) {
+			oResultado.setMensaje("Debe especificar el puesto de notificación.");
+			return oResultado;
+		}
+		
 		// El número de lámina debe de ser declarado y mayor que cero.
 		if (pMuestreoHematico.getNumeroLamina()==null || (pMuestreoHematico.getNumeroLamina().compareTo(Utilidades.CERO)!=1)) {
 			oResultado.setMensaje("El número de lámina es requerido y debe de ser superior a cero");
@@ -321,6 +453,19 @@ public class VigilanciaValidacion {
 			return oResultado;
 		}
 
+		// La fecha de toma de la muestra de gota gruesa debe ser inferior o igual a la fecha de cierre
+		// del puesto de notificación, en caso de que ésta se encuentre declarada
+		if (pMuestreoHematico.getPuestoNotificacion().getFechaCierre()!=null && pMuestreoHematico.getFechaToma().after(pMuestreoHematico.getPuestoNotificacion().getFechaCierre())) {
+			oResultado.setMensaje("La fecha de la toma de la muestra de la gota gruesa no puede ser superior a la fecha de cierre del puesto de notificación.");
+			return oResultado;
+		}
+
+		// La fecha de toma de la muestra de gota gruesa debe ser superior o igual a la fecha de apertura del puesto de notificación
+		if (pMuestreoHematico.getFechaToma().before(pMuestreoHematico.getPuestoNotificacion().getFechaApertura())) {
+			oResultado.setMensaje("La fecha de la toma de la muestra de la gota gruesa no puede ser inferior a la fecha de apertura del puesto de notificación.");
+			return oResultado;
+		}
+		
 		// La semana y año epidemiológico son requeridos
 		if (pMuestreoHematico.getSemanaEpidemiologica()==null) {
 			oResultado.setMensaje("La semana epidemiológica es requerida.");
@@ -370,6 +515,13 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("Si declara el teléfono de la persona referente, debe indicar el nombre y apellidos de dicha persona");
 			return oResultado;
 		}
+		
+		// si la fecha de inicio de síntomas es diferente de nulo implica que es sintomático
+		// por tanto dicha fecha debe ser inferior o igual que la fecha de la toma de la muestra
+		if (pMuestreoHematico.getInicioSintomas()!=null && pMuestreoHematico.getInicioSintomas().after(pMuestreoHematico.getFechaToma())) {
+			oResultado.setMensaje("La fecha de inicio de los síntomas debe ser inferior o igual que la fecha de toma de la muestra");
+			return oResultado;
+		}
 
 		if (pMuestreoHematico.getInicioTratamiento()==null &&
 				(pMuestreoHematico.getFinTratamiento()!=null || 
@@ -382,12 +534,17 @@ public class VigilanciaValidacion {
 			oResultado.setMensaje("Si indica algún dato sobre el tratamiento malárico, la fecha de inicio del tratamiento es requerida");
 			return oResultado;
 		}
-		
+
 		if (pMuestreoHematico.getInicioTratamiento()!=null && 
 				pMuestreoHematico.getFinTratamiento()!=null && 
 				pMuestreoHematico.getFinTratamiento().before(pMuestreoHematico.getInicioTratamiento())) {
 			
 			oResultado.setMensaje("La fecha de finalización del tratamiento debe ser mayor o igual que la fecha de inicio");
+			return oResultado;
+		}
+		
+		if (pMuestreoHematico.getInicioSintomas()!=null && pMuestreoHematico.getInicioTratamiento()!=null && pMuestreoHematico.getInicioSintomas().after(pMuestreoHematico.getInicioTratamiento())) {
+			oResultado.setMensaje("La fecha de inicio de los síntomas debe ser inferior o igual que la fecha de inicio del tratamiento");
 			return oResultado;
 		}
 

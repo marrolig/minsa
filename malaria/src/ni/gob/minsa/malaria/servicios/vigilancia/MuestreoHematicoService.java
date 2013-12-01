@@ -87,20 +87,114 @@ public interface MuestreoHematicoService {
 	 * la clave y número de lámina.  Retorna <code>null</code>
 	 * si no encuentra ningún registro de muestreo hemático asociado.
 	 * 
+	 * @param pEntidadId Identificador de la Entidad Administrativa
 	 * @param pClave Clave
 	 * @param pLamina Número de lámina
 	 * @return Objeto {@link MuestreoHematico} o <code>null</code> si no encuentra
 	 */
-	public MuestreoHematico EncontrarPorLamina(String pClave, BigDecimal pLamina);
+	public MuestreoHematico EncontrarPorLamina(long pEntidadIdId, String pClave, BigDecimal pLamina);
 
 	/**
 	 * Retorna una lista de objetos {@link MuestreoHematico} que correspondan
-	 * a una clave específica a partir de la fecha de toma de muestra especificada.
-	 * La clave puede estar asignada en el tiempo a diferentes puestos de notificación.  
+	 * a un puesto de notificación específico, para un año epidemiológico específico y situación.  
 	 * 
-	 * @param pClave Clave bajo la cual se realizó el muestreo hemático
+	 * @param pPuestoNotificacionId Identificador del puesto de notificación
+	 * @param pAnioEpi Año epidemiológico al cual corresponde el muestreo hemático; 0 = sin filtro de año
+	 * @param pSituacion Número entero de 1 a 4 que indica el estado o situación del muestreo hemático
+	 * <p>
+	 * <code>0</code>: Todas las situaciones.<br>
+	 * <code>1</code>: Ficha existente sin investigación epidemiológica asociada.<br>  
+	 * <code>2</code>: Ficha existente con investigación epidemiológica abierta sin confirmación.<br>
+	 * <code>3</code>: Ficha existente con investigación epidemiológica abierta con confirmación de diagnóstico. <br>
+	 * <code>4</code>: Ficha existente con investigación epidemiológica cerrada.  
+	 *
 	 * @return Lista de {@link MuestreoHematico}
 	 */
-	public List<MuestreoHematico> ListarPorClave(String pClave);
+	public List<MuestreoHematico> ListarPorPuesto(long pPuestoNotificacionId, Integer pAnioEpi, Integer pSituacion, int pPaginaActual, int pTotalPorPagina, int pNumRegistros);
 
+	/**
+	 * Contabiliza el número de muestras notificadas por un puesto de notificación
+	 * para un año epidemiológico específico y situación.
+	 * 
+	 * @param pPuestoNotificacionId
+	 * @param pAnioEpi   Año epidemiológico; 0 = sin filtro de año epidemiológico
+	 * @param pSituacion Número entero de 1 a 4 que indica el estado o situación del muestreo hemático, 0 incluye a todas las situaciones
+	 * <p>
+	 * <code>0</code>: Todas las situaciones.<br>
+	 * <code>1</code>: Ficha existente sin investigación epidemiológica asociada.<br>  
+	 * <code>2</code>: Ficha existente con investigación epidemiológica abierta sin confirmación.<br>
+	 * <code>3</code>: Ficha existente con investigación epidemiológica abierta con confirmación de diagnóstico. <br>
+	 * <code>4</code>: Ficha existente con investigación epidemiológica cerrada.  
+	 * @return
+	 */
+	public int ContarPorPuesto(long pPuestoNotificacionId, Integer pAnioEpi, Integer pSituacion);
+
+	/**
+	 * Retorna una lista de objetos {@link MuestreoHematico} que notificados por los puestos
+	 * de notificación coordinados por la unidad, y aquellos objetos notificados directamente
+	 * por dicha únidad, en caso de que dicha unidad sea puesto de notificación.  Para un año 
+	 * epidemiológico específico y situación.  
+	 * 
+	 * @param pUnidad Identificador de la unidad de salud coordinadora/puesto
+	 * @param pAnioEpi Año epidemiológico al cual corresponde el muestreo hemático
+	 * @param pSituacion Número entero de 1 a 4 que indica el estado o situación del muestreo hemático
+	 * <p>
+	 * <code>1</code>: Ficha existente sin investigación epidemiológica asociada.<br>  
+	 * <code>2</code>: Ficha existente con investigación epidemiológica abierta sin confirmación.<br>
+	 * <code>3</code>: Ficha existente con investigación epidemiológica abierta con confirmación de diagnóstico. <br>
+	 * <code>4</code>: Ficha existente con investigación epidemiológica cerrada.  
+	 *
+	 * @return Lista de {@link MuestreoHematico}
+	 */
+	public List<MuestreoHematico> ListarPorUnidad(long pUnidadId, Integer pAnioEpi, Integer pSituacion, int pPaginaActual, int pTotalPorPagina, int pNumRegistros);
+
+	/**
+	 * Contabiliza el número de muestras notificadas por los puestos de notificación coordinados
+	 * por una unidad específica y aquellas notificadas por dicha unidad directamente, en caso que la 
+	 * unidad además sea un puesto de notificación, para un año epidemiológico específico y situación.
+	 *
+	 * @param pUnidad   Identificador de la unidad de salud
+	 * @param pAnioEpi  Año epidemiológico o 0 para todos los años
+	 * @param pSituacion
+	 * <p>
+	 * <code>0</code>: Todas las situaciones.<br>
+	 * <code>1</code>: Ficha existente sin investigación epidemiológica asociada.<br>  
+	 * <code>2</code>: Ficha existente con investigación epidemiológica abierta sin confirmación.<br>
+	 * <code>3</code>: Ficha existente con investigación epidemiológica abierta con confirmación de diagnóstico. <br>
+	 * <code>4</code>: Ficha existente con investigación epidemiológica cerrada.  
+	 * @return
+	 */
+	public int ContarPorUnidad(long pUnidadId, Integer pAnioEpi, Integer pSituacion);
+	
+	/**
+	 * Retorna una lista de los años epidemiológicos en los cuales existen muestreos hemáticos
+	 * notificados por una unidad de salud, sea esta puesto de notificación o solo coordinadora
+	 * de puestos de notificación (colaboradores voluntarios) a partir de un año
+	 * epidemiológico especifico
+	 * 
+	 * @param pUnidad  Identificador de la unidad de salud
+	 * @param pAnioEpi
+	 * @return
+	 */
+	public List<Integer> ListarAñosConMuestreoUnidad(long pUnidadId, Integer pAnioEpi);
+	
+	/**
+	 * Retorna una lista de los años epidemiológicos en los cuales existen muestreos hemáticos vinculados
+	 * a un puesto de notificación específico a partir de un año epidemiológico específico
+	 * 
+	 * @param pPuestoNotificacionId
+	 * @param pAnioEpi
+	 * @return
+	 */
+	public List<Integer> ListarAñosConMuestreoPuesto(long pPuestoNotificacionId, Integer pAnioEpi);
+	
+	/**
+	 * Retorna el número de muestreos hemáticos vinculados a un puesto de notificación
+	 * posteriores a la fecha indicada
+	 * @param pPuestoNotificacionId  Identificador del puesto de notificación
+	 * @param pFecha  Fecha posterior a la cual se contabilizan los muestreos hemáticos
+	 * @param pModo   0=Antes de la Fecha, 1=Después de la Fecha
+	 * @return
+	 */
+	public int ContarPorPuestoFecha(long pPuestoNotificacionId, Date pFecha, int pModo);
 }

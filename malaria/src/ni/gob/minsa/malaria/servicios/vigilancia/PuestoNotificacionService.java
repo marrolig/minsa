@@ -4,6 +4,7 @@
 
 package ni.gob.minsa.malaria.servicios.vigilancia;
 
+import java.util.Date;
 import java.util.List;
 
 import ni.gob.minsa.ciportal.dto.InfoResultado;
@@ -42,11 +43,12 @@ public interface PuestoNotificacionService {
 	 * fecha cierre es mayor que la fecha actual.
 	 * 
 	 * @param pEntidadAdtvaId      Identificador de la entidad administrativa
-	 * @param pSoloActivos   <code>true</code> incluye únicamente los activos;
-	 * 						 <code>false</code> retorna todos los puestos de notificacion;
+	 * @param pModo          <code>1</code> incluye únicamente los activos;
+	 * 						 <code>0</code> retorna todos los puestos de notificacion;
+	 * 						 <code>2</code> retorn los puestos activos y aquellos que han dejando de serlo 12 meses atrás
 	 * @return Lista de objetos {@link PuestoNotificacion}
 	 */
-	public List<PuestoNotificacion> ListarUnidadesPorEntidad(long pEntidadAdtvaId, boolean pSoloActivos); 
+	public List<PuestoNotificacion> ListarUnidadesPorEntidad(long pEntidadAdtvaId, int pModo); 
 
 	/**
 	 * Retorna una lista de objetos {@link PuestoNotificacion} correspondiente a colaboradores 
@@ -89,9 +91,10 @@ public interface PuestoNotificacionService {
 	 * fecha actual
 	 * 
 	 * @param pClave Clave que se asigna al puesto de notificación
+	 * @param pEntidadId Identificador de la entidad administrativa
 	 * @return Objeto {@link PuestoNotificacion} o <code>null</code> si no lo encuentra
 	 */
-	public PuestoNotificacion EncontrarPorClave(String pClave);
+	public PuestoNotificacion EncontrarPorClave(String pClave,long pEntidadId);
 	
 	/**
 	 * Agrega un puesto de notificación, actualiza los datos modificables de la unidad
@@ -117,10 +120,10 @@ public interface PuestoNotificacionService {
 	 * @param pEntidadAdtvaId  Identificador de la entidad administrativa para la cual se quiere realizar el conteo
 	 * @param pNombre          Literal de búsqueda del puesto de notificación
 	 * @param pTipoPuesto      Ambito del conteo, U=Solo unidades, C=Solo colaboradores voluntarios, <code>null</code>=ambos
-	 * @param pSoloActivos     <code>true</code>, solo activos. <code>false</code>, ambos (activos y pasivos)  
+	 * @param pModo            0: activos y pasivos, 1: solo activos, 2: activos y pasivos menores de 12 meses  
 	 * @return
 	 */
-	public int ContarPorEntidad(long pEntidadAdtvaId, String pNombre, String pTipoPuesto, boolean pSoloActivos);
+	public int ContarPorEntidad(long pEntidadAdtvaId, String pNombre, String pTipoPuesto, int pModo);
 
 	/**
 	 * Retorna el número de puestos de notificación que corresponden a colaboradores voluntarios
@@ -129,10 +132,10 @@ public interface PuestoNotificacionService {
 	 * 
 	 * @param pUnidadId
 	 * @param pNombre
-	 * @param pSoloActivos
+	 * @param pModo  0:Activos y Pasivos, 1=Solo Activos, 2=Activos y Pasivos menores de 12 meses
 	 * @return
 	 */
-	public int ContarPorUnidad(long pUnidadId, String pNombre, boolean pSoloActivos);
+	public int ContarPorUnidad(long pUnidadId, String pNombre, int pModo);
 	
 	/**
 	 * Retorna una lista de objetos ColVolPuesto que corresponden a colaboradores voluntarios
@@ -142,10 +145,31 @@ public interface PuestoNotificacionService {
 	 * 
 	 * @param pUnidadId
 	 * @param pNombre
-	 * @param pSoloActivos
+	 * @param pModo  0=Activos y Pasivos, 1=Solo Activos, 2=Activos y que han dejado de serlo 12 meses atrás
 	 * @return
 	 */
-	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, 
-			boolean pSoloActivos);
+	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, int pModo);
+	
+	/**
+	 * Lista las unidades que conforman la red de vigilancia, las cuales pueden ser puestos de notificación
+	 * o bien, unidades de enlace de colaboradores voluntarios
+	 * 
+	 * @param pEntidadAdtvaId
+	 * @param pModo  0=Activos y Pasivos, 1=Solo Activos, 2=Activos y que han dejado de serlo 12 meses atrás
+	 * @return
+	 */
+	public List<Unidad> ListarUnidadesVigilanciaEntidad(long pEntidadAdtvaId, int pModo);
+	
+	/**
+	 * Encuentra un Puesto de Notificación cuya clave se encuentra activa entre dos fechas, apertura y cierre
+	 * para una entidad administrativa
+	 * 
+	 * @param pClave
+	 * @param pEntidadId
+	 * @param pFechaApertura
+	 * @param pFechaCierre
+	 * @return
+	 */
+	public PuestoNotificacion EncontrarClaveEntreFechas(String pClave, long pEntidadId, Date pFechaApertura, Date pFechaCierre);
 	
 }

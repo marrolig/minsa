@@ -2,6 +2,8 @@ package ni.gob.minsa.malaria.datos.vigilancia;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
@@ -81,22 +83,72 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<PuestoNotificacion> ListarUnidadesPorEntidad(long pEntidadAdtvaId, boolean pSoloActivos) {
+	public List<PuestoNotificacion> ListarUnidadesPorEntidad(long pEntidadAdtvaId, int pModo) {
+		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		
+		Calendar iCalendario = Calendar.getInstance();
+		Date iFechaMin;
+		if (pModo==2) {
+			iCalendario.add(Calendar.MONTH, -12);
+			iFechaMin=iCalendario.getTime();
+			pModo=1;
+		} else {
+			iFechaMin=iCalendario.getTime();
+		}
+
 	    try{
 	    	Query query = null;
 	    	query=em.createNamedQuery("PuestoNotificacion.listarUnidadesPorEntidad");
 	    	query.setParameter("pEntidadAdtvaId",pEntidadAdtvaId);
-	    	query.setParameter("pTodos", pSoloActivos?0:1);
+	    	query.setParameter("pTodos", pModo);
+	    	query.setParameter("pFechaMin",iFechaMin);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 	        return(query.getResultList());
 	    }finally{
 	    	em.close();
-	    }		
+	    }
+	    
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
+	public List<Unidad> ListarUnidadesVigilanciaEntidad(long pEntidadAdtvaId, int pModo) {
+		
+		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+		
+		Calendar iCalendario = Calendar.getInstance();
+		Date iFechaMin;
+		if (pModo==2) {
+			iCalendario.add(Calendar.MONTH, -12);
+			iFechaMin=iCalendario.getTime();
+			pModo=1;
+		} else {
+			iFechaMin=iCalendario.getTime();
+		}
+
+	    try{
+	    	Query query = null;
+       		query = em.createQuery("select u from Unidad u where (u.unidadId IN (select pn1.unidad.unidadId from PuestoNotificacion pn1 " +
+					"where ((pn1.unidad IS NOT NULL and pn1.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
+				 	"   (:pTodos=1 or (:pTodos=0 and (pn1.fechaCierre is null or pn1.fechaCierre>:pFechaMin)))))) OR " +
+				 	"(u.unidadId IN (select distinct pn2.colVol.unidad.unidadId from PuestoNotificacion pn2 " +
+				 	"where (pn2.colVol IS NOT NULL and (pn2.colVol.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
+				 	"   (:pTodos=1 or (:pTodos=0 and (pn2.fechaCierre is null or pn2.fechaCierre>:pFechaMin))))))");
+	    	query.setParameter("pEntidadAdtvaId",pEntidadAdtvaId);
+	    	query.setParameter("pTodos", pModo);
+	    	query.setParameter("pFechaMin",iFechaMin);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+	        return(query.getResultList());
+	    }finally{
+	    	em.close();
+	    }
+	    
+	}
+	
+	@SuppressWarnings("unchecked")
 	public List<PuestoNotificacion> ListarPuestosPorUnidad(long pUnidadId, boolean pSoloActivos) {
+		
 		EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 	    try{
 	    	Query query = null;
@@ -143,10 +195,27 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	public PuestoNotificacion EncontrarPorUnidad(long pUnidadId,int pActiva) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+
+		Calendar iCalendario = Calendar.getInstance();
+		Date iFechaMin;
+		if (pActiva==2) {
+			iCalendario.add(Calendar.MONTH, -12);
+			iFechaMin=iCalendario.getTime();
+			pActiva=1;
+		} else {
+			iFechaMin=iCalendario.getTime();
+		}
+
         try{
-            Query query = em.createNamedQuery("PuestoNotificacion.encontrarPorUnidad");
+            Query query = null;
+       		query = em.createQuery("select pn from PuestoNotificacion pn " +
+					"where (pn.unidad.unidadId=:pUnidadId and pn.colVol IS NULL) and " +
+				 	"   (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>:pFechaMin))) " +
+				 	"order by pn.fechaCierre desc");
             query.setParameter("pUnidadId", pUnidadId);
-            query.setParameter("pActiva", pActiva);
+            query.setParameter("pFechaMin", iFechaMin);
+            query.setParameter("pTodos", pActiva==0?1:0);
+            query.setMaxResults(1);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
             return (PuestoNotificacion)query.getSingleResult();
         }catch (NoResultException iExcepcion) {
@@ -174,13 +243,15 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	}
 
 	@Override
-	public PuestoNotificacion EncontrarPorClave(String pClave) {
+	public PuestoNotificacion EncontrarPorClave(String pClave, long pEntidadId) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         try{
             Query query = em.createNamedQuery("PuestoNotificacion.encontrarPorClave");
             query.setParameter("pClave", pClave);
+            query.setParameter("pEntidadId", pEntidadId);
             query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            query.setMaxResults(1);
             return (PuestoNotificacion)query.getSingleResult();
         }catch (NoResultException iExcepcion) {
         	return null;
@@ -188,6 +259,41 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         finally{
             em.close();
         }
+	}
+	
+	public PuestoNotificacion EncontrarClaveEntreFechas(String pClave, long pEntidadId, Date pFechaApertura, Date pFechaCierre) {
+		
+        EntityManager em = jpaResourceBean.getEMF().createEntityManager();
+
+        try{
+            Query query = null;
+            if (pFechaCierre!=null) {
+            	query = em.createQuery("select pn1 from PuestoNotificacion pn1 LEFT JOIN pn1.unidad u LEFT JOIN pn1.colVol c " +
+       				"LEFT JOIN u.entidadAdtva eu LEFT JOIN c.unidad uc LEFT JOIN uc.entidadAdtva ec " +
+					"where (eu.entidadAdtvaId=:pEntidadId OR ec.entidadAdtvaId=:pEntidadId) AND pn1.clave=:pClave and " +
+				 	"   ((:pFechaApertura>=pn1.fechaApertura AND (pn1.fechaCierre IS NULL OR :pFechaApertura<=pn1.fechaCierre)) OR " +
+				 	"    (:pFechaApertura<pn1.fechaApertura AND :pFechaCierre>=pn1.fechaApertura) OR " +
+				 	"    (:pFechaApertura<pn1.fechaApertura AND :pFechaCierre>=pn1.fechaCierre))");
+                query.setParameter("pFechaCierre", pFechaCierre);
+            } else {
+            	query = em.createQuery("select pn1 from PuestoNotificacion pn1 LEFT JOIN pn1.unidad u LEFT JOIN pn1.colVol c " +
+           				"LEFT JOIN u.entidadAdtva eu LEFT JOIN c.unidad uc LEFT JOIN uc.entidadAdtva ec " +
+    					"where (eu.entidadAdtvaId=:pEntidadId OR ec.entidadAdtvaId=:pEntidadId) AND pn1.clave=:pClave and " +
+    				 	"   (:pFechaApertura>=pn1.fechaApertura AND (pn1.fechaCierre IS NULL OR :pFechaApertura<=pn1.fechaCierre))");
+            }
+            query.setParameter("pEntidadId", pEntidadId);
+            query.setParameter("pFechaApertura", pFechaApertura);
+            query.setParameter("pClave", pClave);
+            query.setMaxResults(1);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            return (PuestoNotificacion)query.getSingleResult();
+        }catch (NoResultException iExcepcion) {
+        	return null;
+        }
+        finally{
+            em.close();
+        }			
+
 	}
 
 	@Override
@@ -507,29 +613,41 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 
 	@Override
 	public int ContarPorEntidad(long pEntidadAdtvaId, String pNombre,
-			String pTipoPuesto, boolean pSoloActivos) {
+			String pTipoPuesto, int pModo) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         int totalUnidades=0;
         int totalColVoles=0;
         String pCodigoNombre="";
         
+		Calendar iCalendario = Calendar.getInstance();
+		Date iFechaMin;
+		if (pModo==2) {
+			iCalendario.add(Calendar.MONTH, -12);
+			iFechaMin=iCalendario.getTime();
+			pModo=1;
+		} else {
+			iFechaMin=iCalendario.getTime();
+		}
+        
         if ((pNombre==null) || (pNombre.trim().isEmpty())) {
         	Query query = null;
         	if ((pTipoPuesto == null) || (pTipoPuesto.equals(Utilidades.PUESTO_NOTIFICACION_UNIDAD))) {
         		query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
         									"where (pn.unidad IS NOT NULL AND pn.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
-        								 	"   (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>CURRENT_DATE))) ");
+        								 	"   (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>:pFechaMin))) ");
         		query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
-        		query.setParameter("pTodos", pSoloActivos?0:1);
+        		query.setParameter("pTodos", pModo==0?1:0);
+        		query.setParameter("pFechaMin", iFechaMin);
         		totalUnidades = ((Long)query.getSingleResult()).intValue();
         	} 
         	if ((pTipoPuesto == null) || (pTipoPuesto.equals(Utilidades.PUESTO_NOTIFICACION_COLVOL))) {
         		query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
 											"where (pn.colVol IS NOT NULL AND pn.colVol.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
-					 						"   (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>CURRENT_DATE))) ");
+					 						"   (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>:pFechaMin))) ");
         		query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
-        		query.setParameter("pTodos", pSoloActivos?0:1);
+        		query.setParameter("pTodos", pModo==0?1:0);
+        		query.setParameter("pFechaMin", iFechaMin);
         		totalColVoles = ((Long)query.getSingleResult()).intValue();
         	}
         } else {
@@ -537,11 +655,12 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         	if ((pTipoPuesto == null) || (pTipoPuesto.equals(Utilidades.PUESTO_NOTIFICACION_UNIDAD))) {
         		query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
 										 "where (pn.unidad IS NOT NULL AND pn.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
-										 "  (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>CURRENT_DATE))) and " +
+										 "  (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>:pFechaMin))) and " +
 										 "  (UPPER(pn.unidad.nombre) LIKE :pNombre)");
         		query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
-        		query.setParameter("pTodos", pSoloActivos?0:1);
+        		query.setParameter("pTodos", pModo==0?1:0);
         		query.setParameter("pNombre", "%" + pNombre.toUpperCase() + "%");
+        		query.setParameter("pFechaMin", iFechaMin);
         		totalUnidades = ((Long)query.getSingleResult()).intValue();
         	}
         	if ((pTipoPuesto == null) || (pTipoPuesto.equals(Utilidades.PUESTO_NOTIFICACION_COLVOL))) {
@@ -556,11 +675,12 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         		
             		query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
 										 		"where (pn.colVol IS NOT NULL AND pn.colVol.unidad.entidadAdtva.entidadAdtvaId=:pEntidadAdtvaId) and " +
-										 		"  (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>CURRENT_DATE))) and " +
+										 		"  (:pTodos=1 or (:pTodos=0 and (pn.fechaCierre is null or pn.fechaCierre>:pFechaMin))) and " +
 										 		"  FUNC('CATSEARCH',pn.colVol.persona.sndNombre, :pCodigoNombre,null)>0");
             		query.setParameter("pEntidadAdtvaId", pEntidadAdtvaId);
-            		query.setParameter("pTodos", pSoloActivos?0:1);
+            		query.setParameter("pTodos", pModo==0?1:0);
             		query.setParameter("pCodigoNombre", pCodigoNombre);
+            		query.setParameter("pFechaMin", iFechaMin);
             		totalColVoles = ((Long)query.getSingleResult()).intValue();
                 } catch (NamingException iExcepcion){
             		iExcepcion.printStackTrace();
@@ -574,10 +694,20 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         return (totalUnidades+totalColVoles);
 	}
 	
-	public int ContarPorUnidad(long pUnidadId, String pNombre, boolean pSoloActivos) {
+	public int ContarPorUnidad(long pUnidadId, String pNombre, int pModo) {
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
         int totalPuestos=0;
         
+		Calendar iCalendario = Calendar.getInstance();
+		Date iFechaMin;
+		if (pModo==2) {
+			iCalendario.add(Calendar.MONTH, -12);
+			iFechaMin=iCalendario.getTime();
+			pModo=1;
+		} else {
+			iFechaMin=iCalendario.getTime();
+		}
+
         InitialContext ctx;
         String oCodigoSND=null;
         
@@ -597,18 +727,20 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
         	Query query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
         								 "where pn.colVol IS NOT NULL AND " +
         								 "		pn.colVol.unidad.unidadId=:pUnidadId AND " +
-        								 "      (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>CURRENT_DATE))) ");
+        								 "      (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>:pFechaMin))) ");
             query.setParameter("pUnidadId", pUnidadId);
-            query.setParameter("pTodos", pSoloActivos?0:1);
+            query.setParameter("pTodos", pModo==0?1:0);
+            query.setParameter("pFechaMin", iFechaMin);
         	totalPuestos = ((Long)query.getSingleResult()).intValue();
         } else {
         	Query query = em.createQuery("select count(pn) from PuestoNotificacion pn " +
 										 "where pn.colVol.unidad.unidadId=:pUnidadId AND " +
-										 "  (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>CURRENT_DATE))) AND " +
+										 "  (:pTodos=1 OR (:pTodos=0 AND (pn.fechaCierre IS NULL OR pn.fechaCierre>:pFechaMin))) AND " +
 										 "  FUNC('CATSEARCH',pn.colVol.sisPersona.sndNombre, :pCodigoNombre,null)>0");
         	query.setParameter("pUnidadId", pUnidadId);
-        	query.setParameter("pTodos", pSoloActivos?0:1);
+        	query.setParameter("pTodos", pModo==0?1:0);
         	query.setParameter("pCodigoNombre", oCodigoSND);
+        	query.setParameter("pFechaMin", iFechaMin);
         	totalPuestos = ((Long)query.getSingleResult()).intValue();
         }
         return totalPuestos;
@@ -616,14 +748,17 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	
 	@SuppressWarnings("unchecked")
 	public List<ColVolPuesto> ListarColVolPorUnidad(long pUnidadId, String pNombre, 
-										boolean pSoloActivos) {
+										int pModo) {
 		
         EntityManager em = jpaResourceBean.getEMF().createEntityManager();
 
         InitialContext ctx;
         String oCodigoSND=null;
-    	BigDecimal iTodos = pSoloActivos?(new BigDecimal(0)):(new BigDecimal(1));
         
+    	String iFechaMin="CURRENT_DATE";
+    	if (pModo==2) iFechaMin="ADD_MONTHS(CURRENT_DATE,-12)";
+    	BigDecimal iTodos = pModo==0?(new BigDecimal(0)):(new BigDecimal(1));
+    	
         if ((pNombre!=null) && (!pNombre.trim().isEmpty())) {
         	try {
         		ctx = new InitialContext();
@@ -643,7 +778,8 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	    	if ((pNombre==null) || (pNombre.trim().isEmpty())) {
 	    		query = em.createNativeQuery("WITH params AS (SELECT ? AS pUnidadId, ? AS pTodos, ? AS pCodigoSND FROM DUAL) " +
 					     "SELECT t2.PUESTO_NOTIFICACION_ID AS a1, " +
-					     "	     t2.CLAVE AS a2, t0.PRIMER_NOMBRE AS a3, t0.SEGUNDO_NOMBRE AS a4, t0.PRIMER_APELLIDO AS a5, t0.SEGUNDO_APELLIDO AS a6 " +
+					     "	     t2.CLAVE AS a2, t0.PRIMER_NOMBRE AS a3, t0.SEGUNDO_NOMBRE AS a4, t0.PRIMER_APELLIDO AS a5, t0.SEGUNDO_APELLIDO AS a6, " +
+					     "       t2.FECHA_APERTURA as a7, t2.FECHA_CIERRE as a8 " +
 					     "	FROM GENERAL.UNIDADES t3, " +
 					     "		 SIVE.PUESTOS_NOTIFICACION t2, " +
 					     "		 SIVE.COLVOLS t1, " +
@@ -652,7 +788,7 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 					     "	WHERE ((t3.UNIDAD_ID = p.pUnidadId AND " +
 					     "		  NOT (t2.COLVOL IS NULL) AND " +
 					     "		  (p.pTodos = 1 OR (p.pTodos = 0 AND " + 
-					     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE))))) AND " +
+					     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE("+iFechaMin+"))))) AND " +
 					     "		  (t1.COLVOL_ID = t2.COLVOL AND t3.CODIGO = t1.UNIDAD AND t0.PERSONA_ID = t1.PERSONA)) " +
 					     "	ORDER BY t0.PRIMER_APELLIDO ASC, t0.SEGUNDO_APELLIDO ASC, t0.PRIMER_NOMBRE ASC, t0.SEGUNDO_NOMBRE ASC");
 
@@ -662,7 +798,8 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	    	} else {
 	    		query = em.createNativeQuery("WITH params AS (SELECT ? AS pUnidadId, ? AS pTodos, ? AS pCodigoSND FROM DUAL) " +
 	    								     "SELECT t2.PUESTO_NOTIFICACION_ID AS a1, " +
-	    								     "	     t2.CLAVE AS a2, t0.PRIMER_NOMBRE AS a3, t0.SEGUNDO_NOMBRE AS a4, t0.PRIMER_APELLIDO AS a5, t0.SEGUNDO_APELLIDO AS a6 " +
+	    								     "	     t2.CLAVE AS a2, t0.PRIMER_NOMBRE AS a3, t0.SEGUNDO_NOMBRE AS a4, t0.PRIMER_APELLIDO AS a5, t0.SEGUNDO_APELLIDO AS a6, " +
+	    								     "       t2.FECHA_APERTURA as a7, t2.FECHA_CIERRE as a8 " +
 	    								     "	FROM GENERAL.UNIDADES t3, " +
 	    								     "		 SIVE.PUESTOS_NOTIFICACION t2, " +
 	    								     "		 SIVE.COLVOLS t1, " +
@@ -670,7 +807,7 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	    								     "       INNER JOIN params p ON 1=1 " +
 	    								     "	WHERE ((t3.UNIDAD_ID = p.pUnidadId AND NOT (t2.COLVOL IS NULL) AND " +
 	    								     "		  (p.pTodos = 1 OR (p.pTodos = 0 AND " + 
-	    								     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE(CURRENT_DATE))))) AND " +
+	    								     "        (t2.FECHA_CIERRE IS NULL OR t2.FECHA_CIERRE > TO_DATE(+iFechaMin+))))) AND " +
 	    								     "        (CATSEARCH(t0.SND_NOMBRE, p.pCodigoSND, null) > 0) AND " +
 	    								     "		  (t1.COLVOL_ID = t2.COLVOL AND t3.CODIGO = t1.UNIDAD AND t0.PERSONA_ID = t1.PERSONA)) " +
 	    								     "	ORDER BY t0.PRIMER_APELLIDO ASC, t0.SEGUNDO_APELLIDO ASC, t0.PRIMER_NOMBRE ASC, t0.SEGUNDO_NOMBRE ASC");
@@ -695,6 +832,8 @@ public class PuestoNotificacionDA implements PuestoNotificacionService {
 	            String iNombre2=(oFilaResultado[3]!=null && !((String)oFilaResultado[3]).isEmpty())?" "+(String)oFilaResultado[3]:"";
 
 	            oColVolPuesto.setNombreColVol((String)oFilaResultado[2]+iNombre2+", "+(String)oFilaResultado[4]+iApellido2);
+	            oColVolPuesto.setFechaApertura((Date)oFilaResultado[6]);
+	            oColVolPuesto.setFechaCierre((Date)oFilaResultado[7]);
 	            oColVolPuestos.add(oColVolPuesto);
 	        }
 	            	

@@ -41,7 +41,7 @@ public class UnidadAcceso extends BaseEntidadAcceso implements Serializable {
 	private long unidadAccesoId;
 
 	@NotNull(message="La asociación con la unidad de salud es requerida")
-	@OneToOne(targetEntity=Unidad.class)
+	@OneToOne(targetEntity=Unidad.class,fetch=FetchType.LAZY)
 	@JoinColumn(name="UNIDAD",nullable=false,updatable=false)
 	private Unidad unidad;
 	

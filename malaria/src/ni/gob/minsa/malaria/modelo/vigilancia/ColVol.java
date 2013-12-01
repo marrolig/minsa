@@ -45,7 +45,8 @@ import org.eclipse.persistence.annotations.Cache;
 	@NamedQuery(
 			name="ColVol.encontrarPorPersona",
 			query="select tc from ColVol tc " +
-							"where tc.sisPersona.personaId=:pPersonaId"),
+							"where tc.sisPersona.personaId=:pPersonaId and " +
+							"      tc.fechaFin is null or tc.fechaFin>CURRENT_DATE"),
 	@NamedQuery(
 			name="ColVol.listarPorNombre",
 			query="select tc from ColVol tc " +
